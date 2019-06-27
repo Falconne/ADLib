@@ -1,0 +1,25 @@
+*                   text=auto
+*.*proj             text eol=crlf
+*.sln               text eol=crlf
+*.bds*              text eol=crlf
+*.bpf               text eol=crlf
+*.cs                text diff=csharp
+package.json        text eol=lf
+package-lock.json   text eol=lf
+
+*.exe           binary
+*.dll           binary
+*.pfx           binary
+*.cer           binary
+*.snk           binary
+*.bin           binary
+*.bmp           binary
+*.jpg           binary
+*.png           binary
+*.msi           binary
+*.dlf           binary
+*.res           binary
+*.dfm           binary
+*.ico           binary
+
+*.ps1           diff
