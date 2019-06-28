@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AKBDLib.STLogger</AssemblyName>
-    <RootNamespace>AKBDLib.STLogger</RootNamespace>
+    <AssemblyName>AKBDLib.Logging</AssemblyName>
+    <RootNamespace>AKBDLib.Logging</RootNamespace>
   </PropertyGroup>
 
 </Project>
