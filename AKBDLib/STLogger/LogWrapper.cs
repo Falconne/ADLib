@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace STLogger
+namespace AKBDLib.STLogger
 {
     public static class LogWrapper
     {
