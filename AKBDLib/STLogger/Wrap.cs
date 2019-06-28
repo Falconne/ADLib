@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace AKBDLib.STLogger
+namespace AKBDLib.Logging
 {
-    public static class LogWrapper
+    public static class Wrap
     {
         public static Action<string> Debug = s => WriteToConsole(s, "DEBUG");
 
