@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ResourceResolver
+namespace AKBDLib.ResourceResolver
 {
     public class Credential
     {

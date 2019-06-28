@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace ResourceResolver
+namespace AKBDLib.ResourceResolver
 {
     public class Values
     {

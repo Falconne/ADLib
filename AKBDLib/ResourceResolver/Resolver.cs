@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using AKBDLib.Logging;
+using AKBDLib.Util;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
-using Util;
-using Path = System.IO.Path;
 
-namespace ResourceResolver
+namespace AKBDLib.ResourceResolver
 {
     public sealed class Resolver
     {
@@ -25,14 +25,14 @@ namespace ResourceResolver
                     $"Resource Resolver: Credential set {name} not found!");
             }
 
-            STLogger.LogWrapper.Info($"Returning credentials for user {result.Username}");
+            Wrap.Info($"Returning credentials for user {result.Username}");
 
             return result;
         }
 
         public static string GetShare(string name)
         {
-            STLogger.LogWrapper.Info($"Resolving share path for '{name}'");
+            Wrap.Info($"Resolving share path for '{name}'");
             var result = Values.Shares.FirstOrDefault(s => s.Name == name);
             if (result == null)
             {
@@ -68,7 +68,7 @@ namespace ResourceResolver
                 throw new Exception($"Unable to access {result.Path}.");
             }
 
-            STLogger.LogWrapper.Info($"Returning share path {result.Path}");
+            Wrap.Info($"Returning share path {result.Path}");
             return result.Path;
         }
 
