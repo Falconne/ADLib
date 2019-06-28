@@ -88,14 +88,19 @@ namespace AKBDLib.ResourceResolver
 
             while (true)
             {
-                var possibleJsonLocation = Path.Combine(directoryToCheck, "SharedTools", "resources.json");
+                var possibleJsonLocation = Path.Combine(directoryToCheck, "resources.json");
+                if (File.Exists(possibleJsonLocation))
+                    return possibleJsonLocation;
+
+                // TODO allow passing in a lambda for this
+                possibleJsonLocation = Path.Combine(directoryToCheck, "SharedTools", "resources.json");
                 if (File.Exists(possibleJsonLocation))
                     return possibleJsonLocation;
 
                 directoryToCheck = Directory.GetParent(directoryToCheck)?.FullName;
                 if (directoryToCheck == null)
                 {
-                    throw new Exception("Unable to find SharedTools/resources.json");
+                    throw new Exception("Unable to find resources.json");
                 }
             }
         }
