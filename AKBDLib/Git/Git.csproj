@@ -1,7 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>AKBDLib.Git</AssemblyName>
+    <RootNamespace>AKBDLib.Git</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -10,8 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResourceResolver\ResourceResolver.csproj" />
-    <ProjectReference Include="..\STLogger\STLogger.csproj" />
+    <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\Util\Util.csproj" />
   </ItemGroup>
 

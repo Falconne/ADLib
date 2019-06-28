@@ -1,5 +1,5 @@
-﻿using ResourceResolver;
-using STLogger;
+﻿using AKBDLib.Logging;
+using AKBDLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Git
+namespace AKBDLib.Git
 {
     public class Repo
     {
@@ -50,7 +50,7 @@ namespace Git
 
         public void RunAndShowOutput(string arguments)
         {
-            LogWrapper.Info(Run(arguments));
+            Wrap.Info(Run(arguments));
         }
 
         private static string RunWithoutChangingRoot(string arguments)
@@ -74,8 +74,8 @@ namespace Git
             p.OutputDataReceived += (sender, args) => { lock (outputLock) { output.Append(args.Data + "\n"); } };
             p.ErrorDataReceived += (sender, args) => { lock (outputLock) { output.Append(args.Data + "\n"); } };
 
-            LogWrapper.Info($"Running: git.exe {arguments}");
-            LogWrapper.Info($"\tFrom {Directory.GetCurrentDirectory()}");
+            Wrap.Info($"Running: git.exe {arguments}");
+            Wrap.Info($"\tFrom {Directory.GetCurrentDirectory()}");
             try
             {
                 p.Start();
@@ -86,8 +86,8 @@ namespace Git
             }
             catch (Exception e)
             {
-                LogWrapper.Info(output.ToString());
-                LogWrapper.Info($"Failed Command: git.exe {arguments}");
+                Wrap.Info(output.ToString());
+                Wrap.Info($"Failed Command: git.exe {arguments}");
                 throw new Exception("Failure: " + e.Message);
             }
 
@@ -97,15 +97,15 @@ namespace Git
             {
                 return result;
             }
-            LogWrapper.Info(result);
-            LogWrapper.Info($"Failed Command: git.exe {arguments}");
+            Wrap.Info(result);
+            Wrap.Info($"Failed Command: git.exe {arguments}");
             throw new Exception($"Command returned exit code: {p.ExitCode}");
 
         }
 
         public void MakeFreshClone()
         {
-            Util.Retry.OnException(
+            Retry.OnException(
                 () =>
                 {
                     DeleteClone();
@@ -116,7 +116,7 @@ namespace Git
 
         public void DeleteClone()
         {
-            Util.Path.DeleteDirectory(Root);
+            FileSystem.DeleteDirectory(Root);
         }
 
         public bool IsClean()
@@ -138,14 +138,14 @@ namespace Git
 
         public void StageModified()
         {
-            LogWrapper.Info("Staging modified files");
+            Wrap.Info("Staging modified files");
             Run("add -u");
-            LogWrapper.Info(Run("status"));
+            Wrap.Info(Run("status"));
         }
 
-        public void Commit(string message)
+        /*public void Commit(string message)
         {
-            LogWrapper.Info("Committing staged files");
+            Wrap.Info("Committing staged files");
             if (message.Contains('\n'))
             {
                 throw new Exception("Multi-line messages are not supported by this method");
@@ -154,8 +154,8 @@ namespace Git
             var messageConstruct = Util.Shell.EscapeArguments(args);
 
             var result = Run($"commit {messageConstruct}");
-            LogWrapper.Info(result);
-        }
+            Wrap.Info(result);
+        }*/
 
         public void PushWithRebase()
         {
@@ -193,14 +193,14 @@ namespace Git
         {
             if (IsLocalBranch(localBranchName))
             {
-                LogWrapper.Info($"Checking out local branch {localBranchName}");
+                Wrap.Info($"Checking out local branch {localBranchName}");
                 RunAndShowOutput($"checkout {localBranchName}");
             }
             else
             {
                 Fetch();
                 var remoteBranchDesignation = $"{DefaultRemote}/{localBranchName}";
-                LogWrapper.Info($"Checking out remote branch {remoteBranchDesignation} into local");
+                Wrap.Info($"Checking out remote branch {remoteBranchDesignation} into local");
                 RunAndShowOutput($"checkout -t {remoteBranchDesignation}");
             }
 
