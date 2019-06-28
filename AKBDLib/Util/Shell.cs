@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace Util
+namespace AKBDLib.Util
 {
     public static class Shell
     {
@@ -135,7 +135,7 @@ namespace Util
 
         public static void RobocopyWithoutMirror(string source, string destination)
         {
-            STLogger.LogWrapper.Info(
+            Logging.Wrap.Info(
                 $"Robocopy without mirror '{source}' --> '{destination}'");
 
             if (!Directory.Exists(source))

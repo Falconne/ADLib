@@ -1,8 +1,7 @@
-﻿using STLogger;
-using System;
+﻿using System;
 using System.Threading;
 
-namespace Util
+namespace AKBDLib.Util
 {
     public static class Retry
     {
@@ -15,20 +14,20 @@ namespace Util
             {
                 try
                 {
-                    LogWrapper.Info(introMessage);
+                    Logging.Wrap.Info(introMessage);
                     action();
                     return;
                 }
                 catch (Exception e)
                 {
-                    LogWrapper.Warning("Caught exception during retriable operation:");
-                    LogWrapper.Warning(e.Message);
+                    Logging.Wrap.Warning("Caught exception during retriable operation:");
+                    Logging.Wrap.Warning(e.Message);
                     if (numRetries == 0)
                     {
-                        LogWrapper.Error("No more retries left");
+                        Logging.Wrap.Error("No more retries left");
                         throw;
                     }
-                    LogWrapper.Info($"Retries remaining: {numRetries}");
+                    Logging.Wrap.Info($"Retries remaining: {numRetries}");
                     Thread.Sleep(delay);
                 }
             }

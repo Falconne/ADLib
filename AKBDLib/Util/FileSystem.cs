@@ -1,11 +1,10 @@
-﻿using STLogger;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 
-namespace Util
+namespace AKBDLib.Util
 {
-    public static class Path
+    public static class FileSystem
     {
         public static void DeleteDirectory(string path)
         {
@@ -17,18 +16,18 @@ namespace Util
             {
                 try
                 {
-                    LogWrapper.Info($"Deleting directory: {path}...");
+                    Logging.Wrap.Info($"Deleting directory: {path}...");
                     Directory.Delete(path, true);
 
                 }
                 catch (Exception e) when (e is IOException && retries-- >= 0)
                 {
-                    LogWrapper.Warning("Unable to delete directory. Will retry...");
+                    Logging.Wrap.Warning("Unable to delete directory. Will retry...");
                     Thread.Sleep(3000);
                 }
                 catch (UnauthorizedAccessException) when (retries-- >= 0)
                 {
-                    LogWrapper.Warning("Unable to delete directory. Will attempt to remove read-only files...");
+                    Logging.Wrap.Warning("Unable to delete directory. Will attempt to remove read-only files...");
                     DeleteReadOnlyDirectory(path);
                 }
             }
@@ -46,7 +45,7 @@ namespace Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    LogWrapper.Warning($"Unable to write to {path}. Will retry...");
+                    Logging.Wrap.Warning($"Unable to write to {path}. Will retry...");
                     Thread.Sleep(3000);
                 }
             }
@@ -82,7 +81,7 @@ namespace Util
                             }
                             catch (IOException) when (retries-- >= 0)
                             {
-                                LogWrapper.Warning($"Unable to delete {path}. Will retry...");
+                                Logging.Wrap.Warning($"Unable to delete {path}. Will retry...");
                                 Thread.Sleep(1000);
                             }
 
@@ -95,7 +94,7 @@ namespace Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    LogWrapper.Warning($"Unable to delete {path}. Will retry...");
+                    Logging.Wrap.Warning($"Unable to delete {path}. Will retry...");
                     Thread.Sleep(2000);
                 }
             }

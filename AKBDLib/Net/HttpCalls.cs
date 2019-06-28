@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Net
+namespace AKBDLib.Net
 {
     public static class HttpCalls
     {
