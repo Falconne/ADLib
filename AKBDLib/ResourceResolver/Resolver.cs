@@ -1,4 +1,5 @@
-﻿using AKBDLib.Logging;
+﻿using AKBDLib.Exceptions;
+using AKBDLib.Logging;
 using AKBDLib.Util;
 using Newtonsoft.Json;
 using System;
@@ -21,7 +22,7 @@ namespace AKBDLib.ResourceResolver
             var result = Values.Credentials.FirstOrDefault(c => c.Name == name);
             if (result == null)
             {
-                throw new Exception(
+                throw new ConfigurationException(
                     $"Resource Resolver: Credential set {name} not found!");
             }
 
@@ -36,7 +37,7 @@ namespace AKBDLib.ResourceResolver
             var result = Values.Shares.FirstOrDefault(s => s.Name == name);
             if (result == null)
             {
-                throw new Exception(
+                throw new ConfigurationException(
                     $"Resource Resolver: Share {name} not found!");
             }
 
@@ -65,7 +66,7 @@ namespace AKBDLib.ResourceResolver
 
             if (!Directory.Exists(result.Path))
             {
-                throw new Exception($"Unable to access {result.Path}.");
+                throw new UnauthorizedAccessException($"Unable to access {result.Path}.");
             }
 
             Wrap.Info($"Returning share path {result.Path}");
@@ -100,7 +101,7 @@ namespace AKBDLib.ResourceResolver
                 directoryToCheck = Directory.GetParent(directoryToCheck)?.FullName;
                 if (directoryToCheck == null)
                 {
-                    throw new Exception("Unable to find resources.json");
+                    throw new ConfigurationException("Unable to find resources.json");
                 }
             }
         }
