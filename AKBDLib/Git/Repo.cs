@@ -143,7 +143,7 @@ namespace AKBDLib.Git
             Wrap.Info(Run("status"));
         }
 
-        /*public void Commit(string message)
+        public void Commit(string message)
         {
             Wrap.Info("Committing staged files");
             if (message.Contains('\n'))
@@ -151,11 +151,9 @@ namespace AKBDLib.Git
                 throw new Exception("Multi-line messages are not supported by this method");
             }
 
-            var messageConstruct = Util.Shell.EscapeArguments(args);
-
-            var result = Run($"commit {messageConstruct}");
+            var result = Run($"commit {message}");
             Wrap.Info(result);
-        }*/
+        }
 
         public void PushWithRebase()
         {
