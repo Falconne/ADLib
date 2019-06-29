@@ -50,7 +50,7 @@ namespace AKBDLib.Git
 
         public void RunAndShowOutput(string arguments)
         {
-            Wrap.Info(Run(arguments));
+            GenLog.Info(Run(arguments));
         }
 
         private static string RunWithoutChangingRoot(string arguments)
@@ -74,8 +74,8 @@ namespace AKBDLib.Git
             p.OutputDataReceived += (sender, args) => { lock (outputLock) { output.Append(args.Data + "\n"); } };
             p.ErrorDataReceived += (sender, args) => { lock (outputLock) { output.Append(args.Data + "\n"); } };
 
-            Wrap.Info($"Running: git.exe {arguments}");
-            Wrap.Info($"\tFrom {Directory.GetCurrentDirectory()}");
+            GenLog.Info($"Running: git.exe {arguments}");
+            GenLog.Info($"\tFrom {Directory.GetCurrentDirectory()}");
             try
             {
                 p.Start();
@@ -86,8 +86,8 @@ namespace AKBDLib.Git
             }
             catch (Exception e)
             {
-                Wrap.Info(output.ToString());
-                Wrap.Info($"Failed Command: git.exe {arguments}");
+                GenLog.Info(output.ToString());
+                GenLog.Info($"Failed Command: git.exe {arguments}");
                 throw new Exception("Failure: " + e.Message);
             }
 
@@ -97,8 +97,8 @@ namespace AKBDLib.Git
             {
                 return result;
             }
-            Wrap.Info(result);
-            Wrap.Info($"Failed Command: git.exe {arguments}");
+            GenLog.Info(result);
+            GenLog.Info($"Failed Command: git.exe {arguments}");
             throw new Exception($"Command returned exit code: {p.ExitCode}");
 
         }
@@ -138,21 +138,21 @@ namespace AKBDLib.Git
 
         public void StageModified()
         {
-            Wrap.Info("Staging modified files");
+            GenLog.Info("Staging modified files");
             Run("add -u");
-            Wrap.Info(Run("status"));
+            GenLog.Info(Run("status"));
         }
 
         public void Commit(string message)
         {
-            Wrap.Info("Committing staged files");
+            GenLog.Info("Committing staged files");
             if (message.Contains('\n'))
             {
                 throw new Exception("Multi-line messages are not supported by this method");
             }
 
             var result = Run($"commit {message}");
-            Wrap.Info(result);
+            GenLog.Info(result);
         }
 
         public void PushWithRebase()
@@ -191,14 +191,14 @@ namespace AKBDLib.Git
         {
             if (IsLocalBranch(localBranchName))
             {
-                Wrap.Info($"Checking out local branch {localBranchName}");
+                GenLog.Info($"Checking out local branch {localBranchName}");
                 RunAndShowOutput($"checkout {localBranchName}");
             }
             else
             {
                 Fetch();
                 var remoteBranchDesignation = $"{DefaultRemote}/{localBranchName}";
-                Wrap.Info($"Checking out remote branch {remoteBranchDesignation} into local");
+                GenLog.Info($"Checking out remote branch {remoteBranchDesignation} into local");
                 RunAndShowOutput($"checkout -t {remoteBranchDesignation}");
             }
 
