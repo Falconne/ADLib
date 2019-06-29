@@ -14,20 +14,20 @@ namespace AKBDLib.Util
             {
                 try
                 {
-                    Logging.Wrap.Info(introMessage);
+                    Logging.GenLog.Info(introMessage);
                     action();
                     return;
                 }
                 catch (Exception e)
                 {
-                    Logging.Wrap.Warning("Caught exception during retriable operation:");
-                    Logging.Wrap.Warning(e.Message);
+                    Logging.GenLog.Warning("Caught exception during retriable operation:");
+                    Logging.GenLog.Warning(e.Message);
                     if (numRetries == 0)
                     {
-                        Logging.Wrap.Error("No more retries left");
+                        Logging.GenLog.Error("No more retries left");
                         throw;
                     }
-                    Logging.Wrap.Info($"Retries remaining: {numRetries}");
+                    Logging.GenLog.Info($"Retries remaining: {numRetries}");
                     Thread.Sleep(delay);
                 }
             }

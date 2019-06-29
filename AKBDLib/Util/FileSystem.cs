@@ -16,18 +16,18 @@ namespace AKBDLib.Util
             {
                 try
                 {
-                    Logging.Wrap.Info($"Deleting directory: {path}...");
+                    Logging.GenLog.Info($"Deleting directory: {path}...");
                     Directory.Delete(path, true);
 
                 }
                 catch (Exception e) when (e is IOException && retries-- >= 0)
                 {
-                    Logging.Wrap.Warning("Unable to delete directory. Will retry...");
+                    Logging.GenLog.Warning("Unable to delete directory. Will retry...");
                     Thread.Sleep(3000);
                 }
                 catch (UnauthorizedAccessException) when (retries-- >= 0)
                 {
-                    Logging.Wrap.Warning("Unable to delete directory. Will attempt to remove read-only files...");
+                    Logging.GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
                     DeleteReadOnlyDirectory(path);
                 }
             }
@@ -45,7 +45,7 @@ namespace AKBDLib.Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    Logging.Wrap.Warning($"Unable to write to {path}. Will retry...");
+                    Logging.GenLog.Warning($"Unable to write to {path}. Will retry...");
                     Thread.Sleep(3000);
                 }
             }
@@ -81,7 +81,7 @@ namespace AKBDLib.Util
                             }
                             catch (IOException) when (retries-- >= 0)
                             {
-                                Logging.Wrap.Warning($"Unable to delete {path}. Will retry...");
+                                Logging.GenLog.Warning($"Unable to delete {path}. Will retry...");
                                 Thread.Sleep(1000);
                             }
 
@@ -94,7 +94,7 @@ namespace AKBDLib.Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    Logging.Wrap.Warning($"Unable to delete {path}. Will retry...");
+                    Logging.GenLog.Warning($"Unable to delete {path}. Will retry...");
                     Thread.Sleep(2000);
                 }
             }

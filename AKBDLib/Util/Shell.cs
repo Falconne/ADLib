@@ -135,7 +135,7 @@ namespace AKBDLib.Util
 
         public static void RobocopyWithoutMirror(string source, string destination)
         {
-            Logging.Wrap.Info(
+            Logging.GenLog.Info(
                 $"Robocopy without mirror '{source}' --> '{destination}'");
 
             if (!Directory.Exists(source))

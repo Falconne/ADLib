@@ -26,14 +26,14 @@ namespace AKBDLib.ResourceResolver
                     $"Resource Resolver: Credential set {name} not found!");
             }
 
-            Wrap.Info($"Returning credentials for user {result.Username}");
+            GenLog.Info($"Returning credentials for user {result.Username}");
 
             return result;
         }
 
         public static string GetShare(string name)
         {
-            Wrap.Info($"Resolving share path for '{name}'");
+            GenLog.Info($"Resolving share path for '{name}'");
             var result = Values.Shares.FirstOrDefault(s => s.Name == name);
             if (result == null)
             {
@@ -69,7 +69,7 @@ namespace AKBDLib.ResourceResolver
                 throw new UnauthorizedAccessException($"Unable to access {result.Path}.");
             }
 
-            Wrap.Info($"Returning share path {result.Path}");
+            GenLog.Info($"Returning share path {result.Path}");
             return result.Path;
         }
 
