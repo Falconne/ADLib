@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AKBDLib.Logging;
+using System;
 using System.IO;
 using System.Threading;
 
@@ -8,7 +9,7 @@ namespace AKBDLib.Util
     {
         public static void DeleteDirectory(string path)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (String.IsNullOrWhiteSpace(path))
                 return;
 
             var retries = 5;
@@ -16,18 +17,18 @@ namespace AKBDLib.Util
             {
                 try
                 {
-                    Logging.GenLog.Info($"Deleting directory: {path}...");
+                    GenLog.Info($"Deleting directory: {path}...");
                     Directory.Delete(path, true);
 
                 }
                 catch (Exception e) when (e is IOException && retries-- >= 0)
                 {
-                    Logging.GenLog.Warning("Unable to delete directory. Will retry...");
+                    GenLog.Warning("Unable to delete directory. Will retry...");
                     Thread.Sleep(3000);
                 }
                 catch (UnauthorizedAccessException) when (retries-- >= 0)
                 {
-                    Logging.GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
+                    GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
                     DeleteReadOnlyDirectory(path);
                 }
             }
@@ -45,7 +46,7 @@ namespace AKBDLib.Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    Logging.GenLog.Warning($"Unable to write to {path}. Will retry...");
+                    GenLog.Warning($"Unable to write to {path}. Will retry...");
                     Thread.Sleep(3000);
                 }
             }
@@ -81,7 +82,7 @@ namespace AKBDLib.Util
                             }
                             catch (IOException) when (retries-- >= 0)
                             {
-                                Logging.GenLog.Warning($"Unable to delete {path}. Will retry...");
+                                GenLog.Warning($"Unable to delete {path}. Will retry...");
                                 Thread.Sleep(1000);
                             }
 
@@ -94,9 +95,30 @@ namespace AKBDLib.Util
                 }
                 catch (IOException) when (retries-- >= 0)
                 {
-                    Logging.GenLog.Warning($"Unable to delete {path}. Will retry...");
+                    GenLog.Warning($"Unable to delete {path}. Will retry...");
                     Thread.Sleep(2000);
                 }
+            }
+        }
+
+        public static void RobocopyWithoutMirror(string source, string destination)
+        {
+            Logging.GenLog.Info(
+                $"Robocopy without mirror '{source}' --> '{destination}'");
+
+            if (!Directory.Exists(source))
+            {
+                throw new ArgumentException($"{source} not found");
+            }
+
+            Directory.CreateDirectory(destination);
+
+            var result = Shell.RunAndGetExitCode(
+                "robocopy", source, destination, "/e", "/MT", "/R:3");
+
+            if (result > 3)
+            {
+                throw new IOException($"Robocopy returned code {result}");
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 
 namespace AKBDLib.Util
@@ -130,27 +129,6 @@ namespace AKBDLib.Util
             {
                 throw new InvalidOperationException(
                     $"Command: '{program} {argumentString}' returned {exitCode}");
-            }
-        }
-
-        public static void RobocopyWithoutMirror(string source, string destination)
-        {
-            Logging.GenLog.Info(
-                $"Robocopy without mirror '{source}' --> '{destination}'");
-
-            if (!Directory.Exists(source))
-            {
-                throw new ArgumentException($"{source} not found");
-            }
-
-            Directory.CreateDirectory(destination);
-
-            var result = RunAndGetExitCode(
-                "robocopy", source, destination, "/e", "/MT", "/R:3");
-
-            if (result > 3)
-            {
-                throw new IOException($"Robocopy returned code {result}");
             }
         }
     }
