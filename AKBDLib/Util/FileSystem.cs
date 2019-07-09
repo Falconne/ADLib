@@ -34,6 +34,32 @@ namespace AKBDLib.Util
             }
         }
 
+        public static void Copy(string src, string dest)
+        {
+            GenLog.Info($"Copying {src} to {dest}");
+            if (!File.Exists(src))
+            {
+                throw new FileNotFoundException("src");
+            }
+
+            File.Copy(src, dest);
+        }
+
+        public static void Delete(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                DeleteDirectory(path);
+                return;
+            }
+
+            if (!File.Exists(path))
+                return;
+
+            GenLog.Info($"Deleting {path}");
+            File.Delete(path);
+        }
+
         public static void WriteToFileSafely(string path, string[] content)
         {
             var retries = 4;
