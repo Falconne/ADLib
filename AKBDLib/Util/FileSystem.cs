@@ -21,10 +21,11 @@ namespace AKBDLib.Util
                     Directory.Delete(path, true);
 
                 }
-                catch (Exception e) when (e is IOException && retries-- >= 0)
+                catch (IOException e) when (retries-- >= 0)
                 {
                     GenLog.Warning("Unable to delete directory. Will retry...");
-                    Thread.Sleep(3000);
+                    GenLog.Warning(e.Message);
+                    Thread.Sleep(5000);
                 }
                 catch (UnauthorizedAccessException) when (retries-- >= 0)
                 {
