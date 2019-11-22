@@ -12,7 +12,7 @@ namespace AKBDLib.Util
             if (string.IsNullOrWhiteSpace(path))
                 return;
 
-            var retries = 5;
+            var retries = 10;
             while (Directory.Exists(path))
             {
                 try
@@ -30,7 +30,7 @@ namespace AKBDLib.Util
                 catch (UnauthorizedAccessException) when (retries-- >= 0)
                 {
                     GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
-                    DeleteReadOnlyDirectory(path);
+                    RemoveReadOnlyAttributes(path);
                 }
             }
         }
@@ -88,51 +88,19 @@ namespace AKBDLib.Util
             }
         }
 
-        private static void DeleteReadOnlyDirectory(string path)
+        private static void RemoveReadOnlyAttributes(string path)
         {
-            var retries = 5;
-
-            while (Directory.Exists(path))
+            foreach (var s in Directory.GetDirectories(path))
             {
-                try
+                RemoveReadOnlyAttributes(s);
+            }
+
+            foreach (var f in Directory.GetFiles(path))
+            {
+                var attr = File.GetAttributes(f);
+                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
                 {
-                    foreach (var s in Directory.GetDirectories(path))
-                    {
-                        DeleteReadOnlyDirectory(s);
-                    }
-
-                    foreach (var f in Directory.GetFiles(path))
-                    {
-                        while (File.Exists(f))
-                        {
-                            try
-                            {
-                                var attr = File.GetAttributes(f);
-                                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                                {
-                                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
-                                }
-
-                                File.Delete(f);
-                                break;
-                            }
-                            catch (IOException) when (retries-- >= 0)
-                            {
-                                GenLog.Warning($"Unable to delete {path}. Will retry...");
-                                Thread.Sleep(1000);
-                            }
-
-                        }
-                    }
-
-                    Directory.Delete(path, true);
-                    break;
-
-                }
-                catch (IOException) when (retries-- >= 0)
-                {
-                    GenLog.Warning($"Unable to delete {path}. Will retry...");
-                    Thread.Sleep(2000);
+                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
                 }
             }
         }
