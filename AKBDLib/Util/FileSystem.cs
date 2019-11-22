@@ -9,7 +9,7 @@ namespace AKBDLib.Util
     {
         public static void DeleteDirectory(string path)
         {
-            if (String.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(path))
                 return;
 
             var retries = 5;
@@ -32,6 +32,15 @@ namespace AKBDLib.Util
                     DeleteReadOnlyDirectory(path);
                 }
             }
+        }
+
+        public static void CreateDirectory(string path)
+        {
+            if (Directory.Exists(path))
+                return;
+
+            GenLog.Info($"Creating directory {path}");
+            Directory.CreateDirectory(path);
         }
 
         public static void Copy(string src, string dest)
@@ -147,5 +156,30 @@ namespace AKBDLib.Util
                 throw new IOException($"Robocopy returned code {result}");
             }
         }
+
+        public static string TrySearchUpForFileFrom(
+            string filename, string startingLocation, string underSubDir = null)
+        {
+            var directoryToCheck = startingLocation;
+            GenLog.Info($"Searching for {filename} starting from {startingLocation}");
+
+            while (directoryToCheck != null)
+            {
+                var possibleFileLocation = !string.IsNullOrWhiteSpace(underSubDir)
+                    ? Path.Combine(directoryToCheck, underSubDir, filename)
+                    : Path.Combine(directoryToCheck, filename);
+
+                if (File.Exists(possibleFileLocation))
+                {
+                    GenLog.Info($"Found at {possibleFileLocation}");
+                    return possibleFileLocation;
+                }
+
+                directoryToCheck = Directory.GetParent(directoryToCheck)?.FullName;
+            }
+
+            return null;
+        }
+
     }
 }

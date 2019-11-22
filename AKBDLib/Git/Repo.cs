@@ -25,15 +25,9 @@ namespace AKBDLib.Git
 
         public string Run(string arguments)
         {
-            string previousDirectory = null;
+            var previousDirectory = ChangeToRepoRoot();
+
             string result;
-
-            if (Directory.Exists(Root))
-            {
-                previousDirectory = Directory.GetCurrentDirectory();
-                Directory.SetCurrentDirectory(Root);
-            }
-
             try
             {
                 result = RunWithoutChangingRoot(arguments);
@@ -46,6 +40,17 @@ namespace AKBDLib.Git
             }
 
             return result;
+        }
+
+        public string ChangeToRepoRoot()
+        {
+            var previousDirectory = Directory.GetCurrentDirectory();
+            if (Directory.Exists(Root))
+            {
+                Directory.SetCurrentDirectory(Root);
+            }
+
+            return previousDirectory;
         }
 
         public void RunAndShowOutput(string arguments)

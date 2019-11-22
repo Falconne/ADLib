@@ -131,5 +131,10 @@ namespace AKBDLib.Util
                     $"Command: '{program} {argumentString}' returned {exitCode}");
             }
         }
+
+        public static string GetScriptDir()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
     }
 }
