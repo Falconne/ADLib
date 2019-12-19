@@ -117,7 +117,7 @@ namespace AKBDLib.Util
 
             Directory.CreateDirectory(destination);
 
-            var result = Shell.RunAndGetExitCode(
+            var result = Shell.RunAndGetExitCodeMS(
                 "robocopy", source, destination, "/e", "/MT", "/R:3");
 
             if (result > 3)

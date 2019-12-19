@@ -1,14 +1,15 @@
-﻿using Medallion.Shell;
+﻿using AKBDLib.Exceptions;
+using Medallion.Shell;
 using System;
 using System.Diagnostics;
 using System.Text;
-using AKBDLib.Exceptions;
 
 namespace AKBDLib.Util
 {
     public static class Shell
     {
         // Copied from https://stackoverflow.com/questions/15365038/how-processstartinfo-argument-consider-arguments
+        [Obsolete("Use MedallionShell commands")]
         public static string EscapeArgument(string argument)
         {
             using (var characterEnumerator = argument.GetEnumerator())
@@ -90,6 +91,7 @@ namespace AKBDLib.Util
         }
 
         // Copied from https://stackoverflow.com/questions/15365038/how-processstartinfo-argument-consider-arguments
+        [Obsolete("Use MedallionShell commands")]
         public static string EscapeArguments(params string[] args)
         {
             var argEnumerator = args.GetEnumerator();
@@ -111,6 +113,7 @@ namespace AKBDLib.Util
             return arguments.ToString();
         }
 
+        [Obsolete("Use MedallionShell commands")]
         public static int RunAndGetExitCode(string program, string argumentString)
         {
             var p = Process.Start(program, argumentString);
@@ -118,12 +121,13 @@ namespace AKBDLib.Util
             return p.ExitCode;
         }
 
-        public static int RunAndGetExitCode(string program, params string[] args)
+        [Obsolete("Use MedallionShell commands")]
+        public static int RunAndGetExitCode(string program, params object[] args)
         {
-            var escapedArgs = EscapeArguments(args);
-            return RunAndGetExitCode(program, escapedArgs);
+            return RunAndGetExitCodeMS(program, args);
         }
 
+        [Obsolete("Use MedallionShell commands")]
         public static void RunAndFailIfNotExitZero(string program, string argumentString)
         {
             var exitCode = RunAndGetExitCode(program, argumentString);
@@ -144,14 +148,14 @@ namespace AKBDLib.Util
             return command.Result.ExitCode;
         }
 
-        //public static int RunAndFailIfNotExitZeroMS(string program, params object[] args)
-        //{
-        //    var exitCode = RunAndGetExitCodeMS(program, args);
-        //    if (exitCode != 0)
-        //    {
-        //        throw new ConfigurationException("");
-        //    }
-        //}
+        public static void RunAndFailIfNotExitZeroMS(string program, params object[] args)
+        {
+            var exitCode = RunAndGetExitCodeMS(program, args);
+            if (exitCode != 0)
+            {
+                throw new ConfigurationException("");
+            }
+        }
 
 
         public static string GetScriptDir()
