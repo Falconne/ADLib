@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Medallion.Shell;
+using System;
 using System.Diagnostics;
 using System.Text;
+using AKBDLib.Exceptions;
 
 namespace AKBDLib.Util
 {
@@ -131,6 +133,26 @@ namespace AKBDLib.Util
                     $"Command: '{program} {argumentString}' returned {exitCode}");
             }
         }
+
+        public static int RunAndGetExitCodeMS(string program, params object[] args)
+        {
+            var command = Command.Run(program, args)
+                .RedirectTo(Console.Out)
+                .RedirectStandardErrorTo(Console.Error);
+
+            command.Wait();
+            return command.Result.ExitCode;
+        }
+
+        //public static int RunAndFailIfNotExitZeroMS(string program, params object[] args)
+        //{
+        //    var exitCode = RunAndGetExitCodeMS(program, args);
+        //    if (exitCode != 0)
+        //    {
+        //        throw new ConfigurationException("");
+        //    }
+        //}
+
 
         public static string GetScriptDir()
         {
