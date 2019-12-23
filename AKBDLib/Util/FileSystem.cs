@@ -1,4 +1,5 @@
-﻿using AKBDLib.Logging;
+﻿using AKBDLib.Exceptions;
+using AKBDLib.Logging;
 using System;
 using System.IO;
 using System.Threading;
@@ -52,6 +53,16 @@ namespace AKBDLib.Util
                 throw new FileNotFoundException("src");
             }
 
+            if (Directory.Exists(dest))
+            {
+                var fileName = Path.GetFileName(src);
+                if (fileName == null)
+                {
+                    throw new ConfigurationException(
+                        $"Cannot determine filename from {src}");
+                }
+                dest = Path.Combine(dest, fileName);
+            }
             File.Copy(src, dest);
         }
 
