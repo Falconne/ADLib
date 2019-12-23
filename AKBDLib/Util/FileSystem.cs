@@ -45,7 +45,7 @@ namespace AKBDLib.Util
             Directory.CreateDirectory(path);
         }
 
-        public static void Copy(string src, string dest, bool force)
+        public static void Copy(string src, string dest, bool force = false)
         {
             GenLog.Info($"Copying {src} to {dest}");
             if (!File.Exists(src))
