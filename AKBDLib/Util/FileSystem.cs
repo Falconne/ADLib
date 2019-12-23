@@ -45,7 +45,7 @@ namespace AKBDLib.Util
             Directory.CreateDirectory(path);
         }
 
-        public static void Copy(string src, string dest)
+        public static void Copy(string src, string dest, bool force)
         {
             GenLog.Info($"Copying {src} to {dest}");
             if (!File.Exists(src))
@@ -63,7 +63,7 @@ namespace AKBDLib.Util
                 }
                 dest = Path.Combine(dest, fileName);
             }
-            File.Copy(src, dest);
+            File.Copy(src, dest, force);
         }
 
         public static void Delete(string path)
