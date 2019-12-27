@@ -9,6 +9,9 @@ namespace Chocolatey
     // TODO parent process must be elevated, check for elevation
     public class Client
     {
+        private string _choco;
+
+
         public int InstallOrUpgradePackage(string packageName)
         {
             GenLog.Info($"Installing/Upgrading Chocolatey package {packageName}");
@@ -26,7 +29,15 @@ namespace Chocolatey
             return result;
         }
 
-        private static string GetChocoExecutable()
+        private string GetChocoExecutable()
+        {
+            if (string.IsNullOrWhiteSpace(_choco))
+                _choco = FindChocoExecutable();
+
+            return _choco;
+        }
+
+        private static string FindChocoExecutable()
         {
             GenLog.Info("Looking for chocolatey");
 
@@ -57,7 +68,6 @@ namespace Chocolatey
 
             return choco;
         }
-
     }
 
 }
