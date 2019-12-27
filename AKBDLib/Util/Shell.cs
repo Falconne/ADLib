@@ -176,12 +176,13 @@ namespace AKBDLib.Util
 
             if (Path.GetExtension(name) == null)
             {
+                // Iterate over platform specific extensions; cmd, bat, ps1, sh, <none>
                 name += ".exe";
             }
 
             GenLog.Info($"Looking for command {name}");
 
-            string doSearch()
+            string DoSearch()
             {
                 if (File.Exists(name))
                     return Path.Combine(Directory.GetCurrentDirectory(), name);
@@ -207,12 +208,36 @@ namespace AKBDLib.Util
                 return null;
             }
 
-            var result = doSearch();
+            var result = DoSearch();
             if (string.IsNullOrWhiteSpace(result))
                 return null;
 
             GenLog.Info($"Found at {result}");
             return result;
+        }
+
+        public static int RunPowerShellScriptAndGetExitCode(string script, params object[] args)
+        {
+            script = GetExecutableInPath(script);
+            if (string.IsNullOrWhiteSpace(script))
+            {
+                throw new ConfigurationException($"Script not found {script}");
+            }
+
+            return RunAndGetExitCodeMS(
+                "powershell.exe",
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                script,
+                args);
+        }
+
+        public static void RunPowerShellScriptAndFailIfNotExitZero(string script, params object[] args)
+        {
+            if (RunPowerShellScriptAndGetExitCode(script, args) != 0)
+            {
+                throw new ConfigurationException($"Command failed: {script}");
+            }
         }
     }
 }
