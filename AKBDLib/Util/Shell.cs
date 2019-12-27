@@ -170,8 +170,11 @@ namespace AKBDLib.Util
         {
             if (!string.IsNullOrWhiteSpace(Path.GetDirectoryName(name)))
             {
+                if (File.Exists(name))
+                    return name;
+
                 throw new ConfigurationException(
-                    $"Argument to GetExecutableInPath should be a filename, not {name}");
+                    $"Argument to GetExecutableInPath should be a filename. '{name}' does not exist.");
             }
 
             if (string.IsNullOrWhiteSpace(Path.GetExtension(name)))

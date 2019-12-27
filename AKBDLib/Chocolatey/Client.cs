@@ -12,6 +12,7 @@ namespace Chocolatey
         public int InstallOrUpgradePackage(string packageName)
         {
             GenLog.Info($"Installing/Upgrading Chocolatey package {packageName}");
+
             var result = Shell.RunAndGetExitCodeMS(
                 GetChocoExecutable(),
                 "upgrade", "-y",
@@ -37,7 +38,7 @@ namespace Chocolatey
             if (allUsersProfile == null)
                 throw new ConfigurationException("Cannot determine All Users profile directory");
 
-            choco = Path.Combine(allUsersProfile, "chocolatey", "bin");
+            choco = Path.Combine(allUsersProfile, "chocolatey", "bin", "choco.exe");
 
             if (File.Exists(choco))
                 return choco;
@@ -52,7 +53,7 @@ namespace Chocolatey
             Shell.RunPowerShellScriptAndFailIfNotExitZero(chocoInstallScript);
 
             if (!File.Exists(choco))
-                throw new ConfigurationException("Unable to install Chocolatey, please install manually");
+                throw new ConfigurationException($"Chocolatey not found in {choco}, please install manually");
 
             return choco;
         }
