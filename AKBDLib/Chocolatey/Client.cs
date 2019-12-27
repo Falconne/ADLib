@@ -11,6 +11,8 @@ namespace Chocolatey
     {
         private string _choco;
 
+        private bool _upgraded;
+
 
         public int InstallOrUpgradePackage(string packageName)
         {
@@ -32,12 +34,20 @@ namespace Chocolatey
         private string GetChocoExecutable()
         {
             if (string.IsNullOrWhiteSpace(_choco))
+            {
                 _choco = FindChocoExecutable();
+                if (!_upgraded)
+                {
+                    GenLog.Info("Upgrading Chocolatey");
+                    InstallOrUpgradePackage("chocolatey");
+                    _upgraded = true;
+                }
+            }
 
             return _choco;
         }
 
-        private static string FindChocoExecutable()
+        private string FindChocoExecutable()
         {
             GenLog.Info("Looking for chocolatey");
 
@@ -66,6 +76,7 @@ namespace Chocolatey
             if (!File.Exists(choco))
                 throw new ConfigurationException($"Chocolatey not found in {choco}, please install manually");
 
+            _upgraded = true;
             return choco;
         }
     }
