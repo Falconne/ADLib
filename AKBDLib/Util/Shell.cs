@@ -1,7 +1,9 @@
 ﻿using AKBDLib.Exceptions;
+using AKBDLib.Logging;
 using Medallion.Shell;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace AKBDLib.Util
@@ -157,10 +159,60 @@ namespace AKBDLib.Util
             }
         }
 
-
         public static string GetScriptDir()
         {
             return AppDomain.CurrentDomain.BaseDirectory;
+        }
+
+        // Searches local dir PATH environment for command 'name' and returns absolute path to same
+        // if found, otherwise null
+        public static string GetExecutableInPath(string name)
+        {
+            if (Path.GetDirectoryName(name) != null)
+            {
+                throw new ConfigurationException(
+                    $"Argument to GetExecutableInPath should be a filename, not {name}");
+            }
+
+            if (Path.GetExtension(name) == null)
+            {
+                name += ".exe";
+            }
+
+            GenLog.Info($"Looking for command {name}");
+
+            string doSearch()
+            {
+                if (File.Exists(name))
+                    return Path.Combine(Directory.GetCurrentDirectory(), name);
+
+                var fileInScriptDir = Path.Combine(GetScriptDir(), name);
+                if (File.Exists(fileInScriptDir))
+                    return fileInScriptDir;
+
+                var dirsInPath = Environment.GetEnvironmentVariable("PATH")?.Split(';');
+                if (dirsInPath == null || dirsInPath.Length == 0)
+                {
+                    GenLog.Warning("PATH environment variable is empty");
+                    return null;
+                }
+
+                foreach ( var dir in dirsInPath)
+                {
+                    var fileInDir = Path.Combine(dir, name);
+                    if (File.Exists(fileInDir))
+                        return fileInDir;
+                }
+
+                return null;
+            }
+
+            var result = doSearch();
+            if (string.IsNullOrWhiteSpace(result))
+                return null;
+
+            GenLog.Info($"Found at {result}");
+            return result;
         }
     }
 }
