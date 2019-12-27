@@ -168,13 +168,13 @@ namespace AKBDLib.Util
         // if found, otherwise null
         public static string GetExecutableInPath(string name)
         {
-            if (Path.GetDirectoryName(name) != null)
+            if (!string.IsNullOrWhiteSpace(Path.GetDirectoryName(name)))
             {
                 throw new ConfigurationException(
                     $"Argument to GetExecutableInPath should be a filename, not {name}");
             }
 
-            if (Path.GetExtension(name) == null)
+            if (string.IsNullOrWhiteSpace(Path.GetExtension(name)))
             {
                 // Iterate over platform specific extensions; cmd, bat, ps1, sh, <none>
                 name += ".exe";
@@ -198,7 +198,7 @@ namespace AKBDLib.Util
                     return null;
                 }
 
-                foreach ( var dir in dirsInPath)
+                foreach (var dir in dirsInPath)
                 {
                     var fileInDir = Path.Combine(dir, name);
                     if (File.Exists(fileInDir))
