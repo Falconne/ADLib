@@ -42,7 +42,7 @@ namespace AKBDLib.Util
             var originalContent = _content;
             foreach (var pair in props)
             {
-                AddOrUpdateProperty(pair.Key, pair.Value);
+                AddOrUpdatePropImpl(pair.Key, pair.Value);
             }
 
             if (_content == originalContent)
@@ -54,7 +54,7 @@ namespace AKBDLib.Util
             File.WriteAllText(_path, _content);
         }
 
-        private void AddOrUpdateProperty(string key, string value)
+        private void AddOrUpdatePropImpl(string key, string value)
         {
             value = value.Replace(":", @"\:");
             GenLog.Info($"Settings property {key} => {value}");
