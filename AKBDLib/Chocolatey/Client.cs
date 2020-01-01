@@ -14,14 +14,15 @@ namespace Chocolatey
         private bool _upgraded;
 
 
-        public int InstallOrUpgradePackage(string packageName)
+        public int InstallOrUpgradePackages(params string[] packages)
         {
-            GenLog.Info($"Installing/Upgrading Chocolatey package {packageName}");
+            var pkgList = string.Join(" ", packages);
+            GenLog.Info($"Installing/Upgrading Chocolatey packages: {pkgList}");
 
             var result = Shell.RunAndGetExitCodeMS(
                 GetChocoExecutable(),
                 "upgrade", "-y",
-                packageName);
+                packages);
 
             if (result != 0)
             {
@@ -39,7 +40,7 @@ namespace Chocolatey
                 if (!_upgraded)
                 {
                     GenLog.Info("Upgrading Chocolatey");
-                    InstallOrUpgradePackage("chocolatey");
+                    InstallOrUpgradePackages("chocolatey");
                     _upgraded = true;
                 }
             }
