@@ -242,5 +242,25 @@ namespace AKBDLib.Util
                 throw new ConfigurationException($"Command failed: {script}");
             }
         }
+
+        // True if environment variable is set to a generic "not false" value
+        public static bool IsEnvironmentVariableTrue(string name)
+        {
+            var value = Environment.GetEnvironmentVariable(name);
+            GenLog.Debug($"Env: {name} => {value}");
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            if (value.ToLowerInvariant() == "false")
+                return false;
+
+            if (int.TryParse(value, out var result))
+            {
+                if (result == 0)
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
