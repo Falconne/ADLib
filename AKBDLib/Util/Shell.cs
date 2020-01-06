@@ -142,6 +142,7 @@ namespace AKBDLib.Util
 
         public static int RunAndGetExitCodeMS(string program, params object[] args)
         {
+            GenLog.Debug($"{program} {string.Join(" ", args)}");
             var command = Command.Run(program, args)
                 .RedirectTo(Console.Out)
                 .RedirectStandardErrorTo(Console.Error);
