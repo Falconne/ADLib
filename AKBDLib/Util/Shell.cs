@@ -2,6 +2,7 @@
 using AKBDLib.Logging;
 using Medallion.Shell;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -228,12 +229,17 @@ namespace AKBDLib.Util
                 throw new ConfigurationException($"Script not found {script}");
             }
 
-            return RunAndGetExitCodeMS(
-                "powershell.exe",
+            var command = new List<object>
+            {
                 "-NoProfile",
                 "-ExecutionPolicy", "Bypass",
-                script,
-                args);
+                script
+            };
+
+            if (args.Length > 0)
+                command.AddRange(args);
+
+            return RunAndGetExitCodeMS("powershell.exe", command.ToArray());
         }
 
         public static void RunPowerShellScriptAndFailIfNotExitZero(string script, params object[] args)
