@@ -22,7 +22,7 @@ namespace Chocolatey
         }
 
 
-        public void InstallOrUpgradePackages(params string[] packages)
+        public Client InstallOrUpgradePackages(params string[] packages)
         {
             var pkgList = string.Join(" ", packages);
             GenLog.Info($"Installing/Upgrading Chocolatey packages: {pkgList}");
@@ -36,7 +36,7 @@ namespace Chocolatey
             switch (result)
             {
                 case 0:
-                    return;
+                    break;
 
                 case 1641:
                     _interactionHandler.ExitWithSuccess("Exiting for reboot");
@@ -44,12 +44,14 @@ namespace Chocolatey
 
                 case 3010:
                     AskForRestart();
-                    return;
+                    break;
 
                 default:
                     _interactionHandler.ExitWithError("Chocolatey failed");
                     break;
             }
+
+            return this;
         }
 
         private void AskForRestart()
