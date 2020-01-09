@@ -23,13 +23,13 @@ namespace Chocolatey
         }
 
 
-        public Client InstallOrUpgradePackages(params string[] packages)
+        public Client InstallOrUpgradePackages(params string[] packagesAndArguments)
         {
-            var pkgList = string.Join(" ", packages);
-            GenLog.Info($"Installing/Upgrading Chocolatey packages: {pkgList}");
+            var pkgAndArgsList = string.Join(" ", packagesAndArguments);
+            GenLog.Info($"Chocolatey Installing / Upgrading: {pkgAndArgsList}");
 
             var args = new List<object> { "upgrade", "-y" };
-            args.AddRange(packages);
+            args.AddRange(packagesAndArguments);
 
             var result = Shell.RunAndGetExitCodeMS(GetChocoExecutable(), args.ToArray());
 
