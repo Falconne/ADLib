@@ -5,7 +5,7 @@ using System.IO;
 
 namespace AKBDLib.Util
 {
-    public class GitClient
+    public class Git
     {
         private string _path;
 
