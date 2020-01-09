@@ -1,5 +1,5 @@
-﻿using AKBDLib.Exceptions;
-using AKBDLib.Logging;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using Medallion.Shell;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace AKBDLib.Util
+namespace ADLib.Util
 {
     public static class Shell
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AKBDLib.Exceptions
+namespace ADLib.Exceptions
 {
     public class ConfigurationException : Exception
     {

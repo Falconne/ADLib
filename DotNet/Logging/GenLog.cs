@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AKBDLib.Logging
+namespace ADLib.Logging
 {
     public static class GenLog
     {

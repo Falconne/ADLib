@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AKBDLib.Net</AssemblyName>
-    <RootNamespace>AKBDLib.Net</RootNamespace>
+    <AssemblyName>ADLib.Net</AssemblyName>
+    <RootNamespace>ADLib.Net</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AKBDLib.Util</AssemblyName>
-    <RootNamespace>AKBDLib.Util</RootNamespace>
+    <AssemblyName>ADLib.Util</AssemblyName>
+    <RootNamespace>ADLib.Util</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace AKBDLib.Util
+namespace ADLib.Util
 {
     public static class Retry
     {

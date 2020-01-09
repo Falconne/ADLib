@@ -1,11 +1,11 @@
-﻿using AKBDLib.Logging;
-using AKBDLib.Util;
+﻿using ADLib.Logging;
+using ADLib.Util;
 using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 
-namespace AKBDLib.Net
+namespace ADLib.Net
 {
     public static class Client
     {

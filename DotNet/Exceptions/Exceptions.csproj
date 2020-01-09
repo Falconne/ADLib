@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AKBDLib.Exceptions</AssemblyName>
-    <RootNamespace>AKBDLib.Exceptions</RootNamespace>
+    <AssemblyName>ADLib.Exceptions</AssemblyName>
+    <RootNamespace>ADLib.Exceptions</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

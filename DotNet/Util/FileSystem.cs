@@ -1,10 +1,10 @@
-﻿using AKBDLib.Exceptions;
-using AKBDLib.Logging;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using System;
 using System.IO;
 using System.Threading;
 
-namespace AKBDLib.Util
+namespace ADLib.Util
 {
     public static class FileSystem
     {

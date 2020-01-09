@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>AKBDLib.Logging</AssemblyName>
-    <RootNamespace>AKBDLib.Logging</RootNamespace>
+    <AssemblyName>ADLib.Logging</AssemblyName>
+    <RootNamespace>ADLib.Logging</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -1,10 +1,10 @@
-﻿using AKBDLib.Exceptions;
-using AKBDLib.Logging;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace AKBDLib.Util
+namespace ADLib.Util
 {
     public class JavaProp
     {

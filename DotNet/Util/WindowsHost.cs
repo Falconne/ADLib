@@ -1,6 +1,6 @@
-﻿using AKBDLib.Logging;
+﻿using ADLib.Logging;
 
-namespace AKBDLib.Util
+namespace ADLib.Util
 {
     public static class WindowsHost
     {

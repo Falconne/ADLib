@@ -1,6 +1,6 @@
-﻿using AKBDLib.Exceptions;
-using AKBDLib.Logging;
-using AKBDLib.Util;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
+using ADLib.Util;
 using System;
 using System.IO;
 
@@ -68,7 +68,7 @@ namespace Chocolatey
             GenLog.Info("Installing Chocolatey");
 
             var chocoInstallScript = Path.Combine(Path.GetTempPath(), "choco-install.ps1");
-            AKBDLib.Net.Client.DownloadFile(
+            ADLib.Net.Client.DownloadFile(
                 "https://chocolatey.org/install.ps1",
                 chocoInstallScript);
 

@@ -1,5 +1,5 @@
-﻿using AKBDLib.Logging;
-using AKBDLib.Util;
+﻿using ADLib.Logging;
+using ADLib.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace AKBDLib.Git
+namespace ADLib.Git
 {
     public class Repo
     {
