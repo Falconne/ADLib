@@ -1,8 +1,8 @@
-﻿using AKBDLib.Exceptions;
-using AKBDLib.Logging;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using System;
 
-namespace AKBDLib.Interactivity
+namespace ADLib.Interactivity
 {
     public abstract class ConsoleInteractionHandlerBase : IInteractionHandler
     {

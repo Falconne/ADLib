@@ -1,7 +1,7 @@
-﻿using AKBDLib.Logging;
+﻿using ADLib.Logging;
 using System;
 
-namespace AKBDLib.Interactivity
+namespace ADLib.Interactivity
 {
     public static class InteractionHandlerFactory
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using AKBDLib.Logging;
+using ADLib.Logging;
 
-namespace AKBDLib.Interactivity
+namespace ADLib.Interactivity
 {
     public class ConsoleInteractionHandler : ConsoleInteractionHandlerBase
     {

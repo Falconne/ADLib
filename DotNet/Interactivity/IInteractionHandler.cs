@@ -1,4 +1,4 @@
-﻿namespace AKBDLib.Interactivity
+﻿namespace ADLib.Interactivity
 {
     public interface IInteractionHandler
     {
