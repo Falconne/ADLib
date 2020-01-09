@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Interactivity\Interactivity.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\Net\Net.csproj" />
     <ProjectReference Include="..\Util\Util.csproj" />

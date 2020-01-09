@@ -1,4 +1,5 @@
 ﻿using ADLib.Exceptions;
+using ADLib.Interactivity;
 using ADLib.Logging;
 using ADLib.Util;
 using System;
@@ -13,8 +14,15 @@ namespace Chocolatey
 
         private bool _upgraded;
 
+        private readonly IInteractionHandler _interactionHandler;
 
-        public int InstallOrUpgradePackages(params string[] packages)
+        public Client(IInteractionHandler interactionHandler)
+        {
+            _interactionHandler = interactionHandler;
+        }
+
+
+        public void InstallOrUpgradePackages(params string[] packages)
         {
             var pkgList = string.Join(" ", packages);
             GenLog.Info($"Installing/Upgrading Chocolatey packages: {pkgList}");
@@ -24,12 +32,33 @@ namespace Chocolatey
                 "upgrade", "-y",
                 packages);
 
-            if (result != 0)
+            GenLog.Info("Chocolatey command done");
+            switch (result)
             {
-                GenLog.Error($"Exit code was {result}. A reboot or retry may be required.");
-            }
+                case 0:
+                    return;
 
-            return result;
+                case 1641:
+                    _interactionHandler.ExitWithSuccess("Exiting for reboot");
+                    break;
+
+                case 3010:
+                    AskForRestart();
+                    return;
+
+                default:
+                    _interactionHandler.ExitWithError("Chocolatey failed");
+                    break;
+            }
+        }
+
+        private void AskForRestart()
+        {
+            if (!_interactionHandler.GetYesNoResponse("A restart is required. Restart now?"))
+                return;
+
+            WindowsHost.Restart(0);
+            _interactionHandler.ExitWithSuccess("Exiting for reboot");
         }
 
         private string GetChocoExecutable()
