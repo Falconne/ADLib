@@ -152,6 +152,18 @@ namespace AKBDLib.Util
             return command.Result.ExitCode;
         }
 
+        public static (int exitCode, string output) Run(string program, params object[] args)
+        {
+            GenLog.Debug($"{program} {string.Join(" ", args)}");
+            var output = new StringWriter();
+            var command = Command.Run(program, args)
+                .RedirectTo(output)
+                .RedirectStandardErrorTo(output);
+
+            command.Wait();
+            return (command.Result.ExitCode, output.ToString());
+        }
+
         public static void RunAndFailIfNotExitZeroMS(string program, params object[] args)
         {
             var exitCode = RunAndGetExitCodeMS(program, args);
