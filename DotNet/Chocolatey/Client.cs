@@ -3,6 +3,7 @@ using ADLib.Interactivity;
 using ADLib.Logging;
 using ADLib.Util;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Chocolatey
@@ -27,10 +28,10 @@ namespace Chocolatey
             var pkgList = string.Join(" ", packages);
             GenLog.Info($"Installing/Upgrading Chocolatey packages: {pkgList}");
 
-            var result = Shell.RunAndGetExitCodeMS(
-                GetChocoExecutable(),
-                "upgrade", "-y",
-                packages);
+            var args = new List<object> { "upgrade", "-y" };
+            args.AddRange(packages);
+
+            var result = Shell.RunAndGetExitCodeMS(GetChocoExecutable(), args.ToArray());
 
             GenLog.Info("Chocolatey command done");
             switch (result)
