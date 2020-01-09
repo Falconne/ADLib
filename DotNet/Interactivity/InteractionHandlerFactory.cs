@@ -1,5 +1,5 @@
 ﻿using AKBDLib.Logging;
-using AKBDLib.Util;
+using System;
 
 namespace AKBDLib.Interactivity
 {
@@ -7,7 +7,7 @@ namespace AKBDLib.Interactivity
     {
         public static IInteractionHandler GetHandler(IInteractivityOptions options)
         {
-            if (Shell.IsEnvironmentVariableTrue("ZInteractive"))
+            if ("1" == Environment.GetEnvironmentVariable("ZInteractive"))
             {
                 GenLog.Debug("Using TemporaryConsoleInteractionHandler");
                 return new TemporaryConsoleInteractionHandler(options);
