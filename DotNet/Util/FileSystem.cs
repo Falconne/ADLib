@@ -161,5 +161,12 @@ namespace ADLib.Util
             return null;
         }
 
+        public static void EnsureFileExists(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new ConfigurationException($"Expected file not found: {path}");
+            }
+        }
     }
 }
