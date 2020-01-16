@@ -1,4 +1,5 @@
-﻿using ADLib.Logging;
+﻿using System;
+using ADLib.Logging;
 
 namespace ADLib.Util
 {
@@ -7,7 +8,7 @@ namespace ADLib.Util
         public static void Restart(int delay)
         {
             GenLog.Info($"Restarting computer in {delay} seconds");
-            Shell.RunAndFailIfNotExitZeroMS($"shutdown /r /t {delay}");
+            Shell.RunAndFailIfNotExitZeroMS($@"{Environment.SystemDirectory}\shutdown.exe", "/r", "/t", delay);
         }
     }
 }
