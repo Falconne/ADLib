@@ -55,16 +55,7 @@ namespace Chocolatey
             return this;
         }
 
-        private void AskForRestart()
-        {
-            if (!_interactionHandler.GetYesNoResponse("A restart is required. Restart now?"))
-                return;
-
-            WindowsHost.Restart(0);
-            _interactionHandler.ExitWithSuccess("Exiting for reboot");
-        }
-
-        private string GetChocoExecutable()
+        public string GetChocoExecutable()
         {
             if (string.IsNullOrWhiteSpace(_choco))
             {
@@ -78,6 +69,15 @@ namespace Chocolatey
             }
 
             return _choco;
+        }
+
+        private void AskForRestart()
+        {
+            if (!_interactionHandler.GetYesNoResponse("A restart is required. Restart now?"))
+                return;
+
+            WindowsHost.Restart(0);
+            _interactionHandler.ExitWithSuccess("Exiting for reboot");
         }
 
         private string FindChocoExecutable()
