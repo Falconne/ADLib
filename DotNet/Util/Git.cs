@@ -18,10 +18,10 @@ namespace ADLib.Util
             _gitPath = Shell.GetExecutableInPath("git");
 
             if (string.IsNullOrWhiteSpace(_gitPath))
-                _gitPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "git.exe");
+                _gitPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)}\git\bin\git.exe";
 
             if (!File.Exists(_gitPath))
-                _gitPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "git.exe");
+                _gitPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)}\git\bin\git.exe";
 
             if (!File.Exists(_gitPath))
             {
