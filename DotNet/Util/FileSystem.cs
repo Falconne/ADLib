@@ -45,6 +45,14 @@ namespace ADLib.Util
             Directory.CreateDirectory(path);
         }
 
+
+        // Create or clean out given directory
+        public static void InitialiseDirectory(string path)
+        {
+            DeleteDirectory(path);
+            CreateDirectory(path);
+        }
+
         public static void Copy(string src, string dest, bool force = false)
         {
             GenLog.Info($"Copying {src} to {dest}");
@@ -101,25 +109,42 @@ namespace ADLib.Util
 
         private static void RemoveReadOnlyAttributes(string path)
         {
-            foreach (var s in Directory.GetDirectories(path))
+            try
             {
-                RemoveReadOnlyAttributes(s);
-            }
-
-            foreach (var f in Directory.GetFiles(path))
-            {
-                var attr = File.GetAttributes(f);
-                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                foreach (var s in Directory.GetDirectories(path))
                 {
-                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                    RemoveReadOnlyAttributes(s);
                 }
+
+                foreach (var f in Directory.GetFiles(path))
+                {
+                    var attr = File.GetAttributes(f);
+                    if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    {
+                        File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                    }
+                }
+            }
+            catch
+            {
+                // ignored
             }
         }
 
-        public static void RobocopyWithoutMirror(string source, string destination)
+        public static void CopyWithoutMirror(string source, string destination)
+        {
+            DoRobocopy(source, destination, "/e", 3);
+        }
+
+        public static void CopyWithMirror(string source, string destination)
+        {
+            DoRobocopy(source, destination, "/MIR", 4);
+        }
+
+        private static void DoRobocopy(string source, string destination, string type, int exitCodeLimit)
         {
             Logging.GenLog.Info(
-                $"Robocopy without mirror '{source}' --> '{destination}'");
+                $"Robocopy ({type}) '{source}' --> '{destination}'");
 
             if (!Directory.Exists(source))
             {
@@ -129,9 +154,9 @@ namespace ADLib.Util
             Directory.CreateDirectory(destination);
 
             var result = Shell.RunAndGetExitCodeMS(
-                "robocopy", source, destination, "/e", "/MT", "/R:3");
+                "robocopy", source, destination, type, "/MT", "/R:3");
 
-            if (result > 3)
+            if (result > exitCodeLimit)
             {
                 throw new IOException($"Robocopy returned code {result}");
             }

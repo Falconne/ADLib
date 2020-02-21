@@ -45,5 +45,15 @@ namespace ADLib.Util
         {
             return Shell.Run(GetClient(), args);
         }
+
+        public static string RunAndFailIfNotExitZero(params object[] args)
+        {
+            var (exitCode, output) = Run(args);
+            if (exitCode == 0)
+                return output;
+
+            GenLog.Info(output);
+            throw new ConfigurationException($"Git command failed with code {exitCode}");
+        }
     }
 }
