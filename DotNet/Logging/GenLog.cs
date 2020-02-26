@@ -12,6 +12,15 @@ namespace ADLib.Logging
 
         public static Action<string> Error = s => WriteToConsole(s, "ERROR");
 
+
+        public static void WriteAlert(string message)
+        {
+            var previous = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(message);
+            Console.ForegroundColor = previous;
+        }
+
         private static void WriteToConsole(string message, string type)
         {
             Console.WriteLine($"{type}: {message}");
