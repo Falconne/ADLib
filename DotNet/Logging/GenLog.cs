@@ -4,7 +4,14 @@ namespace ADLib.Logging
 {
     public static class GenLog
     {
-        public static Action<string> Debug = s => WriteToConsole(s, "DEBUG");
+        public static bool DebugEnabled = false;
+
+
+        public static Action<string> Debug = s =>
+        {
+            if (DebugEnabled)
+                WriteToConsole(s, "DEBUG");
+        };
 
         public static Action<string> Info = s => WriteToConsole(s, "INFO");
 
