@@ -1,5 +1,4 @@
 ﻿using ADLib.Logging;
-using System;
 
 namespace ADLib.Interactivity
 {
@@ -7,7 +6,7 @@ namespace ADLib.Interactivity
     {
         public static IInteractionHandler GetHandler(IInteractivityOptions options)
         {
-            if ("1" == Environment.GetEnvironmentVariable("ZInteractive"))
+            if (options.Pause)
             {
                 GenLog.Debug("Using TemporaryConsoleInteractionHandler");
                 return new TemporaryConsoleInteractionHandler(options);
