@@ -143,7 +143,7 @@ namespace ADLib.Util
 
         public static int RunAndGetExitCodeMS(string program, params object[] args)
         {
-            GenLog.Debug($"{program} {string.Join(" ", args)}");
+            GenLog.Info($"{program} {string.Join(" ", args)}");
             var command = Command.Run(program, args)
                 .RedirectTo(Console.Out)
                 .RedirectStandardErrorTo(Console.Error);
@@ -154,7 +154,7 @@ namespace ADLib.Util
 
         public static (int exitCode, string output) Run(string program, params object[] args)
         {
-            GenLog.Debug($"{program} {string.Join(" ", args)}");
+            GenLog.Info($"{program} {string.Join(" ", args)}");
             var output = new StringWriter();
             var command = Command.Run(program, args)
                 .RedirectTo(output)
@@ -266,7 +266,7 @@ namespace ADLib.Util
         public static bool IsEnvironmentVariableTrue(string name)
         {
             var value = Environment.GetEnvironmentVariable(name);
-            GenLog.Debug($"Env: {name} => {value}");
+            GenLog.Info($"Env: {name} => {value}");
             if (string.IsNullOrWhiteSpace(value))
                 return false;
 
