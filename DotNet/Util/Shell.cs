@@ -161,7 +161,9 @@ namespace ADLib.Util
                 .RedirectStandardErrorTo(output);
 
             command.Wait();
-            return (command.Result.ExitCode, output.ToString());
+            var outputString = output.ToString();
+            GenLog.Info(outputString);
+            return (command.Result.ExitCode, outputString);
         }
 
         public static void RunAndFailIfNotExitZeroMS(string program, params object[] args)
