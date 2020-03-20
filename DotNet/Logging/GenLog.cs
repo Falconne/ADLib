@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.TeamCity.ServiceMessages.Write.Special;
+using System;
 
 namespace ADLib.Logging
 {
@@ -17,7 +18,11 @@ namespace ADLib.Logging
 
         public static Action<string> Warning = s => WriteToConsole(s, "WARNING");
 
-        public static Action<string> Error = s => WriteToConsole(s, "ERROR");
+        public static Action<string> Error = s =>
+        {
+            WriteToConsole(s, "ERROR");
+            WriteErrorToTeamCity(s);
+        };
 
 
         public static void WriteAlert(string message)
@@ -31,6 +36,14 @@ namespace ADLib.Logging
         private static void WriteToConsole(string message, string type)
         {
             Console.WriteLine($"{type}: {message}");
+        }
+
+        private static void WriteErrorToTeamCity(string message)
+        {
+            using (var writer = new TeamCityServiceMessages().CreateWriter(Console.WriteLine))
+            {
+                writer.WriteError(message);
+            }
         }
     }
 }

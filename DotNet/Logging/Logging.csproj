@@ -16,4 +16,8 @@
     <WarningsAsErrors />
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="TeamCity.ServiceMessages" Version="3.0.13" />
+  </ItemGroup>
+
 </Project>
