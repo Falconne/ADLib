@@ -40,6 +40,10 @@ namespace ADLib.Logging
 
         private static void WriteErrorToTeamCity(string message)
         {
+            var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
             using (var writer = new TeamCityServiceMessages().CreateWriter(Console.WriteLine))
             {
                 writer.WriteError(message);
