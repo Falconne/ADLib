@@ -42,6 +42,22 @@ namespace ADLib.Git
             return result;
         }
 
+        public void RunGitAndFailIfNotExitZeroMS(params string[] args)
+        {
+            var previousDirectory = ChangeToRepoRoot();
+
+            try
+            {
+                Shell.RunAndFailIfNotExitZeroMS("git.exe", args);
+
+            }
+            finally
+            {
+                if (!string.IsNullOrWhiteSpace(previousDirectory))
+                    Directory.SetCurrentDirectory(previousDirectory);
+            }
+        }
+
         public string ChangeToRepoRoot()
         {
             var previousDirectory = Directory.GetCurrentDirectory();
