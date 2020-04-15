@@ -193,7 +193,7 @@ namespace ADLib.Git
         public void StageModified()
         {
             GenLog.Info("Staging modified files");
-            RunAndFailIfNotExitZero("add -u");
+            RunAndFailIfNotExitZero("add", "-u");
             RunAndFailIfNotExitZero("status");
         }
 
