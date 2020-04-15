@@ -19,6 +19,9 @@ namespace ADLib.Git
 
         public string DefaultRemote = "origin";
 
+        private string _name;
+
+
         public Repo(string root, string url)
         {
             Root = root;
@@ -166,12 +169,20 @@ namespace ADLib.Git
 
         public string GetName()
         {
+            if (!string.IsNullOrEmpty(_name))
+                return _name;
+
             if (Url.ToLower().StartsWith("http"))
-                return GetNameOfHttpRepo();
+                throw new ConfigurationException("Repo name is not set");
 
             var leaf = Url.Split(':').Last();
             return leaf.Replace(".git", "");
 
+        }
+
+        public void SetName(string name)
+        {
+            _name = name;
         }
 
         private string GetNameOfHttpRepo()
