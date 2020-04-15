@@ -6,23 +6,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using ADLib.Exceptions;
 
 namespace ADLib.Git
 {
     public class Repo
     {
-        public readonly string Root;
+        public string Root { get; set; }
 
-        private readonly string _url;
+        public string Url { get; set; }
 
         public string DefaultRemote = "origin";
 
         public Repo(string root, string url)
         {
             Root = root;
-            _url = url;
+            Url = url;
+
+            if (string.IsNullOrEmpty(root) && string.IsNullOrEmpty(url))
+                throw new ConfigurationException("Local directory or URL must be set");
         }
 
+        [Obsolete("Use a MedallionShell run method instead")]
         public string Run(string arguments)
         {
             var previousDirectory = ChangeToRepoRoot();
@@ -42,20 +48,15 @@ namespace ADLib.Git
             return result;
         }
 
-        public void RunGitAndFailIfNotExitZeroMS(params string[] args)
+        public string RunAndFailIfNotExitZero(params string[] args)
         {
-            var previousDirectory = ChangeToRepoRoot();
-
-            try
+            var (result, output) = Run(args);
+            if (result != 0)
             {
-                Shell.RunAndFailIfNotExitZeroMS("git.exe", args);
+                throw new ConfigurationException("git command failed");
+            }
 
-            }
-            finally
-            {
-                if (!string.IsNullOrWhiteSpace(previousDirectory))
-                    Directory.SetCurrentDirectory(previousDirectory);
-            }
+            return output;
         }
 
         public string ChangeToRepoRoot()
@@ -69,11 +70,28 @@ namespace ADLib.Git
             return previousDirectory;
         }
 
-        public void RunAndShowOutput(string arguments)
+        private (int ExitCode, string Output) Run(params string[] args)
         {
-            GenLog.Info(Run(arguments));
+            var previousDirectory = ChangeToRepoRoot();
+
+            try
+            {
+                return RunWithoutChangingRoot(args);
+            }
+            finally
+            {
+                if (!string.IsNullOrWhiteSpace(previousDirectory))
+                    Directory.SetCurrentDirectory(previousDirectory);
+            }
         }
 
+        private static (int ExitCode, string Output) RunWithoutChangingRoot(params string[] args)
+        {
+            // TODO use git object
+            return Shell.Run("git.exe", args);
+        }
+
+        [Obsolete("Use a MedallionShell run method instead")]
         private static string RunWithoutChangingRoot(string arguments)
         {
             var output = new StringBuilder();
@@ -130,9 +148,9 @@ namespace ADLib.Git
                 () =>
                 {
                     DeleteClone();
-                    RunWithoutChangingRoot($"clone {_url} \"{Root}\"");
+                    RunWithoutChangingRoot("clone", Url, Root);
                 },
-                $"Cloning fresh repo from {_url} to {Root}");
+                $"Cloning fresh repo from {Url} to {Root}");
         }
 
         public void DeleteClone()
@@ -142,26 +160,30 @@ namespace ADLib.Git
 
         public bool IsClean()
         {
-            var result = Run("status --porcelain --untracked-files=no");
+            var result = RunAndFailIfNotExitZero("status",  "--porcelain",  "--untracked-files=no");
             return string.IsNullOrWhiteSpace(result);
         }
 
         public string GetName()
         {
-            // TODO handle this
-            if (_url.ToLower().StartsWith("http"))
-                return _url;
+            if (Url.ToLower().StartsWith("http"))
+                return GetNameOfHttpRepo();
 
-            var leaf = _url.Split(':').Last();
+            var leaf = Url.Split(':').Last();
             return leaf.Replace(".git", "");
 
+        }
+
+        private string GetNameOfHttpRepo()
+        {
+            return Regex.Replace(Url, @"^.+?//.+?/", "");
         }
 
         public void StageModified()
         {
             GenLog.Info("Staging modified files");
-            Run("add -u");
-            GenLog.Info(Run("status"));
+            RunAndFailIfNotExitZero("add -u");
+            RunAndFailIfNotExitZero("status");
         }
 
         public void Commit(string message)
@@ -172,24 +194,24 @@ namespace ADLib.Git
                 throw new Exception("Multi-line messages are not supported by this method");
             }
 
-            var result = Run($"commit {message}");
+            var result = RunAndFailIfNotExitZero("commit", message);
             GenLog.Info(result);
         }
 
         public void PushWithRebase()
         {
-            Util.Retry.OnException(() => Run("pull --rebase"), "Pulling before push...");
-            Util.Retry.OnException(() => Run("push"), "Pushing...");
+            Retry.OnException(() => RunAndFailIfNotExitZero("pull", "rebase"), "Pulling before push...");
+            Retry.OnException(() => RunAndFailIfNotExitZero("push"), "Pushing...");
         }
 
         public void Fetch()
         {
-            Util.Retry.OnException(() => Run("fetch"), "Fetching");
+            Retry.OnException(() => RunAndFailIfNotExitZero("fetch"), "Fetching");
         }
 
         public IEnumerable<string> GetRemoteBranchList()
         {
-            var output = Run($"for-each-ref --format=%(refname:short) refs/remotes/{DefaultRemote}");
+            var output = RunAndFailIfNotExitZero("for-each-ref", "--format=%(refname:short)", $"refs/remotes/{DefaultRemote}");
             return output.Split('\n')
                 .Where(b => !string.IsNullOrWhiteSpace(b) && !b.EndsWith("/HEAD"));
         }
@@ -204,7 +226,7 @@ namespace ADLib.Git
 
         public bool IsLocalBranch(string localName)
         {
-            var output = Run($"for-each-ref --format=%(refname:short) refs/heads/{localName}");
+            var output = RunAndFailIfNotExitZero("for-each-ref", "--format=%(refname:short)", $"refs/heads/{localName}");
             return !string.IsNullOrWhiteSpace(output);
         }
 
@@ -213,17 +235,17 @@ namespace ADLib.Git
             if (IsLocalBranch(localBranchName))
             {
                 GenLog.Info($"Checking out local branch {localBranchName}");
-                RunAndShowOutput($"checkout {localBranchName}");
+                RunAndFailIfNotExitZero("checkout", localBranchName);
             }
             else
             {
                 Fetch();
                 var remoteBranchDesignation = $"{DefaultRemote}/{localBranchName}";
                 GenLog.Info($"Checking out remote branch {remoteBranchDesignation} into local");
-                RunAndShowOutput($"checkout -t {remoteBranchDesignation}");
+                RunAndFailIfNotExitZero("checkout", "-t", remoteBranchDesignation);
             }
 
-            RunAndShowOutput("submodule update --recursive");
+            RunAndFailIfNotExitZero("submodule", "update", "--recursive");
         }
     }
 }
