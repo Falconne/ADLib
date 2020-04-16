@@ -130,7 +130,7 @@ namespace ADLib.Git
 
         public void PushWithRebase()
         {
-            Retry.OnException(() => RunAndFailIfNotExitZero("pull", "rebase"), "Pulling before push...");
+            Retry.OnException(() => RunAndFailIfNotExitZero("pull", "--rebase"), "Pulling before push...");
             Retry.OnException(() => RunAndFailIfNotExitZero("push"), "Pushing...");
         }
 
