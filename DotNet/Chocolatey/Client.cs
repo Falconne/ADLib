@@ -73,7 +73,8 @@ namespace Chocolatey
 
         private void AskForRestart()
         {
-            if (!_interactionHandler.GetYesNoResponse("A restart is required. Restart now?"))
+            var query = "A restart is required. Restart now? You may need to re-run the current script after the restart to complete your installation.";
+            if (!_interactionHandler.GetYesNoResponse(query))
                 return;
 
             WindowsHost.Restart(0);
