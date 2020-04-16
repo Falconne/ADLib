@@ -1,11 +1,12 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
+using ADLib.Util;
 using System;
 using System.IO;
 
-namespace ADLib.Util
+namespace ADLib.Git
 {
-    public static class Git
+    public static class Client
     {
         private static string _gitPath;
 

@@ -67,7 +67,7 @@ namespace ADLib.Git
 
         private static (int ExitCode, string StdOut, string StdErr) RunWithoutChangingRoot(params string[] args)
         {
-            return Util.Git.Run(args);
+            return Client.Run(args);
         }
 
         public void MakeFreshClone()
