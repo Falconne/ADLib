@@ -41,18 +41,17 @@ namespace ADLib.Util
             return _gitPath;
         }
 
-        public static (int exitCode, string output) Run(params object[] args)
+        public static (int exitCode, string stdout, string stderr) Run(params string[] args)
         {
             return Shell.Run(GetClient(), args);
         }
 
-        public static string RunAndFailIfNotExitZero(params object[] args)
+        public static (string stdout, string stderr) RunAndFailIfNotExitZero(params string[] args)
         {
-            var (exitCode, output) = Run(args);
+            var (exitCode, stdout, stderr) = Run(args);
             if (exitCode == 0)
-                return output;
+                return (stdout, stderr);
 
-            GenLog.Info(output);
             throw new ConfigurationException($"Git command failed with code {exitCode}");
         }
     }
