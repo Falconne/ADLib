@@ -163,7 +163,11 @@ namespace ADLib.Util
                 .RedirectStandardErrorTo(output);
 
             command.Wait();
-            var outputString = output.ToString();
+            var outputString = "";
+            Retry.OnException(
+                () => { outputString = output.ToString(); },
+                "Reading command output");
+
             GenLog.Info(outputString);
             return (command.Result.ExitCode, outputString);
         }
