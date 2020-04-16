@@ -154,7 +154,9 @@ namespace ADLib.Util
 
         public static (int exitCode, string output) Run(string program, params object[] args)
         {
-            GenLog.Info($"{program} {string.Join(" ", args)}");
+            var argsPrinted = args.Length == 0 ? "" : string.Join(" ", args);
+            GenLog.Info($"{program} {argsPrinted}");
+
             var output = new StringWriter();
             var command = Command.Run(program, args)
                 .RedirectTo(output)
