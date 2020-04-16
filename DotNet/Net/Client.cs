@@ -1,5 +1,4 @@
-﻿using ADLib.Logging;
-using ADLib.Util;
+﻿using ADLib.Util;
 using System;
 using System.IO;
 using System.Net;
@@ -21,9 +20,19 @@ namespace ADLib.Net
 
         public static string DownloadFile(string url, string destination)
         {
-            GenLog.Info($"Downloading {url} to {destination}");
             var destinationDirectory = Path.GetDirectoryName(destination);
             FileSystem.CreateDirectory(destinationDirectory);
+
+            Retry.OnException(
+                () => { DownloadFileOrFail(url, destination); },
+
+                $"Downloading {url} to {destination}");
+
+            return destination;
+        }
+
+        private static void DownloadFileOrFail(string url, string destination)
+        {
             using (var client = new WebClient())
             {
                 client.DownloadFile(url, destination);
@@ -33,8 +42,6 @@ namespace ADLib.Net
             {
                 throw new Exception($"Could not download {url}");
             }
-
-            return destination;
         }
     }
 }
