@@ -46,7 +46,7 @@ namespace ADLib.Util
             var exitCode = RunAndGetExitCodeMS(program, args);
             if (exitCode != 0)
             {
-                throw new ConfigurationException("");
+                throw new ConfigurationException($"Exit code was {exitCode}");
             }
         }
 
