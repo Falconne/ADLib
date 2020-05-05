@@ -28,6 +28,22 @@ namespace ADLib.Git
                 throw new ConfigurationException("Local directory or URL must be set");
         }
 
+        public static Repo CloneUnder(string directory, string url, params string[] extraArgs)
+        {
+            FileSystem.CreateDirectory(directory);
+            var args = new List<string>
+            {
+                "clone",
+                url
+            };
+
+            args.AddRange(extraArgs);
+
+            RunWithoutChangingRoot(args.ToArray());
+            var root = GetNameFromUrl(url);
+            return new Repo(root, url);
+        }
+
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
         {
             var (result, stdout, stderr) = Run(args);
@@ -94,15 +110,16 @@ namespace ADLib.Git
 
         public string GetName()
         {
-            if (!string.IsNullOrEmpty(_name))
-                return _name;
+            return !string.IsNullOrEmpty(_name) ? _name : GetNameFromUrl(Url);
+        }
 
-            if (Url.ToLower().StartsWith("http"))
+        private static string GetNameFromUrl(string url)
+        {
+            if (url.ToLower().StartsWith("http"))
                 throw new ConfigurationException("Repo name is not set");
 
-            var leaf = Url.Split(':').Last();
+            var leaf = url.Split(':').Last();
             return leaf.Replace(".git", "");
-
         }
 
         public void SetName(string name)
