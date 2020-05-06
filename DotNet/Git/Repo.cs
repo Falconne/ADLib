@@ -30,17 +30,27 @@ namespace ADLib.Git
 
         public static Repo CloneUnder(string directory, string url, params string[] extraArgs)
         {
-            FileSystem.CreateDirectory(directory);
+            GenLog.Info($"Cloning {url} to {directory}");
+            var root = Path.Combine(directory, GetNameFromUrl(url));
+            FileSystem.InitialiseDirectory(root);
             var args = new List<string>
             {
-                "clone",
-                url
+                "clone"
             };
 
             args.AddRange(extraArgs);
+            args.AddRange(
+                new[] {
+                url,
+                root
+            });
 
-            RunWithoutChangingRoot(args.ToArray());
-            var root = GetNameFromUrl(url);
+            var (result, _ , _) = RunWithoutChangingRoot(args.ToArray());
+            if (result != 0)
+            {
+                throw new ConfigurationException("Cloning failed");
+            }
+
             return new Repo(root, url);
         }
 
@@ -104,7 +114,7 @@ namespace ADLib.Git
 
         public bool IsClean()
         {
-            var result= RunAndFailIfNotExitZero("status",  "--porcelain",  "--untracked-files=no");
+            var result = RunAndFailIfNotExitZero("status", "--porcelain", "--untracked-files=no");
             return string.IsNullOrWhiteSpace(Shell.GetCombinedOutput(result));
         }
 
