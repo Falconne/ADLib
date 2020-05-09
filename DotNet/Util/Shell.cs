@@ -32,10 +32,22 @@ namespace ADLib.Util
             var stderr = command.StandardError.ReadToEnd();
 
 
-            GenLog.Info("=====================================stdout=====================================");
-            GenLog.Info(stdout);
-            GenLog.Info("=====================================stderr=====================================");
-            GenLog.Info(stderr);
+            if (!string.IsNullOrWhiteSpace(stdout))
+            {
+                GenLog.Info("=====================================stdout=====================================");
+                GenLog.Info(stdout);
+            }
+            else
+            {
+                GenLog.Info("<no stdout>");
+            }
+
+            if (!string.IsNullOrWhiteSpace(stderr))
+            {
+                GenLog.Info("=====================================stderr=====================================");
+                GenLog.Info(stderr);
+            }
+
             GenLog.Info("================================================================================");
 
             return (command.Result.ExitCode, stdout, stderr);

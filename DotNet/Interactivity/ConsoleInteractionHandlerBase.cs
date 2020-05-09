@@ -12,6 +12,8 @@ namespace ADLib.Interactivity
         protected ConsoleInteractionHandlerBase(IInteractivityOptions options)
         {
             Options = options;
+            GenLog.DebugEnabled = options.Debug;
+            GenLog.LogFile = options.Log;
         }
 
         public abstract void ExitWithError(string message);
