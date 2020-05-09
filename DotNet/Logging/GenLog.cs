@@ -43,7 +43,7 @@ namespace ADLib.Logging
             if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            File.AppendAllText(LogFile, logMessage);
+            File.AppendAllText(LogFile, $"{logMessage}\n");
         }
 
         private static void SetColorForLogType(LogMessageType type)
