@@ -31,10 +31,19 @@ namespace ADLib.Logging
                 WriteErrorToTeamCity(message);
             }
 
-            if (!string.IsNullOrWhiteSpace(LogFile))
-            {
-                File.AppendAllText(LogFile, logMessage);
-            }
+            WriteToFile(logMessage);
+        }
+
+        private static void WriteToFile(string logMessage)
+        {
+            if (string.IsNullOrWhiteSpace(LogFile))
+                return;
+
+            var directory = Path.GetDirectoryName(LogFile);
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            File.AppendAllText(LogFile, logMessage);
         }
 
         private static void SetColorForLogType(LogMessageType type)
