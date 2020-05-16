@@ -174,7 +174,7 @@ namespace ADLib.Util
                     ? Path.Combine(directoryToCheck, underSubDir, filename)
                     : Path.Combine(directoryToCheck, filename);
 
-                if (File.Exists(possibleFileLocation))
+                if (File.Exists(possibleFileLocation) || Directory.Exists(possibleFileLocation))
                 {
                     GenLog.Info($"Found at {possibleFileLocation}");
                     return possibleFileLocation;
