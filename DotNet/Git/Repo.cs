@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+
 namespace ADLib.Git
 {
     public class Repo
@@ -131,10 +132,14 @@ namespace ADLib.Git
             return !string.IsNullOrEmpty(_name) ? _name : GetNameFromUrl(Url);
         }
 
-        private static string GetNameFromUrl(string url)
+        // TODO Shouldn't be company specific
+        public static string GetNameFromUrl(string url)
         {
             if (url.ToLowerInvariant().Contains("dev.azure.com"))
                 return GetNameFromAzureUrl(url);
+
+            if (url.ToLowerInvariant().Contains("git@akl-gitlab"))
+                return GetNameFromGitlabSshUrl(url);
 
             if (url.ToLowerInvariant().Contains("akl-gitlab"))
                 return GetNameFromGitlabUrl(url);
@@ -149,6 +154,11 @@ namespace ADLib.Git
         }
 
         private static string GetNameFromGitlabUrl(string url)
+        {
+            return Regex.Replace(url, @".+\.net/", "");
+        }
+
+        private static string GetNameFromGitlabSshUrl(string url)
         {
             var leaf = url.Split(':').Last();
             return leaf.Replace(".git", "");
