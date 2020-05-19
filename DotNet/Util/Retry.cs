@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace ADLib.Util
 {
     public static class Retry
     {
-        public static void OnException(Action action, string introMessage, int numRetries = 3, int delay = 3000)
+        public static void OnException([InstantHandle] Action action, string introMessage, int numRetries = 3, int delay = 3000)
         {
             if (numRetries < 0)
                 numRetries = 0;
