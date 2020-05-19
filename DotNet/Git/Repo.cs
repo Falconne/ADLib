@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ADLib.Git
 {
@@ -30,9 +31,8 @@ namespace ADLib.Git
 
         public static Repo CloneUnder(string directory, string url, params string[] extraArgs)
         {
-            GenLog.Info($"Cloning {url} to {directory}");
-            var root = Path.Combine(directory, GetNameFromUrl(url));
-            FileSystem.InitialiseDirectory(root);
+            var name = GetNameFromUrl(url);
+            var root = Path.Combine(directory, name);
             var args = new List<string>
             {
                 "clone"
@@ -45,13 +45,21 @@ namespace ADLib.Git
                 root
             });
 
-            var (result, _ , _) = RunWithoutChangingRoot(args.ToArray());
-            if (result != 0)
+            void CloneSafely()
             {
-                throw new ConfigurationException("Cloning failed");
+                FileSystem.InitialiseDirectory(root);
+                var (result, _, _) = RunWithoutChangingRoot(args.ToArray());
+                if (result != 0)
+                {
+                    throw new ConfigurationException("Cloning failed");
+                }
             }
 
-            return new Repo(root, url);
+            Retry.OnException(CloneSafely, $"Cloning {url} to {directory}");
+
+            var repo = new Repo(root, url);
+            repo.SetName(name);
+            return repo;
         }
 
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
@@ -125,11 +133,26 @@ namespace ADLib.Git
 
         private static string GetNameFromUrl(string url)
         {
-            if (url.ToLower().StartsWith("http"))
-                throw new ConfigurationException("Repo name is not set");
+            if (url.ToLowerInvariant().Contains("dev.azure.com"))
+                return GetNameFromAzureUrl(url);
 
+            if (url.ToLowerInvariant().Contains("akl-gitlab"))
+                return GetNameFromGitlabUrl(url);
+
+            throw new ConfigurationException($"Unrecognised server: {url}");
+        }
+
+        private static string GetNameFromAzureUrl(string url)
+        {
+            var suffix = Regex.Replace(url, @".+\.com/", "");
+            return suffix.Replace("/_git", "");
+        }
+
+        private static string GetNameFromGitlabUrl(string url)
+        {
             var leaf = url.Split(':').Last();
             return leaf.Replace(".git", "");
+
         }
 
         public void SetName(string name)
