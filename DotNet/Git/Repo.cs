@@ -145,7 +145,7 @@ namespace ADLib.Git
             return !string.IsNullOrWhiteSpace(output);
         }
 
-        public void Checkout(string localBranchName)
+        public void Checkout(string localBranchName, bool updateSubmodules = false)
         {
             if (IsLocalBranch(localBranchName))
             {
@@ -160,7 +160,8 @@ namespace ADLib.Git
                 RunAndFailIfNotExitZero("checkout", "-t", remoteBranchDesignation);
             }
 
-            RunAndFailIfNotExitZero("submodule", "update", "--recursive");
+            if (updateSubmodules)
+                RunAndFailIfNotExitZero("submodule", "update", "--recursive", "--init");
         }
     }
 }
