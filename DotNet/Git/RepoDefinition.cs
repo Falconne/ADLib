@@ -61,37 +61,29 @@ namespace ADLib.Git
             return Client.Run(args);
         }
 
-        // TODO Shouldn't be company specific
         public static string GetNameFromUrl(string url)
         {
-            if (url.ToLowerInvariant().Contains("dev.azure.com"))
-                return GetNameFromAzureUrl(url);
+            string nameFromUrl;
 
-            if (url.ToLowerInvariant().Contains("git@akl-gitlab"))
-                return GetNameFromGitlabSshUrl(url);
+            if (url.ToLowerInvariant().StartsWith("http"))
+                nameFromUrl = GetNameFromHttpsUrl(url);
+            else if (url.ToLowerInvariant().StartsWith("git@"))
+                nameFromUrl = GetNameFromSshUrl(url);
+            else
+                throw new ConfigurationException($"Unrecognised protocol: {url}");
 
-            if (url.ToLowerInvariant().Contains("akl-gitlab"))
-                return GetNameFromGitlabUrl(url);
-
-            throw new ConfigurationException($"Unrecognised server: {url}");
+            return Regex.Replace(nameFromUrl, @"\.git$", "");
         }
 
-        private static string GetNameFromAzureUrl(string url)
+        private static string GetNameFromHttpsUrl(string url)
         {
-            var suffix = Regex.Replace(url, @".+\.com/", "");
+            var suffix = Regex.Replace(url, @".+?/", "");
             return suffix.Replace("/_git", "");
         }
 
-        private static string GetNameFromGitlabUrl(string url)
+        private static string GetNameFromSshUrl(string url)
         {
-            return Regex.Replace(url, @".+\.net/", "");
-        }
-
-        private static string GetNameFromGitlabSshUrl(string url)
-        {
-            var leaf = url.Split(':').Last();
-            return leaf.Replace(".git", "");
-
+            return url.Split(':').Last();
         }
     }
 }
