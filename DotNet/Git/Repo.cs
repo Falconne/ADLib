@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 
 namespace ADLib.Git
@@ -14,50 +13,20 @@ namespace ADLib.Git
     {
         public string Root { get; set; }
 
-        public string Url { get; set; }
+        public readonly RepoDefinition Definition;
+
+        public string Name => Definition.Name;
 
         public string DefaultRemote = "origin";
 
 
-        public Repo(string root, string url)
+        public Repo(string root, RepoDefinition definition)
         {
+            if (string.IsNullOrWhiteSpace(root))
+                throw new ConfigurationException("Cloned repo must have a root");
+
             Root = root;
-            Url = url;
-
-            if (string.IsNullOrEmpty(root) && string.IsNullOrEmpty(url))
-                throw new ConfigurationException("Local directory or URL must be set");
-        }
-
-        public static Repo CloneUnder(string directory, string url, params string[] extraArgs)
-        {
-            var name = GetNameFromUrl(url);
-            var root = Path.Combine(directory, name);
-            var args = new List<string>
-            {
-                "clone"
-            };
-
-            args.AddRange(extraArgs);
-            args.AddRange(
-                new[] {
-                url,
-                root
-            });
-
-            void CloneSafely()
-            {
-                FileSystem.InitialiseDirectory(root);
-                var (result, _, _) = RunWithoutChangingRoot(args.ToArray());
-                if (result != 0)
-                {
-                    throw new ConfigurationException("Cloning failed");
-                }
-            }
-
-            Retry.OnException(CloneSafely, $"Cloning {url} to {directory}");
-
-            var repo = new Repo(root, url);
-            return repo;
+            Definition = definition;
         }
 
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
@@ -77,6 +46,11 @@ namespace ADLib.Git
             if (Directory.Exists(Root))
             {
                 Directory.SetCurrentDirectory(Root);
+            }
+            else
+            {
+                throw new ConfigurationException(
+                    $"Cannot switch to repo root {Root}; directory not found");
             }
 
             return previousDirectory;
@@ -102,17 +76,6 @@ namespace ADLib.Git
             return Client.Run(args);
         }
 
-        public void MakeFreshClone()
-        {
-            Retry.OnException(
-                () =>
-                {
-                    DeleteClone();
-                    RunWithoutChangingRoot("clone", Url, Root);
-                },
-                $"Cloning fresh repo from {Url} to {Root}");
-        }
-
         public void DeleteClone()
         {
             FileSystem.DeleteDirectory(Root);
@@ -120,46 +83,10 @@ namespace ADLib.Git
 
         public bool IsClean()
         {
-            var result = RunAndFailIfNotExitZero("status", "--porcelain", "--untracked-files=no");
+            var result = RunAndFailIfNotExitZero(
+                "status", "--porcelain", "--untracked-files=no");
+
             return string.IsNullOrWhiteSpace(Shell.GetCombinedOutput(result));
-        }
-
-        public string GetName()
-        {
-            return GetNameFromUrl(Url);
-        }
-
-        // TODO Shouldn't be company specific
-        public static string GetNameFromUrl(string url)
-        {
-            if (url.ToLowerInvariant().Contains("dev.azure.com"))
-                return GetNameFromAzureUrl(url);
-
-            if (url.ToLowerInvariant().Contains("git@akl-gitlab"))
-                return GetNameFromGitlabSshUrl(url);
-
-            if (url.ToLowerInvariant().Contains("akl-gitlab"))
-                return GetNameFromGitlabUrl(url);
-
-            throw new ConfigurationException($"Unrecognised server: {url}");
-        }
-
-        private static string GetNameFromAzureUrl(string url)
-        {
-            var suffix = Regex.Replace(url, @".+\.com/", "");
-            return suffix.Replace("/_git", "");
-        }
-
-        private static string GetNameFromGitlabUrl(string url)
-        {
-            return Regex.Replace(url, @".+\.net/", "");
-        }
-
-        private static string GetNameFromGitlabSshUrl(string url)
-        {
-            var leaf = url.Split(':').Last();
-            return leaf.Replace(".git", "");
-
         }
 
         public void StageModified()
