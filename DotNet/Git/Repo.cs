@@ -18,8 +18,6 @@ namespace ADLib.Git
 
         public string DefaultRemote = "origin";
 
-        private string _name;
-
 
         public Repo(string root, string url)
         {
@@ -59,7 +57,6 @@ namespace ADLib.Git
             Retry.OnException(CloneSafely, $"Cloning {url} to {directory}");
 
             var repo = new Repo(root, url);
-            repo.SetName(name);
             return repo;
         }
 
@@ -129,7 +126,7 @@ namespace ADLib.Git
 
         public string GetName()
         {
-            return !string.IsNullOrEmpty(_name) ? _name : GetNameFromUrl(Url);
+            return GetNameFromUrl(Url);
         }
 
         // TODO Shouldn't be company specific
@@ -163,11 +160,6 @@ namespace ADLib.Git
             var leaf = url.Split(':').Last();
             return leaf.Replace(".git", "");
 
-        }
-
-        public void SetName(string name)
-        {
-            _name = name;
         }
 
         public void StageModified()
