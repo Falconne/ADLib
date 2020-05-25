@@ -8,7 +8,7 @@ namespace ADLib.Util
 {
     public static class FileSystem
     {
-        public static void DeleteDirectory(string path)
+        private static void DeleteDirectory(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return;
