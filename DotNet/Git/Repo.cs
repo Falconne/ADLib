@@ -78,7 +78,7 @@ namespace ADLib.Git
 
         public void DeleteClone()
         {
-            FileSystem.DeleteDirectory(Root);
+            FileSystem.Delete(Root);
         }
 
         public bool IsClean()
