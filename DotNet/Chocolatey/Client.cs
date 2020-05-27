@@ -25,10 +25,17 @@ namespace Chocolatey
 
         public Client InstallOrUpgradePackages(params string[] packagesAndArguments)
         {
-            var pkgAndArgsList = string.Join(" ", packagesAndArguments);
-            GenLog.Info($"Chocolatey Installing / Upgrading: {pkgAndArgsList}");
+            return Run("upgrade", packagesAndArguments);
+        }
 
-            var args = new List<object> { "upgrade", "-y" };
+        public Client InstallPackages(params string[] packagesAndArguments)
+        {
+            return Run("install", packagesAndArguments);
+        }
+
+        private Client Run(string cmd, params string[] packagesAndArguments)
+        {
+            var args = new List<object> { cmd, "-y" };
             args.AddRange(packagesAndArguments);
 
             var result = Shell.RunAndGetExitCodeMS(GetChocoExecutable(), args.ToArray());
