@@ -23,10 +23,19 @@ namespace ADLib.Git
                 throw new ConfigurationException("URL must be set");
         }
 
+        public Repo CloneIfNotExistUnder(string directory, params string[] extraArgs)
+        {
+            var root = GetGeneratedRoot(directory);
+            var configPath = Path.Combine(root, ".git", ".config");
+
+            return File.Exists(configPath)
+                ? new Repo(root, this)
+                : CloneUnder(directory, extraArgs);
+        }
+
         public Repo CloneUnder(string directory, params string[] extraArgs)
         {
-            var name = GetNameFromUrl(Url);
-            var root = Path.Combine(directory, name);
+            var root = GetGeneratedRoot(directory);
             var args = new List<string>
             {
                 "clone"
@@ -54,6 +63,13 @@ namespace ADLib.Git
 
             var repo = new Repo(root, this);
             return repo;
+        }
+
+        private string GetGeneratedRoot(string directory)
+        {
+            var name = GetNameFromUrl(Url);
+            var root = Path.Combine(directory, name);
+            return root;
         }
 
         private static (int ExitCode, string StdOut, string StdErr) RunWithoutChangingRoot(params string[] args)
