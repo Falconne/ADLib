@@ -3,6 +3,7 @@ using ADLib.Logging;
 using ADLib.Util;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ADLib.Git
 {
@@ -44,12 +45,24 @@ namespace ADLib.Git
 
         public static (int exitCode, string stdout, string stderr) Run(params string[] args)
         {
-            return Shell.Run(GetClient(), args);
+            return RunAsync(args).Result;
+        }
+
+        public static async Task<(int exitCode, string stdout, string stderr)> RunAsync(
+            params string[] args)
+        {
+            return await Shell.RunAsync(GetClient(), args);
         }
 
         public static (string stdout, string stderr) RunAndFailIfNotExitZero(params string[] args)
         {
-            var (exitCode, stdout, stderr) = Run(args);
+            return RunAndFailIfNotExitZeroAsync(args).Result;
+        }
+
+        public static async Task<(string stdout, string stderr)> RunAndFailIfNotExitZeroAsync(
+            params string[] args)
+        {
+            var (exitCode, stdout, stderr) = await RunAsync(args);
             if (exitCode == 0)
                 return (stdout, stderr);
 

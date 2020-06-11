@@ -4,6 +4,7 @@ using Medallion.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ADLib.Util
 {
@@ -20,9 +21,16 @@ namespace ADLib.Util
             return command.Result.ExitCode;
         }
 
-        public static (int exitCode, string stdout, string stderr) Run(string program, params object[] args)
+        public static (int exitCode, string stdout, string stderr) Run(
+            string program, params object[] args)
         {
-            var (exitCode, stdout, stderr) = RunSilent(program, args);
+            return RunAsync(program, args).Result;
+        }
+
+        public static async Task<(int exitCode, string stdout, string stderr)> RunAsync(
+            string program, params object[] args)
+        {
+            var (exitCode, stdout, stderr) = await RunSilent(program, args);
 
             if (!string.IsNullOrWhiteSpace(stdout))
             {
@@ -45,14 +53,14 @@ namespace ADLib.Util
             return (exitCode, stdout, stderr);
         }
 
-        public static (int exitCode, string stdout, string stderr) RunSilent(string program, params object[] args)
+        public static async Task<(int exitCode, string stdout, string stderr)> RunSilent(string program, params object[] args)
         {
             var argsPrinted = args.Length == 0 ? "" : string.Join(" ", args);
             GenLog.Info($"{program} {argsPrinted}");
 
             var command = Command.Run(program, args);
 
-            command.Wait();
+            await command.Task;
             var stdout = command.StandardOutput.ReadToEnd();
             var stderr = command.StandardError.ReadToEnd();
 

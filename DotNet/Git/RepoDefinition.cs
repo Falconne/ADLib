@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 
 namespace ADLib.Git
@@ -23,17 +24,17 @@ namespace ADLib.Git
                 throw new ConfigurationException("URL must be set");
         }
 
-        public Repo CloneIfNotExistUnder(string directory, params string[] extraArgs)
+        public async Task<Repo> CloneIfNotExistUnder(string directory, params string[] extraArgs)
         {
             var root = GetGeneratedRoot(directory);
             var configPath = Path.Combine(root, ".git", ".config");
 
             return File.Exists(configPath)
                 ? new Repo(root, this)
-                : CloneUnder(directory, extraArgs);
+                : await CloneUnder(directory, extraArgs);
         }
 
-        public Repo CloneUnder(string directory, params string[] extraArgs)
+        public async Task<Repo> CloneUnder(string directory, params string[] extraArgs)
         {
             var root = GetGeneratedRoot(directory);
             var args = new List<string>
@@ -49,17 +50,17 @@ namespace ADLib.Git
                     root
                 });
 
-            void CloneSafely()
+            async Task CloneSafely()
             {
                 FileSystem.InitialiseDirectory(root);
-                var (result, _, _) = RunWithoutChangingRoot(args.ToArray());
+                var (result, _, _) = await RunWithoutChangingRoot(args.ToArray());
                 if (result != 0)
                 {
                     throw new ConfigurationException("Cloning failed");
                 }
             }
 
-            Retry.OnException(CloneSafely, $"Cloning {Url} to {directory}");
+            await Retry.OnExceptionAsync(CloneSafely, $"Cloning {Url} to {directory}");
 
             var repo = new Repo(root, this);
             return repo;
@@ -72,9 +73,9 @@ namespace ADLib.Git
             return root;
         }
 
-        private static (int ExitCode, string StdOut, string StdErr) RunWithoutChangingRoot(params string[] args)
+        private static async Task<(int ExitCode, string StdOut, string StdErr)> RunWithoutChangingRoot(params string[] args)
         {
-            return Client.Run(args);
+            return await Client.RunAsync(args);
         }
 
         public static string GetNameFromUrl(string url)

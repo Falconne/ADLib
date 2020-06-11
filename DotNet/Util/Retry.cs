@@ -1,12 +1,15 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Threading;
-using JetBrains.Annotations;
+using System.Threading.Tasks;
 
 namespace ADLib.Util
 {
     public static class Retry
     {
-        public static void OnException([InstantHandle] Action action, string introMessage, int numRetries = 3, int delay = 3000)
+        public static async Task OnExceptionAsync(
+            [InstantHandle] Func<Task> action, string introMessage, int numRetries = 3, int delay = 3000)
+
         {
             if (numRetries < 0)
                 numRetries = 0;
@@ -16,12 +19,12 @@ namespace ADLib.Util
                 try
                 {
                     Logging.GenLog.Info(introMessage);
-                    action();
+                    await action();
                     return;
                 }
                 catch (Exception e)
                 {
-                    Logging.GenLog.Warning("Caught exception during retriable operation:");
+                    Logging.GenLog.Warning("Caught exception during retry-able operation:");
                     Logging.GenLog.Warning(e.Message);
                     if (numRetries == 0)
                     {
@@ -32,6 +35,13 @@ namespace ADLib.Util
                     Thread.Sleep(delay);
                 }
             }
+        }
+
+        public static void OnException(
+            [InstantHandle] Action action, string introMessage, int numRetries = 3, int delay = 3000)
+
+        {
+            OnExceptionAsync(() => Task.Run(action), introMessage, numRetries, delay).Wait();
         }
     }
 }
