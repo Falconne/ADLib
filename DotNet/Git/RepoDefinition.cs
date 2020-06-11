@@ -1,4 +1,5 @@
 ﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using ADLib.Util;
 using System.Collections.Generic;
 using System.IO;
@@ -27,11 +28,15 @@ namespace ADLib.Git
         public async Task<Repo> CloneIfNotExistUnder(string directory, params string[] extraArgs)
         {
             var root = GetGeneratedRoot(directory);
-            var configPath = Path.Combine(root, ".git", ".config");
+            var configPath = Path.Combine(root, ".git", "config");
+            GenLog.Info($"Checking for existing clone with: {configPath}");
 
-            return File.Exists(configPath)
-                ? new Repo(root, this)
-                : await CloneUnder(directory, extraArgs);
+            if (!File.Exists(configPath))
+                return await CloneUnder(directory, extraArgs);
+
+            GenLog.Info("Clone found, not doing a new clone");
+            return new Repo(root, this);
+
         }
 
         public async Task<Repo> CloneUnder(string directory, params string[] extraArgs)
