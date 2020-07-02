@@ -29,6 +29,13 @@ namespace ADLib.Git
             Definition = definition;
         }
 
+        public Repo RunFluent(params string[] args)
+        {
+            RunAndFailIfNotExitZero(args);
+
+            return this;
+        }
+
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
         {
             var (result, stdout, stderr) = Run(args);
@@ -89,11 +96,22 @@ namespace ADLib.Git
             return string.IsNullOrWhiteSpace(Shell.GetCombinedOutput(result));
         }
 
-        public void StageModified()
+        // Stage modified files and return true if anything to commit
+        public bool StageModified()
         {
             GenLog.Info("Staging modified files");
-            RunAndFailIfNotExitZero("add", "-u");
-            RunAndFailIfNotExitZero("status");
+            return !RunFluent("add", "-u")
+                .RunFluent("status")
+                .IsClean();
+        }
+
+        // Stage all files and return true if anything to commit
+        public bool StageAll()
+        {
+            GenLog.Info("Staging all files");
+            return !RunFluent("add", "-A", "*")
+                .RunFluent("status")
+                .IsClean();
         }
 
         public void Commit(string message)
@@ -113,9 +131,30 @@ namespace ADLib.Git
             Retry.OnException(() => RunAndFailIfNotExitZero("push"), "Pushing...");
         }
 
-        public void Fetch()
+        // Fetch with retry
+        public Repo Fetch()
         {
             Retry.OnException(() => RunAndFailIfNotExitZero("fetch"), "Fetching");
+            return this;
+        }
+
+        // Pull with retry
+        public Repo Pull(params string[] args)
+        {
+            var newArgs = new List<string>
+            {
+                "pull"
+            };
+
+            newArgs.AddRange(args);
+
+            Retry.OnException(() => RunAndFailIfNotExitZero(newArgs.ToArray()), "Pulling");
+            return this;
+        }
+
+        public Repo ResetHard()
+        {
+            return RunFluent("reset", "--hard");
         }
 
         public IEnumerable<string> GetRemoteBranchList()
@@ -131,6 +170,7 @@ namespace ADLib.Git
         // Returns all remote branch refs without remote prefix
         public IEnumerable<string> GetLogicalBranchList()
         {
+            GenLog.Info($"Gathering logical branch list in {Name}");
             var cutLength = $"{DefaultRemote}/".Length;
             return GetRemoteBranchList()
                 .Select(b => b.Substring(cutLength));
@@ -145,7 +185,7 @@ namespace ADLib.Git
             return !string.IsNullOrWhiteSpace(output);
         }
 
-        public void Checkout(string localBranchName, bool updateSubmodules = false)
+        public Repo Checkout(string localBranchName, bool updateSubmodules = false)
         {
             if (IsLocalBranch(localBranchName))
             {
@@ -162,6 +202,9 @@ namespace ADLib.Git
 
             if (updateSubmodules)
                 RunAndFailIfNotExitZero("submodule", "update", "--recursive", "--init");
+
+            return this;
         }
+
     }
 }

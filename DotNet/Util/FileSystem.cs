@@ -44,8 +44,7 @@ namespace ADLib.Util
             GenLog.Info($"Creating directory {path}");
             Directory.CreateDirectory(path);
         }
-
-
+        
         // Create or clean out given directory
         public static void InitialiseDirectory(string path)
         {
@@ -53,15 +52,15 @@ namespace ADLib.Util
             CreateDirectory(path);
         }
 
-        public static void Copy(string src, string dest, bool force = false)
+        public static void CopyFile(string src, string dst, bool force = false)
         {
-            GenLog.Info($"Copying {src} to {dest}");
+            GenLog.Info($"Copying {src} to {dst}");
             if (!File.Exists(src))
             {
                 throw new FileNotFoundException("src");
             }
 
-            if (Directory.Exists(dest))
+            if (Directory.Exists(dst))
             {
                 var fileName = Path.GetFileName(src);
                 if (fileName == null)
@@ -69,9 +68,10 @@ namespace ADLib.Util
                     throw new ConfigurationException(
                         $"Cannot determine filename from {src}");
                 }
-                dest = Path.Combine(dest, fileName);
+                dst = Path.Combine(dst, fileName);
             }
-            File.Copy(src, dest, force);
+
+            File.Copy(src, dst, force);
         }
 
         public static void Delete(string path)
@@ -192,6 +192,22 @@ namespace ADLib.Util
             {
                 throw new ConfigurationException($"Expected file not found: {path}");
             }
+        }
+
+        public static string GetWorkDir()
+        {
+            var filename = System.AppDomain.CurrentDomain.FriendlyName;
+            var basename = Path.GetFileNameWithoutExtension(filename);
+            var workDir = Path.Combine(Path.GetTempPath(), "ZInternals", basename);
+            GenLog.Info($"Using work dir {workDir}");
+
+            return workDir;
+        }
+
+        // Tests for file or directory
+        public static bool Exists(string path)
+        {
+            return File.Exists(path) || Directory.Exists(path);
         }
     }
 }

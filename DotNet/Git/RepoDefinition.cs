@@ -25,7 +25,12 @@ namespace ADLib.Git
                 throw new ConfigurationException("URL must be set");
         }
 
-        public async Task<Repo> CloneIfNotExistUnder(string directory, params string[] extraArgs)
+        public Repo CloneIfNotExistUnder(string directory, params string[] extraArgs)
+        {
+            return CloneIfNotExistUnderAsync(directory, extraArgs).Result;
+        }
+
+        public async Task<Repo> CloneIfNotExistUnderAsync(string directory, params string[] extraArgs)
         {
             var root = GetGeneratedRoot(directory);
             var configPath = Path.Combine(root, ".git", "config");
@@ -35,8 +40,9 @@ namespace ADLib.Git
                 return await CloneUnder(directory, extraArgs);
 
             GenLog.Info("Clone found, not doing a new clone");
-            return new Repo(root, this);
-
+            var repo = new Repo(root, this);
+            repo.Fetch();
+            return repo;
         }
 
         public async Task<Repo> CloneUnder(string directory, params string[] extraArgs)
