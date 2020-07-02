@@ -157,6 +157,16 @@ namespace ADLib.Git
             return RunFluent("reset", "--hard");
         }
 
+        public Repo CleanUntracked()
+        {
+            return RunFluent("clean", "-ffxd");
+        }
+
+        public Repo ResetAndClean()
+        {
+            return ResetHard().CleanUntracked();
+        }
+
         public IEnumerable<string> GetRemoteBranchList()
         {
             var output = Shell.GetCombinedOutput(
