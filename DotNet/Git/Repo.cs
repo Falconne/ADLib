@@ -47,7 +47,7 @@ namespace ADLib.Git
             return (stdout, stderr);
         }
 
-        public string ChangeToRepoRoot()
+        private string ChangeToRepoRoot()
         {
             var previousDirectory = Directory.GetCurrentDirectory();
             if (Directory.Exists(Root))
@@ -169,6 +169,7 @@ namespace ADLib.Git
 
         public IEnumerable<string> GetRemoteBranchList()
         {
+            Fetch();
             var output = Shell.GetCombinedOutput(
                 RunAndFailIfNotExitZero(
                     "for-each-ref", "--format=%(refname:short)", $"refs/remotes/{DefaultRemote}"));
