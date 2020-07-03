@@ -125,11 +125,12 @@ namespace ADLib.Git
             RunAndFailIfNotExitZero("commit", message);
         }
 
-        public void PushWithRebase()
+        public void Push()
         {
-            Retry.OnException(() => RunAndFailIfNotExitZero("pull", "--rebase"), "Pulling before push...");
+            Retry.OnException(() => RunAndFailIfNotExitZero("pull"), "Pulling before push...");
             Retry.OnException(() => RunAndFailIfNotExitZero("push"), "Pushing...");
         }
+
 
         // Fetch with retry
         public Repo Fetch()
@@ -165,6 +166,11 @@ namespace ADLib.Git
         public Repo ResetAndClean()
         {
             return ResetHard().CleanUntracked();
+        }
+
+        public Repo ResetToTrackingAndClean()
+        {
+            return RunFluent("reset", "--hard", "@{u}").CleanUntracked();
         }
 
         public IEnumerable<string> GetRemoteBranchList()
@@ -216,6 +222,5 @@ namespace ADLib.Git
 
             return this;
         }
-
     }
 }
