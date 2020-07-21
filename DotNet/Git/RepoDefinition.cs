@@ -33,10 +33,11 @@ namespace ADLib.Git
         public async Task<Repo> CloneIfNotExistUnderAsync(string directory, params string[] extraArgs)
         {
             var root = GetGeneratedRoot(directory);
+            GenLog.Info($"Checking for existing clone at: {root}");
             var configPath = Path.Combine(root, ".git", "config");
-            GenLog.Info($"Checking for existing clone with: {configPath}");
+            var bareConfigPath = Path.Combine(root, "config");
 
-            if (!File.Exists(configPath))
+            if (!File.Exists(configPath) && !File.Exists(bareConfigPath))
                 return await CloneUnder(directory, extraArgs);
 
             GenLog.Info("Clone found, not doing a new clone");
