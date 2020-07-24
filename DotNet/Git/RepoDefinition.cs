@@ -112,7 +112,7 @@ namespace ADLib.Git
 
         private static string GetNameFromSshUrl(string url)
         {
-            return url.Split(':').Last();
+            return url.Split(':').Last().Split('/').Last();
         }
     }
 }
