@@ -61,8 +61,8 @@ namespace ADLib.Util
             var command = Command.Run(program, args);
 
             await command.Task;
-            var stdout = command.StandardOutput.ReadToEnd();
-            var stderr = command.StandardError.ReadToEnd();
+            var stdout = await command.StandardOutput.ReadToEndAsync();
+            var stderr = await command.StandardError.ReadToEndAsync();
 
             return (command.Result.ExitCode, stdout, stderr);
         }
