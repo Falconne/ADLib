@@ -44,7 +44,7 @@ namespace ADLib.Util
             GenLog.Info($"Creating directory {path}");
             Directory.CreateDirectory(path);
         }
-        
+
         // Create or clean out given directory
         public static void InitialiseDirectory(string path)
         {
@@ -162,8 +162,23 @@ namespace ADLib.Util
             }
         }
 
-        public static string TrySearchUpForFileFrom(
+        public static string SearchUpForFileFrom(
             string filename, string startingLocation, string underSubDir = null)
+        {
+            var result = TrySearchUpForFileFrom(
+                out var foundPath, filename, startingLocation, underSubDir);
+
+            if (!result)
+            {
+                throw new ConfigurationException(
+                    $"Data file {filename} not found searching up from {startingLocation}");
+            }
+
+            return foundPath;
+        }
+
+        public static bool TrySearchUpForFileFrom(
+            out string foundPath, string filename, string startingLocation, string underSubDir = null)
         {
             var directoryToCheck = startingLocation;
             GenLog.Info($"Searching for {filename} starting from {startingLocation}");
@@ -177,13 +192,15 @@ namespace ADLib.Util
                 if (File.Exists(possibleFileLocation) || Directory.Exists(possibleFileLocation))
                 {
                     GenLog.Info($"Found at {possibleFileLocation}");
-                    return possibleFileLocation;
+                    foundPath = possibleFileLocation;
+                    return true;
                 }
 
                 directoryToCheck = Directory.GetParent(directoryToCheck)?.FullName;
             }
 
-            return null;
+            foundPath = null;
+            return false;
         }
 
         public static void EnsureFileExists(string path)
