@@ -202,7 +202,7 @@ namespace ADLib.Git
             return !string.IsNullOrWhiteSpace(output);
         }
 
-        public Repo Checkout(string localBranchName, bool updateSubmodules = false)
+        public Repo CheckoutBranch(string localBranchName, bool updateSubmodules = false)
         {
             if (IsLocalBranch(localBranchName))
             {
