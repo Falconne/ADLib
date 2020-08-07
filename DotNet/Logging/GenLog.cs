@@ -10,6 +10,8 @@ namespace ADLib.Logging
 
         public static string LogFile;
 
+        public static long MaxLogSize = 10 * 1024 * 1024;
+
 
         public static Action<string> Debug = s => WriteToAllSinks(s, LogMessageType.Debug);
         public static Action<string> Info = s => WriteToAllSinks(s, LogMessageType.Info);
@@ -43,7 +45,23 @@ namespace ADLib.Logging
             if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            File.AppendAllText(LogFile, $"{logMessage}\n");
+            // Rollover existing log file if it's larger than MaxLogSize
+            if (File.Exists(LogFile))
+            {
+                var fi = new FileInfo(LogFile);
+                if (fi.Length > MaxLogSize)
+                {
+                    var rolloverFile = 
+                        $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}";
+                    if (File.Exists(rolloverFile))
+                        File.Delete(rolloverFile);
+
+                    File.Move(LogFile, rolloverFile);
+                }
+            }
+
+            var timestamp = DateTime.Now.ToString("s");
+            File.AppendAllText(LogFile, $"{timestamp} {logMessage}\n");
         }
 
         private static void SetColorForLogType(LogMessageType type)
