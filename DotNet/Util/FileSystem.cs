@@ -213,10 +213,11 @@ namespace ADLib.Util
 
         public static string GetWorkDir()
         {
-            var filename = System.AppDomain.CurrentDomain.FriendlyName;
+            var filename = AppDomain.CurrentDomain.FriendlyName;
             var basename = Path.GetFileNameWithoutExtension(filename);
             var workDir = Path.Combine(Path.GetTempPath(), "ZInternals", basename);
             GenLog.Info($"Using work dir {workDir}");
+            CreateDirectory(workDir);
 
             return workDir;
         }
