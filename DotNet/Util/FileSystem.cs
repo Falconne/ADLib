@@ -2,7 +2,6 @@
 using ADLib.Logging;
 using System;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 
 namespace ADLib.Util
@@ -216,11 +215,16 @@ namespace ADLib.Util
         {
             var filename = AppDomain.CurrentDomain.FriendlyName;
             var basename = Path.GetFileNameWithoutExtension(filename);
-            var workDir = Path.Combine(Path.GetTempPath(), "ZInternals", basename);
+            var workDir = Path.Combine(GetZInternalsDir(), basename);
             GenLog.Info($"Using work dir {workDir}");
             CreateDirectory(workDir);
 
             return workDir;
+        }
+
+        public static string GetZInternalsDir()
+        {
+            return Path.Combine(Path.GetTempPath(), "ZInternals");
         }
 
         // Tests for file or directory
@@ -233,7 +237,7 @@ namespace ADLib.Util
         public static void UseStandardLogFile()
         {
             var name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            GenLog.LogFile = Path.Combine(GetWorkDir(), $"{name}.log");
+            GenLog.LogFile = Path.Combine(GetZInternalsDir(), $"{name}.log");
             GenLog.Info($"Writing logfile to {GenLog.LogFile}");
         }
 
