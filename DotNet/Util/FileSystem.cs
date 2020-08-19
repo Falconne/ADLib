@@ -234,6 +234,7 @@ namespace ADLib.Util
         {
             var name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             GenLog.LogFile = Path.Combine(GetWorkDir(), $"{name}.log");
+            GenLog.Info($"Writing logfile to {GenLog.LogFile}");
         }
 
     }
