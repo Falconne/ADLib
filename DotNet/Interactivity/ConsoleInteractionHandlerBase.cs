@@ -13,7 +13,8 @@ namespace ADLib.Interactivity
         {
             Options = options;
             GenLog.DebugEnabled = options.Debug;
-            GenLog.LogFile = options.Log;
+            if (!string.IsNullOrWhiteSpace(options.Log))
+                GenLog.LogFile = options.Log;
         }
 
         public abstract void ExitWithError(string message);
