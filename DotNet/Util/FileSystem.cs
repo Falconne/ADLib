@@ -2,6 +2,7 @@
 using ADLib.Logging;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 
 namespace ADLib.Util
@@ -227,5 +228,13 @@ namespace ADLib.Util
         {
             return File.Exists(path) || Directory.Exists(path);
         }
+
+        
+        public static void UseStandardLogFile()
+        {
+            var name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            GenLog.LogFile = Path.Combine(GetWorkDir(), $"{name}.log");
+        }
+
     }
 }

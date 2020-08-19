@@ -4,7 +4,6 @@ using Medallion.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ADLib.Util
@@ -84,7 +83,7 @@ namespace ADLib.Util
 
         public static string GetCurrentScript()
         {
-            return Assembly.GetExecutingAssembly().FullName;
+            return System.Diagnostics.Process.GetCurrentProcess()?.MainModule?.FileName;
         }
 
         // Searches local dir PATH environment for command 'name' and returns absolute path to same
