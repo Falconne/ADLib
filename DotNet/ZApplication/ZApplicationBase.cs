@@ -4,12 +4,12 @@ using System;
 
 namespace ZApplication
 {
-    public abstract class ZApplication
+    public abstract class ZApplicationBase
     {
         protected readonly IInteractionHandler InteractionHandler;
 
 
-        protected ZApplication(IInteractionHandler interactionHandler)
+        protected ZApplicationBase(IInteractionHandler interactionHandler)
         {
             InteractionHandler = interactionHandler;
         }
