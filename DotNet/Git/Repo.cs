@@ -36,6 +36,11 @@ namespace ADLib.Git
             return this;
         }
 
+        public string  RunAndGetOutput(params string[] args)
+        {
+            return RunAndFailIfNotExitZero(args).StdOut;
+        }
+        
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
         {
             var (result, stdout, stderr) = Run(args);
@@ -45,22 +50,6 @@ namespace ADLib.Git
             }
 
             return (stdout, stderr);
-        }
-
-        private string ChangeToRepoRoot()
-        {
-            var previousDirectory = Directory.GetCurrentDirectory();
-            if (Directory.Exists(Root))
-            {
-                Directory.SetCurrentDirectory(Root);
-            }
-            else
-            {
-                throw new ConfigurationException(
-                    $"Cannot switch to repo root {Root}; directory not found");
-            }
-
-            return previousDirectory;
         }
 
         private (int ExitCode, string StdOut, string StdErr) Run(params string[] args)
@@ -81,6 +70,22 @@ namespace ADLib.Git
         private static (int ExitCode, string StdOut, string StdErr) RunWithoutChangingRoot(params string[] args)
         {
             return Client.Run(args);
+        }
+
+        private string ChangeToRepoRoot()
+        {
+            var previousDirectory = Directory.GetCurrentDirectory();
+            if (Directory.Exists(Root))
+            {
+                Directory.SetCurrentDirectory(Root);
+            }
+            else
+            {
+                throw new ConfigurationException(
+                    $"Cannot switch to repo root {Root}; directory not found");
+            }
+
+            return previousDirectory;
         }
 
         public void DeleteClone()
