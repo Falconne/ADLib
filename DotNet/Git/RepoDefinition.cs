@@ -51,7 +51,9 @@ namespace ADLib.Git
             var root = GetGeneratedRoot(directory);
             var args = new List<string>
             {
-                "clone"
+                "clone",
+                "-c",
+                "core.longpaths=true"
             };
 
             args.AddRange(extraArgs);
