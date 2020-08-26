@@ -212,18 +212,18 @@ namespace ADLib.Git
             if (IsLocalBranch(localBranchName))
             {
                 GenLog.Info($"Checking out local branch {localBranchName}");
-                RunAndFailIfNotExitZero("checkout", localBranchName);
+                RunAndFailIfNotExitZero("-c", "core.longpaths=true", "checkout", localBranchName);
             }
             else
             {
                 Fetch();
                 var remoteBranchDesignation = $"{DefaultRemote}/{localBranchName}";
                 GenLog.Info($"Checking out remote branch {remoteBranchDesignation} into local");
-                RunAndFailIfNotExitZero("checkout", "-t", remoteBranchDesignation);
+                RunAndFailIfNotExitZero("-c", "core.longpaths=true", "checkout", "-t", remoteBranchDesignation);
             }
 
             if (updateSubmodules)
-                RunAndFailIfNotExitZero("submodule", "update", "--recursive", "--init");
+                RunAndFailIfNotExitZero("-c", "core.longpaths=true", "submodule", "update", "--recursive", "--init");
 
             return this;
         }
