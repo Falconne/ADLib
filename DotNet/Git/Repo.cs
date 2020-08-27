@@ -38,7 +38,15 @@ namespace ADLib.Git
 
         public string  RunAndGetOutput(params string[] args)
         {
-            return RunAndFailIfNotExitZero(args).StdOut;
+            return RunAndFailIfNotExitZero(args).StdOut.Trim('\n', '\r', ' ');
+        }
+
+        public IList<string> RunAndGetList(params string[] args)
+        {
+            return RunAndGetOutput(args)
+                .Split(new[] {"\r\n", "\r", "\n"}, StringSplitOptions.None)
+                .Select(l => l.Trim('\n', '\r', ' '))
+                .ToList();
         }
         
         public (string StdOut, string StdErr) RunAndFailIfNotExitZero(params string[] args)
