@@ -3,7 +3,6 @@ using ADLib.Logging;
 using ADLib.Util;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -92,30 +91,12 @@ namespace ADLib.Git
             return await Client.RunAsync(args);
         }
 
-        public static string GetNameFromUrl(string url)
-        {
-            string nameFromUrl;
-
-            if (url.ToLowerInvariant().StartsWith("http"))
-                nameFromUrl = GetNameFromHttpsUrl(url);
-            else if (url.ToLowerInvariant().StartsWith("git@"))
-                nameFromUrl = GetNameFromSshUrl(url);
-            else
-                throw new ConfigurationException($"Unrecognised protocol: {url}");
-
-            return Regex.Replace(nameFromUrl, @"\.git$", "");
-        }
-
-        private static string GetNameFromHttpsUrl(string url)
+        private static string GetNameFromUrl(string url)
         {
             url = url.Replace("https://", "");
             var suffix = Regex.Replace(url, @"^.+?/", "");
+            suffix = Regex.Replace(suffix, @"\.git$", "");
             return suffix.Replace("/_git", "");
-        }
-
-        private static string GetNameFromSshUrl(string url)
-        {
-            return url.Split(':').Last().Split('/').Last();
         }
     }
 }
