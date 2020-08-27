@@ -91,7 +91,7 @@ namespace ADLib.Git
             return await Client.RunAsync(args);
         }
 
-        private static string GetNameFromUrl(string url)
+        public static string GetNameFromUrl(string url)
         {
             url = url.Replace("https://", "");
             var suffix = Regex.Replace(url, @"^.+?/", "");
