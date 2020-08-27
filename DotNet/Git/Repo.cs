@@ -235,5 +235,10 @@ namespace ADLib.Git
 
             return this;
         }
+
+        public string GetCurrentBranchName()
+        {
+            return RunAndGetOutput("rev-parse", "--abbrev-ref", "HEAD");
+        }
     }
 }
