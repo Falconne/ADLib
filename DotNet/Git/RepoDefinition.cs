@@ -108,7 +108,8 @@ namespace ADLib.Git
 
         private static string GetNameFromHttpsUrl(string url)
         {
-            var suffix = Regex.Replace(url, @".+?/", "");
+            url = url.Replace("https://", "");
+            var suffix = Regex.Replace(url, @"^.+?/", "");
             return suffix.Replace("/_git", "");
         }
 
