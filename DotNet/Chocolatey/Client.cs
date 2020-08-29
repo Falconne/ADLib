@@ -84,7 +84,7 @@ namespace Chocolatey
             if (!_interactionHandler.GetYesNoResponse(query))
                 return;
 
-            WindowsHost.Restart(0);
+            WindowsHost.Restart(5);
             _interactionHandler.ExitWithSuccess("Exiting for reboot");
         }
 
