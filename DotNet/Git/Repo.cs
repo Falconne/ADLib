@@ -231,9 +231,21 @@ namespace ADLib.Git
             }
 
             if (updateSubmodules)
-                RunAndFailIfNotExitZero("-c", "core.longpaths=true", "submodule", "update", "--recursive", "--init");
+                InitSubmodules();
 
             return this;
+        }
+
+        public Repo InitSubmodules(params string[] args)
+        {
+            var fullArgs = new List<string>
+            {
+                "-c", "core.longpaths=true", "submodule", "update", "--init", "--recursive"
+            };
+
+            fullArgs.AddRange(args);
+
+            return RunFluent(fullArgs.ToArray());
         }
 
         public string GetCurrentBranchName()
