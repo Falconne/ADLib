@@ -91,20 +91,16 @@ namespace ADLib.Util
 
         public static void WriteToFileSafely(string path, string[] content)
         {
-            var retries = 4;
-            while (true)
-            {
-                try
-                {
-                    File.WriteAllLines(path, content);
-                    break;
-                }
-                catch (IOException) when (retries-- >= 0)
-                {
-                    GenLog.Warning($"Unable to write to {path}. Will retry...");
-                    Thread.Sleep(3000);
-                }
-            }
+            void WriteToFile() { File.WriteAllLines(path, content); }
+
+            Retry.OnException(WriteToFile, $"Writing to {path}", 5);
+        }
+
+        public static void WriteToFileSafely(string path, string content)
+        {
+            void WriteToFile() { File.WriteAllText(path, content); }
+
+            Retry.OnException(WriteToFile, $"Writing to {path}", 5);
         }
 
         private static void RemoveReadOnlyAttributes(string path)
