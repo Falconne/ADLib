@@ -18,6 +18,16 @@ namespace ADLib.Logging
         public static Action<string> Warning = s => WriteToAllSinks(s, LogMessageType.Warning);
         public static Action<string> Error = s => WriteToAllSinks(s, LogMessageType.Error);
 
+        public static void WriteProgress(string message)
+        {
+            if (IsInTeamCity())
+            {
+                Info($"##teamcity[progressMessage '{message}']");
+                return;
+            }
+
+            Info($"==== {message} ====");
+        }
 
         private static void WriteToAllSinks(string message, LogMessageType type)
         {
@@ -87,15 +97,19 @@ namespace ADLib.Logging
 
         private static void WriteErrorToTeamCity(string message)
         {
-            var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
-            if (string.IsNullOrWhiteSpace(value))
-                // Not running in a TeamCity build
+            if (!IsInTeamCity()) 
                 return;
 
             using (var writer = new TeamCityServiceMessages().CreateWriter(Console.WriteLine))
             {
                 writer.WriteError(message);
             }
+        }
+
+        private static bool IsInTeamCity()
+        {
+            var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+            return !string.IsNullOrWhiteSpace(value);
         }
     }
 
