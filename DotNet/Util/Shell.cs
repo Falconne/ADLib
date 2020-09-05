@@ -81,6 +81,17 @@ namespace ADLib.Util
             return AppDomain.CurrentDomain.BaseDirectory;
         }
 
+        public static string GetFileInScriptDir(string filename)
+        {
+            var file = Path.Combine(GetScriptDir(), filename);
+            if (!File.Exists(filename))
+            {
+                throw new ConfigurationException($"File not found {file}");
+            }
+
+            return file;
+        }
+
         public static string GetCurrentScript()
         {
             return System.Diagnostics.Process.GetCurrentProcess()?.MainModule?.FileName;
