@@ -339,3 +339,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Custom
+_NugetPublish/
+nuget.exe
+node.zip
+NuGetTools/

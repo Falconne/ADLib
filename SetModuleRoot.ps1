@@ -2,7 +2,7 @@
 # add the shared modules path to $PSModulePath
 
 $psmodules = "$PSScriptRoot\PSModules"
-if $env:PSModulePath -Contains $psmodules
+if ($env:PSModulePath -Contains $psmodules)
 {
     return
 }
