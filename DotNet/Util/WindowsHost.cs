@@ -8,7 +8,7 @@ namespace ADLib.Util
         public static void Restart(int delay)
         {
             GenLog.Info($"Restarting computer in {delay} seconds");
-            Shell.RunAndFailIfNotExitZeroMS($@"{Environment.SystemDirectory}\shutdown.exe", "/r", "/t", delay);
+            Shell.RunAndFailIfNotExitZero($@"{Environment.SystemDirectory}\shutdown.exe", "/r", "/t", delay);
         }
     }
 }

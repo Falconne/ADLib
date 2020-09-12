@@ -10,7 +10,7 @@ namespace ADLib.Util
 {
     public static class Shell
     {
-        public static int RunAndGetExitCodeMS(string program, params object[] args)
+        public static int RunAndGetExitCode(string program, params object[] args)
         {
             GenLog.Info($"{program} {string.Join(" ", args)}");
             var command = Command.Run(program, args)
@@ -19,6 +19,11 @@ namespace ADLib.Util
 
             command.Wait();
             return command.Result.ExitCode;
+        }
+
+        public static void RunAndDetach(string program, params object[] args)
+        {
+            Command.Run(program, args);
         }
 
         public static (int exitCode, string stdout, string stderr) Run(
@@ -67,9 +72,9 @@ namespace ADLib.Util
             return (command.Result.ExitCode, stdout, stderr);
         }
 
-        public static void RunAndFailIfNotExitZeroMS(string program, params object[] args)
+        public static void RunAndFailIfNotExitZero(string program, params object[] args)
         {
-            var exitCode = RunAndGetExitCodeMS(program, args);
+            var exitCode = RunAndGetExitCode(program, args);
             if (exitCode != 0)
             {
                 throw new ConfigurationException($"Exit code was {exitCode}");
@@ -170,7 +175,7 @@ namespace ADLib.Util
             if (args.Length > 0)
                 command.AddRange(args);
 
-            return RunAndGetExitCodeMS("powershell.exe", command.ToArray());
+            return RunAndGetExitCode("powershell.exe", command.ToArray());
         }
 
         public static void RunPowerShellScriptAndFailIfNotExitZero(string script, params object[] args)

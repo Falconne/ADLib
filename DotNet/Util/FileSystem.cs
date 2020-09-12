@@ -149,7 +149,7 @@ namespace ADLib.Util
 
             Directory.CreateDirectory(destination);
 
-            var result = Shell.RunAndGetExitCodeMS(
+            var result = Shell.RunAndGetExitCode(
                 "robocopy", source, destination, type, "/MT", "/R:3");
 
             if (result > exitCodeLimit)
