@@ -384,9 +384,20 @@ function Publish-DotNetCoreProject
         # Don't delete TargetDir before build
         [Parameter(Mandatory = $false)]
         [switch]
-        $SkipClean
+        $SkipClean,
+
+        # Creates a subfolder under TargetDir using project name
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $CreateSubfolder
     )
 
+    $ProjectName = (Get-Item $ProjectPath).Directory.Name
+    if ($CreateSubfolder)
+    {
+        $TargetPath += "\$ProjectName"
+    }
+    Write-BlockStart "Publishing $ProjectName to $TargetPath"
 
     if ($SlnPath)
     {
@@ -451,6 +462,8 @@ function Publish-DotNetCoreProject
         Test-ForErrors $output
         throw "dotnet publish failed"
     }
+
+    Write-BlockEnd "Publishing $ProjectName to $TargetPath"
 }
 
 function Invoke-SignFile

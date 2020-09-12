@@ -84,7 +84,7 @@ namespace ADLib.Util
         public static string GetFileInScriptDir(string filename)
         {
             var file = Path.Combine(GetScriptDir(), filename);
-            if (!File.Exists(filename))
+            if (!File.Exists(file))
             {
                 throw new ConfigurationException($"File not found {file}");
             }
