@@ -49,7 +49,7 @@ function Save-FileFromNetwork
     # On some networks automatic proxy resolution causes several
     # seconds delay
     $webClient.Proxy = $null
-    Write-Progress "Downloading $url => $destination"
+    Write-CustomProgress "Downloading $url => $destination"
     $webClient.DownloadFile($url, $destination)
     Write-Host "Done"
 }
@@ -649,7 +649,7 @@ function Connect-ToUNCPath
         }
     }
 
-    Write-Progress "Logging in as $Username"
+    Write-CustomProgress "Logging in as $Username"
     & net.exe use $Path /user:$Username $Password | Out-Host
 
     $retries = 3

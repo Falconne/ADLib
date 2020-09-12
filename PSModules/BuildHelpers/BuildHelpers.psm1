@@ -325,7 +325,7 @@ function Invoke-MSBuild
     $retriesLeft = 500
     while ($true)
     {
-        Write-Progress "Building..."
+        Write-CustomProgress "Building..."
         Write-Host "$msbuild $params"
         & $msbuild @params | Tee -Variable output
         if ($LASTEXITCODE -ne 0)
@@ -570,7 +570,7 @@ function Invoke-SignDirectory
     Write-BlockStart "Signing $DirToSign"
     Get-ChildItem -Recurse -Path $DirToSign |
     ? { $_.Extension -in (".cab", ".dll", ".exe", ".msi", ".ps1") } |
-    ? { $_.Extension -in (".msi", ".cab", ".ps1") -or $_.VersionInfo.CompanyName -imatch "Zeacom" -or $_.VersionInfo.CompanyName -imatch "Enghouse" } |
+    ? { $_.Extension -in (".msi", ".cab", ".ps1") } |
     % { Invoke-SignFile $_.FullName -NoTimestamp:$NoTimestamp }
 
     Write-BlockEnd "Signing $DirToSign"

@@ -15,11 +15,6 @@ function Write-CustomProgress
         $Message
     )
 
-    if ($Activity -and !$Message)
-    {
-        $Message = $Activity
-    }
-
     if (Test-IsInsideTeamCity)
     {
         Write-TeamCityProgress $Message
@@ -95,7 +90,7 @@ function Write-BlockStart
     {
         Write-Host " "
         Write-MajorLineMarker
-        Write-Progress $BlockName
+        Write-CustomProgress $BlockName
         Write-MinorLineMarker
     }
 }

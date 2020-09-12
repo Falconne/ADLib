@@ -478,7 +478,7 @@ function New-GeneratedNuGetToolPackage
         $ContentFilesDirectory
     )
 
-    Write-Progress "Generating nuget package from $Directory"
+    Write-CustomProgress "Generating nuget package from $Directory"
     $nuspec = "$ID.nuspec"
     $contentFilesTag = ""
     if ($ContentFilesDirectory)
@@ -548,7 +548,7 @@ function New-GeneratedNuGetArtifactPackage
         $OutputDirectory
     )
 
-    Write-Progress "Generating nuget package from $Directory"
+    Write-CustomProgress "Generating nuget package from $Directory"
     $nuspec = "$ID.nuspec"
     $targetsFile = "$ID.targets"
 
@@ -635,7 +635,7 @@ function New-GeneratedNuGetContentPackage
         $CopyToOutput = "true"
     )
 
-    Write-Progress "Generating nuget package from $Directory"
+    Write-CustomProgress "Generating nuget package from $Directory"
     $nuspec = "$ID.nuspec"
 
     $nuspecContent = @"
