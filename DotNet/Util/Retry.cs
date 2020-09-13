@@ -33,6 +33,7 @@ namespace ADLib.Util
                     }
                     Logging.GenLog.Info($"Retries remaining: {numRetries}");
                     Thread.Sleep(delay);
+                    delay *= 2;
                 }
             }
         }
