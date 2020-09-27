@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ADLib.Net
 {
@@ -18,24 +19,25 @@ namespace ADLib.Net
             }
         }
 
-        public static string DownloadFile(string url, string destination)
+        public static async Task<string> DownloadFileAsync(string url, string destination)
         {
             var destinationDirectory = Path.GetDirectoryName(destination);
             FileSystem.CreateDirectory(destinationDirectory);
 
-            Retry.OnException(
-                () => { DownloadFileOrFail(url, destination); },
+            await Retry.OnExceptionAsync(
+                async () => { await DownloadFileOrFailAsync(url, destination); },
 
                 $"Downloading {url} to {destination}");
 
             return destination;
         }
 
-        private static void DownloadFileOrFail(string url, string destination)
+        private static async Task DownloadFileOrFailAsync(string url, string destination)
         {
             using (var client = new WebClient())
             {
-                client.DownloadFile(url, destination);
+                await Task.Run(() =>
+                    client.DownloadFile(url, destination));
             }
 
             if (!File.Exists(destination))
