@@ -20,7 +20,8 @@ namespace ADLib.Util
             {
                 try
                 {
-                    GenLog.Info(introMessage);
+                    if (!introMessage.IsEmpty())
+                        GenLog.Info(introMessage);
                     await action();
                     return;
                 }
