@@ -35,19 +35,24 @@ namespace ADLib.Net
             return destination;
         }
 
-        private static async Task DownloadFileOrFailAsync(
-            string url, string destination, CancellationToken cancellationToken)
+        public static void DownloadFileOrFail(string url, string destination)
         {
             using (var client = new WebClient())
             {
-                await Task.Run(() =>
-                    client.DownloadFile(url, destination), cancellationToken);
+                client.DownloadFile(url, destination);
             }
 
             if (!File.Exists(destination))
             {
                 throw new Exception($"Could not download {url}");
             }
+        }
+
+        public static async Task DownloadFileOrFailAsync(
+            string url, string destination, CancellationToken cancellationToken)
+        {
+            await Task.Run(() =>
+                DownloadFileOrFail(url, destination), cancellationToken);
         }
     }
 }
