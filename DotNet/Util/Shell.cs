@@ -61,7 +61,7 @@ namespace ADLib.Util
         public static async Task<(int exitCode, string stdout, string stderr)> RunSilent(string program, params object[] args)
         {
             var argsPrinted = args.Length == 0 ? "" : string.Join(" ", args);
-            GenLog.Info($"{program} {argsPrinted}");
+            GenLog.Debug($"{program} {argsPrinted}");
 
             var command = Command.Run(program, args);
 
