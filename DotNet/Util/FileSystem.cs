@@ -229,7 +229,7 @@ namespace ADLib.Util
             return File.Exists(path) || Directory.Exists(path);
         }
 
-        
+
         public static void UseStandardLogFile()
         {
             var name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -237,5 +237,13 @@ namespace ADLib.Util
             GenLog.Info($"Writing logfile to {GenLog.LogFile}");
         }
 
+        public static void MoveFileToDir(string file, string dir)
+        {
+            CreateDirectory(dir);
+            var fileName = Path.GetFileName(file);
+            var dest = Path.Combine(dir, fileName);
+            File.Move(file, dest);
+
+        }
     }
 }
