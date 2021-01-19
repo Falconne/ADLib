@@ -492,8 +492,12 @@ function Invoke-SignFile
     )
 
     $certFile = "$PSScriptRoot\CodeSigningCert.pfx"
+    if (!(Test-Path $certFile))
+    {
+        throw "$certFile not found"
+    }
 
-    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certFile, 'E1C0d3$ign2019!!')
+    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certFile, 'TODOPullPasswordSecurely')
 
     $retries = 3
     $blockName = "Signing $fileToSign"
