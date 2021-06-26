@@ -245,10 +245,10 @@ namespace ADLib.Util
 
         }
 
-        // Removes illegal chars from path
-        public static string GetCleanPath(string path)
+        // Removes illegal chars from filename
+        public static string GetCleanFilename(string path)
         {
-            foreach (var invalidChar in Path.GetInvalidPathChars())
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
             {
                 path = path.Replace(invalidChar, '_');
             }
