@@ -229,7 +229,6 @@ namespace ADLib.Util
             return File.Exists(path) || Directory.Exists(path);
         }
 
-
         public static void UseStandardLogFile()
         {
             var name = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
@@ -244,6 +243,17 @@ namespace ADLib.Util
             var dest = Path.Combine(dir, fileName);
             File.Move(file, dest);
 
+        }
+
+        // Removes illegal chars from path
+        public static string GetCleanPath(string path)
+        {
+            foreach (var invalidChar in Path.GetInvalidPathChars())
+            {
+                path = path.Replace(invalidChar, '_');
+            }
+
+            return path;
         }
     }
 }
