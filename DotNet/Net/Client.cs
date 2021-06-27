@@ -20,7 +20,7 @@ namespace ADLib.Net
             }
         }
 
-        public static async Task<string> DownloadFileAsync(string url, string destination,
+        public static async Task<string> DownloadFileWithRetryAsync(string url, string destination,
             CancellationToken cancellationToken)
         {
             var destinationDirectory = Path.GetDirectoryName(destination);
