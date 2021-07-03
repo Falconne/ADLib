@@ -1,5 +1,4 @@
 ﻿using ADLib.Util;
-using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -12,12 +11,10 @@ namespace ADLib.Net
     {
         public static string GetString(string fromUrl)
         {
-            using (var client = new HttpClient())
-            using (var response = client.GetAsync(fromUrl).Result)
-            using (var content = response.Content)
-            {
-                return content.ReadAsStringAsync().Result;
-            }
+            using var client = new HttpClient();
+            using var response = client.GetAsync(fromUrl).Result;
+            using var content = response.Content;
+            return content.ReadAsStringAsync().Result;
         }
 
         public static async Task<string> DownloadFileWithRetryAsync(string url, string destination,
@@ -44,7 +41,7 @@ namespace ADLib.Net
 
             if (!File.Exists(destination))
             {
-                throw new Exception($"Could not download {url}");
+                throw new($"Could not download {url}");
             }
         }
 
