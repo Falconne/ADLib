@@ -1,4 +1,5 @@
 ﻿using ADLib.Logging;
+using ADLib.Util;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,13 @@ namespace ADLib.Net
         {
             await DoThrottle(cancellationToken);
             GenLog.Debug($"GETting {url}");
-            return await _client.GetStringAsync(url);
+            string result = null;
+            await Retry.OnExceptionAsync(
+                async () => { result = await _client.GetStringAsync(url); },
+                $"GETting {url}",
+                cancellationToken);
+
+            return result;
         }
 
         public async Task<HttpResponseMessage> PostAndFailIfNotOk(string url, Dictionary<string, string> parameters,
@@ -60,8 +67,12 @@ namespace ADLib.Net
         public async Task DownloadFile(string url, string path, CancellationToken cancellationToken)
         {
             await DoThrottle(cancellationToken);
-            GenLog.Info($"Downloading {url} to {path}");
-            var bytes = await _client.GetByteArrayAsync(url);
+            byte[] bytes = null;
+            await Retry.OnExceptionAsync(
+                async () => { bytes = await _client.GetByteArrayAsync(url); },
+                $"Downloading {url} to {path}",
+                cancellationToken);
+
             File.WriteAllBytes(path, bytes);
         }
 
