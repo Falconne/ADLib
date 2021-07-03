@@ -64,7 +64,7 @@ namespace ADLib.Net
             throw new($"Bad status code from POST: {response.StatusCode}");
         }
 
-        public async Task DownloadFile(string url, string path, CancellationToken cancellationToken)
+        public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
         {
             await DoThrottle(cancellationToken);
             byte[] bytes = null;
