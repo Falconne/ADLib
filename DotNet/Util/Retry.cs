@@ -43,7 +43,7 @@ namespace ADLib.Util
                     if (numRetries == 0)
                     {
                         GenLog.Error("No more retries left");
-                        throw new FatalException("Aborting retries", e);
+                        throw;
                     }
                     GenLog.Info($"Retries remaining: {numRetries}");
                     await Task.Delay(delay, cancellationToken);
