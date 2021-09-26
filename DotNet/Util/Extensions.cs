@@ -16,5 +16,11 @@ namespace ADLib.Util
             return string.IsNullOrWhiteSpace(str);
         }
 
+        [AssertionMethod]
+        public static bool IsNotEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
+        {
+            return !string.IsNullOrWhiteSpace(str);
+        }
+
     }
 }
