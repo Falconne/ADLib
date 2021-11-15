@@ -253,7 +253,7 @@ namespace ADLib.Util
                 path = path.Replace(invalidChar, '_');
             }
 
-            return path;
+            return path.Trim(' ').TrimEnd('.', ' ');
         }
     }
 }
