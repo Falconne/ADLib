@@ -13,7 +13,7 @@ namespace ADLib.Net
 {
     public class ThrottledWebClient
     {
-        public int MinDelayMilliseconds = 50;
+        public int MinDelayMilliseconds;
 
         private DateTime _lastCallTime = DateTime.MinValue;
 
@@ -22,10 +22,11 @@ namespace ADLib.Net
         private readonly HttpClient _client;
 
 
-        public ThrottledWebClient()
+        public ThrottledWebClient(int defaultDelayMilliseconds = 50)
         {
             HttpClientHandler handler = new() { CookieContainer = _cookies };
             _client = new(handler);
+            MinDelayMilliseconds = defaultDelayMilliseconds;
         }
 
         public async Task<HtmlDocument> GetPageDocOrFailAsync(string url, CancellationToken cancellationToken)
