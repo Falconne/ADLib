@@ -132,7 +132,7 @@ namespace ADLib.Util
                 if (File.Exists(fileInScriptDir))
                     return fileInScriptDir;
 
-                var dirsInPath = Environment.GetEnvironmentVariable("PATH")?.Split(';');
+                var dirsInPath = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator);
                 if (dirsInPath == null || dirsInPath.Length == 0)
                 {
                     GenLog.Warning("PATH environment variable is empty");
