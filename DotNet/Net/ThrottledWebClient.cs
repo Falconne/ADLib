@@ -25,7 +25,7 @@ namespace ADLib.Net
         public ThrottledWebClient(int defaultDelayMilliseconds = 50)
         {
             HttpClientHandler handler = new() { CookieContainer = _cookies };
-            _client = new(handler);
+            _client = new HttpClient(handler);
             MinDelayMilliseconds = defaultDelayMilliseconds;
         }
 
@@ -75,6 +75,24 @@ namespace ADLib.Net
                 cancellationToken);
 
             File.WriteAllBytes(path, bytes);
+        }
+
+        public async Task<bool> TryDownloadFileAsync(string url, string path, CancellationToken cancellationToken)
+        {
+            await DoThrottle(cancellationToken);
+            GenLog.Info($"Attempt download {url} to {path}");
+            try
+            {
+                var bytes = await _client.GetByteArrayAsync(url);
+                File.WriteAllBytes(path, bytes);
+                GenLog.Info($"Success");
+                return true;
+            }
+            catch (Exception e)
+            {
+                GenLog.Info($"Failed: {e.Message}");
+                return false;
+            }
         }
 
         private async Task DoThrottle(CancellationToken cancellationToken)
