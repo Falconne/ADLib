@@ -72,13 +72,26 @@ namespace ADLib.Util
             return (command.Result.ExitCode, stdout, stderr);
         }
 
-        public static void RunAndFailIfNotExitZero(string program, params object[] args)
+        public static string RunAndFailIfNotExitZero(string program, params object[] args)
         {
-            var exitCode = RunAndGetExitCode(program, args);
+            var (exitCode, stdout, _) = Run(program, args);
             if (exitCode != 0)
             {
                 throw new ConfigurationException($"Exit code was {exitCode}");
             }
+
+            return stdout;
+        }
+
+        public static async Task<string> RunSilentAndFailIfNotExitZeroAsync(string program, params object[] args)
+        {
+            var (exitCode, stdout, _) = await RunSilent(program, args);
+            if (exitCode != 0)
+            {
+                throw new ConfigurationException($"Exit code was {exitCode}");
+            }
+
+            return stdout;
         }
 
         public static string GetScriptDir()
