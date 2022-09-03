@@ -256,6 +256,11 @@ namespace ADLib.Util
             return path.Trim(' ').TrimEnd('.', ' ');
         }
 
+        public static void DeleteFileToRecycleBin(string? path)
+        {
+            DeleteFileToRecycleBinAsync(path, CancellationToken.None).Wait();
+        }
+
         public static async Task DeleteFileToRecycleBinAsync(string? path, CancellationToken cancellationToken)
         {
             if (path!.IsEmpty() || !File.Exists(path))
