@@ -1,6 +1,4 @@
 ﻿using JetBrains.TeamCity.ServiceMessages.Write.Special;
-using System;
-using System.IO;
 
 namespace ADLib.Logging
 {
@@ -8,7 +6,7 @@ namespace ADLib.Logging
     {
         public static bool DebugEnabled = false;
 
-        public static string LogFile;
+        public static string? LogFile;
 
         public static long MaxLogSize = 10 * 1024 * 1024;
 
@@ -61,7 +59,7 @@ namespace ADLib.Logging
                 var fi = new FileInfo(LogFile);
                 if (fi.Length > MaxLogSize)
                 {
-                    var rolloverFile = 
+                    var rolloverFile =
                         $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}";
                     if (File.Exists(rolloverFile))
                         File.Delete(rolloverFile);
@@ -97,7 +95,7 @@ namespace ADLib.Logging
 
         private static void WriteErrorToTeamCity(string message)
         {
-            if (!IsInTeamCity()) 
+            if (!IsInTeamCity())
                 return;
 
             using (var writer = new TeamCityServiceMessages().CreateWriter(Console.WriteLine))

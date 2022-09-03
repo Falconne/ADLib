@@ -1,13 +1,7 @@
 ﻿using ADLib.Logging;
 using ADLib.Util;
 using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ADLib.Net
 {
@@ -37,13 +31,13 @@ namespace ADLib.Net
             return doc;
         }
 
-        public async Task<string> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
+        public async Task<string?> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
         {
             await DoThrottle(cancellationToken);
             GenLog.Debug($"GETting {url}");
-            string result = null;
+            string? result = null;
             await Retry.OnExceptionAsync(
-                async () => { result = await _client.GetStringAsync(url); },
+                async () => { result = await _client.GetStringAsync(url, cancellationToken); },
                 $"GETting {url}",
                 cancellationToken);
 
@@ -61,20 +55,22 @@ namespace ADLib.Net
             if (response.StatusCode == HttpStatusCode.OK)
                 return response;
 
-            GenLog.Error(await response.Content.ReadAsStringAsync());
+            GenLog.Error(await response.Content.ReadAsStringAsync(cancellationToken));
             throw new($"Bad status code from POST: {response.StatusCode}");
         }
 
         public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
         {
             await DoThrottle(cancellationToken);
-            byte[] bytes = null;
+            byte[]? bytes = null;
             await Retry.OnExceptionAsync(
-                async () => { bytes = await _client.GetByteArrayAsync(url); },
+                async () => { bytes = await _client.GetByteArrayAsync(url, cancellationToken); },
                 $"Downloading {url} to {path}",
                 cancellationToken);
 
-            File.WriteAllBytes(path, bytes);
+            if (bytes == null)
+                throw new Exception($"Download returned empty result: {url}");
+            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
         }
 
         public async Task<bool> TryDownloadFileAsync(string url, string path, CancellationToken cancellationToken)
@@ -83,9 +79,9 @@ namespace ADLib.Net
             GenLog.Info($"Attempt download {url} to {path}");
             try
             {
-                var bytes = await _client.GetByteArrayAsync(url);
-                File.WriteAllBytes(path, bytes);
-                GenLog.Info($"Success");
+                var bytes = await _client.GetByteArrayAsync(url, cancellationToken);
+                await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+                GenLog.Info("Success");
                 return true;
             }
             catch (Exception e)

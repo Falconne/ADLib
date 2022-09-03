@@ -1,8 +1,6 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
-using System;
-using System.IO;
-using System.Threading;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ADLib.Util
 {
@@ -91,14 +89,16 @@ namespace ADLib.Util
 
         public static void WriteToFileSafely(string path, string[] content)
         {
-            void WriteToFile() { File.WriteAllLines(path, content); }
+            void WriteToFile()
+            { File.WriteAllLines(path, content); }
 
             Retry.OnException(WriteToFile, $"Writing to {path}", 5);
         }
 
         public static void WriteToFileSafely(string path, string content)
         {
-            void WriteToFile() { File.WriteAllText(path, content); }
+            void WriteToFile()
+            { File.WriteAllText(path, content); }
 
             Retry.OnException(WriteToFile, $"Writing to {path}", 5);
         }
@@ -254,6 +254,30 @@ namespace ADLib.Util
             }
 
             return path.Trim(' ').TrimEnd('.', ' ');
+        }
+
+        public static async Task DeleteFileToRecycleBinAsync(string? path, CancellationToken cancellationToken)
+        {
+            if (path!.IsEmpty() || !File.Exists(path))
+                return;
+
+            await Retry.OnExceptionAsync(async () =>
+                    await Task.Run(() =>
+                        Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin), cancellationToken),
+                "Deleting file to recycle bin", cancellationToken);
+
+        }
+
+        public static async Task DeleteDirToRecycleBinAsync(string? path, CancellationToken cancellationToken)
+        {
+            if (path!.IsEmpty() || !Directory.Exists(path))
+                return;
+
+            await Retry.OnExceptionAsync(async () =>
+                    await Task.Run(() =>
+                        Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin), cancellationToken),
+                "Deleting directory to recycle bin", cancellationToken);
+
         }
     }
 }
