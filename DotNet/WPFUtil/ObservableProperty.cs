@@ -1,4 +1,7 @@
-﻿namespace WPFUtil
+﻿using System;
+using System.Collections.Generic;
+
+namespace WPFUtil
 {
     public class ObservableProperty<T> : ViewModelBase
     {
