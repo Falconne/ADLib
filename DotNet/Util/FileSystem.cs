@@ -158,8 +158,8 @@ namespace ADLib.Util
             }
         }
 
-        public static string SearchUpForFileFrom(
-            string filename, string startingLocation, string underSubDir = null)
+        public static string? SearchUpForFileFrom(
+            string filename, string startingLocation, string? underSubDir = null)
         {
             var result = TrySearchUpForFileFrom(
                 out var foundPath, filename, startingLocation, underSubDir);
@@ -174,7 +174,7 @@ namespace ADLib.Util
         }
 
         public static bool TrySearchUpForFileFrom(
-            out string foundPath, string filename, string startingLocation, string underSubDir = null)
+            out string? foundPath, string filename, string startingLocation, string? underSubDir = null)
         {
             var directoryToCheck = startingLocation;
             GenLog.Info($"Searching for {filename} starting from {startingLocation}");

@@ -1,10 +1,6 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
 using Medallion.Shell;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace ADLib.Util
 {
@@ -112,12 +108,16 @@ namespace ADLib.Util
 
         public static string GetCurrentScript()
         {
-            return System.Diagnostics.Process.GetCurrentProcess()?.MainModule?.FileName;
+            var result = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (result.IsEmpty())
+                throw new Exception("Cannot get current script location");
+
+            return result!;
         }
 
         // Searches local dir PATH environment for command 'name' and returns absolute path to same
         // if found, otherwise null
-        public static string GetExecutableInPath(string name)
+        public static string? GetExecutableInPath(string name)
         {
             if (!string.IsNullOrWhiteSpace(Path.GetDirectoryName(name)))
             {
@@ -136,7 +136,7 @@ namespace ADLib.Util
 
             GenLog.Info($"Looking for command {name}");
 
-            string DoSearch()
+            string? DoSearch()
             {
                 if (File.Exists(name))
                     return Path.Combine(Directory.GetCurrentDirectory(), name);
@@ -170,9 +170,9 @@ namespace ADLib.Util
             return result;
         }
 
-        public static int RunPowerShellScriptAndGetExitCode(string script, params object[] args)
+        public static int RunPowerShellScriptAndGetExitCode(string scriptRaw, params object[] args)
         {
-            script = GetExecutableInPath(script);
+            var script = GetExecutableInPath(scriptRaw);
             if (string.IsNullOrWhiteSpace(script))
             {
                 throw new ConfigurationException($"Script not found {script}");

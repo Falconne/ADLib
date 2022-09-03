@@ -1,5 +1,4 @@
 ﻿using JetBrains.Annotations;
-using System;
 
 namespace ADLib.Util
 {
@@ -16,13 +15,15 @@ namespace ADLib.Util
         }
 
         [AssertionMethod]
-        public static bool IsEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
+        //public static bool IsEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
+        public static bool IsEmpty(this string? str)
         {
             return string.IsNullOrWhiteSpace(str);
         }
 
         [AssertionMethod]
-        public static bool IsNotEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
+        //public static bool IsNotEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
+        public static bool IsNotEmpty(this string? str)
         {
             return !string.IsNullOrWhiteSpace(str);
         }
