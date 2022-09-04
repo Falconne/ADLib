@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace ADLib.Util
 {
@@ -14,16 +14,12 @@ namespace ADLib.Util
             return str.Equals(compareTo, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        [AssertionMethod]
-        //public static bool IsEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
-        public static bool IsEmpty(this string? str)
+        public static bool IsEmpty([NotNullWhen(false)] this string? str)
         {
             return string.IsNullOrWhiteSpace(str);
         }
 
-        [AssertionMethod]
-        //public static bool IsNotEmpty([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] this string str)
-        public static bool IsNotEmpty(this string? str)
+        public static bool IsNotEmpty([NotNullWhen(true)] this string? str)
         {
             return !string.IsNullOrWhiteSpace(str);
         }
