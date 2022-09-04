@@ -269,7 +269,7 @@ namespace ADLib.Util
             await Retry.OnExceptionAsync(async () =>
                     await Task.Run(() =>
                         Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin), cancellationToken),
-                "Deleting file to recycle bin", cancellationToken);
+                $"Deleting file to recycle bin: {path}", cancellationToken);
 
         }
 
@@ -281,7 +281,7 @@ namespace ADLib.Util
             await Retry.OnExceptionAsync(async () =>
                     await Task.Run(() =>
                         Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(path, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin), cancellationToken),
-                "Deleting directory to recycle bin", cancellationToken);
+                $"Deleting directory to recycle bin: {path}", cancellationToken);
 
         }
     }
