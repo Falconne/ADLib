@@ -6,19 +6,20 @@ public class FileSystemItem
 
     public string Filename => Path.GetFileName(OriginalPath);
 
+    public string? Directory => Path.GetDirectoryName(OriginalPath);
+
     public FileSystemItem(string originalPath)
     {
         OriginalPath = originalPath;
     }
 
-    public string GetContainingDirectory()
+    public string GetNonRootContainingDirectory()
     {
-        var dir = Path.GetDirectoryName(OriginalPath);
-        if (dir == null)
+        if (Directory == null)
         {
             throw new Exception($"Unexpected root level path: {OriginalPath}");
         }
 
-        return dir;
+        return Directory;
     }
 }
