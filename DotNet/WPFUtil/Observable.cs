@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace WPFUtil
 {
-    public class ObservablePropertyWithOnChangeHandlerAsync<T> : ViewModelBase
+    public class Observable<T> : ViewModelBase
     {
         private T? _value;
 
-        private readonly Func<T?, Task> _onChange;
+        private readonly Action<T?>? _onChange;
 
-        public ObservablePropertyWithOnChangeHandlerAsync(Func<T?, Task> onChange)
+        public Observable(T? defaultValue = default, Action<T?>? onChange = null)
         {
+            _value = defaultValue;
             _onChange = onChange;
         }
 
@@ -25,7 +25,7 @@ namespace WPFUtil
                     return;
 
                 _value = value;
-                _ = _onChange(_value);
+                _onChange?.Invoke(_value);
                 OnPropertyChanged();
             }
         }
