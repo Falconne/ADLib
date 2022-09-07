@@ -261,6 +261,11 @@ namespace ADLib.Util
             DeleteFileToRecycleBinAsync(path, CancellationToken.None).Wait();
         }
 
+        public static async Task DeletePathToRecycleBinAsync(string? path)
+        {
+            await DeletePathToRecycleBinAsync(path, CancellationToken.None);
+        }
+
         public static async Task DeletePathToRecycleBinAsync(string? path, CancellationToken cancellationToken)
         {
             if (path == null)
