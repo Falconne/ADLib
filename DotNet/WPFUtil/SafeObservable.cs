@@ -12,6 +12,8 @@ namespace WPFUtil
 
         private Func<T, Task>? _onChangeAsync;
 
+        private Action<Exception>? _errorHandler;
+
         public SafeObservable(T defaultValue)
         {
             _value = defaultValue;
@@ -23,9 +25,11 @@ namespace WPFUtil
             return this;
         }
 
-        public SafeObservable<T> WithOnChangeHandlerAsync(Func<T, Task> onChange)
+        public SafeObservable<T> WithOnChangeHandlerAsync(
+            Func<T, Task> onChange, Action<Exception> errorHandler)
         {
             _onChangeAsync = onChange;
+            _errorHandler = errorHandler;
             return this;
         }
 
@@ -40,7 +44,7 @@ namespace WPFUtil
 
                 _value = value;
                 _onChange?.Invoke(_value);
-                _ = _onChangeAsync?.Invoke(_value);
+                _onChangeAsync?.Invoke(_value).FireAndForget(_errorHandler!);
                 OnPropertyChanged();
             }
         }
