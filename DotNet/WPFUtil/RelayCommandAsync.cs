@@ -11,15 +11,18 @@ namespace WPFUtil
 
         private readonly Func<bool>? _canExecute;
 
+        private readonly Action<Exception> _errorHandler;
+
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
 
-        public RelayCommandAsync(Func<Task> execute, Func<bool>? canExecute = null)
+        public RelayCommandAsync(Func<Task> execute, Action<Exception> errorHandler, Func<bool>? canExecute = null)
         {
             _execute = execute;
+            _errorHandler = errorHandler;
             _canExecute = canExecute;
         }
 
@@ -30,7 +33,7 @@ namespace WPFUtil
 
         public void Execute(object? parameter)
         {
-            _ = _execute();
+            _execute().FireAndForget(_errorHandler);
         }
     }
 }

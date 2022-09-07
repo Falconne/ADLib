@@ -261,25 +261,20 @@ namespace ADLib.Util
             DeleteFileToRecycleBinAsync(path, CancellationToken.None).Wait();
         }
 
-        public static async Task DeletePathToRecycleBinAsync(string? path)
+        public static async Task DeleteFileToRecycleBinAsync(string? path)
         {
-            await DeletePathToRecycleBinAsync(path, CancellationToken.None);
-        }
-
-        public static async Task DeletePathToRecycleBinAsync(string? path, CancellationToken cancellationToken)
-        {
-            if (path == null)
-                return;
-
-            if (Directory.Exists(path))
-                await DeleteDirToRecycleBinAsync(path, cancellationToken);
-            else
-                await DeleteFileToRecycleBinAsync(path, cancellationToken);
+            await DeleteFileToRecycleBinAsync(path, CancellationToken.None);
         }
 
         public static async Task DeleteFileToRecycleBinAsync(string? path, CancellationToken cancellationToken)
         {
-            if (path!.IsEmpty() || !File.Exists(path))
+            if (path!.IsEmpty())
+                return;
+
+            if (Directory.Exists(path))
+                throw new InvalidAssumptionException($"Asked to delete file, but is a directory: {path}");
+
+            if (!File.Exists(path))
                 return;
 
             await Retry.OnExceptionAsync(async () =>
@@ -289,9 +284,20 @@ namespace ADLib.Util
 
         }
 
+        public static async Task DeleteDirToRecycleBinAsync(string? path)
+        {
+            await DeleteDirToRecycleBinAsync(path, CancellationToken.None);
+        }
+
         public static async Task DeleteDirToRecycleBinAsync(string? path, CancellationToken cancellationToken)
         {
-            if (path!.IsEmpty() || !Directory.Exists(path))
+            if (path!.IsEmpty())
+                return;
+
+            if (File.Exists(path))
+                throw new InvalidAssumptionException($"Asked to delete directory, but is a directory: {path}");
+
+            if (!Directory.Exists(path))
                 return;
 
             await Retry.OnExceptionAsync(async () =>
