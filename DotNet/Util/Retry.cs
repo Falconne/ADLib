@@ -1,16 +1,12 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
-using JetBrains.Annotations;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ADLib.Util
 {
     public static class Retry
     {
         public static async Task OnExceptionAsync(
-            [InstantHandle] Func<Task> action, string introMessage, CancellationToken cancellationToken, int numRetries = 3, int delay = 3000)
+            Func<Task> action, string introMessage, CancellationToken cancellationToken, int numRetries = 3, int delay = 3000)
 
         {
             if (numRetries < 0)
@@ -53,7 +49,7 @@ namespace ADLib.Util
         }
 
         public static void OnException(
-            [InstantHandle] Action action, string introMessage, int numRetries = 3, int delay = 3000)
+            Action action, string introMessage, int numRetries = 3, int delay = 3000)
 
         {
             OnExceptionAsync(() => Task.Run(action), introMessage, CancellationToken.None, numRetries, delay).Wait();
