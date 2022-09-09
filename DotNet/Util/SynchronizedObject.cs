@@ -2,7 +2,7 @@
 {
     public class SynchronizedObject<T>
     {
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
 
         private T _data;
 
