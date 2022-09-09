@@ -19,9 +19,9 @@ namespace WPFUtil
             remove => CommandManager.RequerySuggested -= value;
         }
 
-        public RelayCommandAsync(Func<Task> execute, Action<Exception> errorHandler, Func<bool>? canExecute = null)
+        public RelayCommandAsync(Func<Task> action, Action<Exception> errorHandler, Func<bool>? canExecute = null)
         {
-            _execute = execute;
+            _execute = action;
             _errorHandler = errorHandler;
             _canExecute = canExecute;
         }
