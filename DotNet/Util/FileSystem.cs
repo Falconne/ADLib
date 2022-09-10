@@ -319,7 +319,7 @@ namespace ADLib.Util
             if (allFilesRaw.IsEmpty())
                 return Array.Empty<string>();
 
-            return allFilesRaw.Split(Environment.NewLine);
+            return allFilesRaw.Split(Environment.NewLine).Where(f => f.IsNotEmpty()).ToArray();
         }
     }
 }
