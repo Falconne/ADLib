@@ -241,8 +241,8 @@ namespace ADLib.Util
             CreateDirectory(dir);
             var fileName = Path.GetFileName(file);
             var dest = Path.Combine(dir, fileName);
+            GenLog.Info($"Moving '{file}' to dir '{dir}'");
             File.Move(file, dest);
-
         }
 
         // Removes illegal chars from filename
