@@ -306,5 +306,20 @@ namespace ADLib.Util
                 $"Deleting directory to recycle bin: {path}", cancellationToken);
 
         }
+
+        // Note: Unicode filenames will be mangled
+        public static async Task<string[]> GetFilesUnderFast(string dir)
+        {
+            if (!Directory.Exists(dir))
+                throw new InvalidAssumptionException($"Directory not found: {dir}");
+
+            var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync(
+                "cmd.exe", "/c", "dir", "/b", dir);
+
+            if (allFilesRaw.IsEmpty())
+                return Array.Empty<string>();
+
+            return allFilesRaw.Split(Environment.NewLine);
+        }
     }
 }
