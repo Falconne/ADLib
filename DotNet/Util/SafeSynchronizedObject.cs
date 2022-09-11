@@ -1,12 +1,12 @@
 ﻿namespace ADLib.Util
 {
-    public class SynchronizedObject<T>
+    public class SafeSynchronizedObject<T>
     {
         private readonly object _lock = new();
 
         private T _data;
 
-        public SynchronizedObject(T data)
+        public SafeSynchronizedObject(T data)
         {
             _data = data;
         }

@@ -1,4 +1,4 @@
-﻿
+﻿using ADLib.Util;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -13,6 +13,8 @@ namespace WPFUtil
 
         private readonly Action<Exception> _errorHandler;
 
+        private SafeSynchronizedObject<bool> _busy = new(false);
+
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
@@ -26,14 +28,21 @@ namespace WPFUtil
             _canExecute = canExecute;
         }
 
+        public RelayCommandAsync WithSharedBusyIndicator(SafeSynchronizedObject<bool> busy)
+        {
+            _busy = busy;
+            return this;
+        }
+
         public bool CanExecute(object? parameter)
         {
-            return _canExecute?.Invoke() ?? true;
+            return !_busy.Get() && (_canExecute?.Invoke() ?? true);
         }
 
         public void Execute(object? parameter)
         {
-            _execute().FireAndForget(_errorHandler);
+            _busy.Set(true);
+            _execute().FireAndForget(_errorHandler, () => _busy.Set(false));
         }
     }
 }
