@@ -34,7 +34,6 @@ namespace ADLib.Net
         public async Task<string?> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
         {
             await DoThrottle(cancellationToken);
-            GenLog.Debug($"GETting {url}");
             string? result = null;
             await Retry.OnExceptionAsync(
                 async () => { result = await _client.GetStringAsync(url, cancellationToken); },
