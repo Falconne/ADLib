@@ -295,7 +295,7 @@ namespace ADLib.Util
                 return;
 
             if (File.Exists(path))
-                throw new InvalidAssumptionException($"Asked to delete directory, but is a directory: {path}");
+                throw new InvalidAssumptionException($"Asked to delete directory, but is a file: {path}");
 
             if (!Directory.Exists(path))
                 return;
