@@ -236,13 +236,19 @@ namespace ADLib.Util
             GenLog.Info($"Writing logfile to {GenLog.LogFile}");
         }
 
-        public static void MoveFileToDir(string file, string dir)
+        public static string MoveFileToDir(string file, string dir)
         {
             CreateDirectory(dir);
             var fileName = Path.GetFileName(file);
             var dest = Path.Combine(dir, fileName);
             GenLog.Info($"Moving '{file}' to dir '{dir}'");
             File.Move(file, dest);
+            return dest;
+        }
+
+        public static async Task<string> MoveFileToDirAsync(string file, string dir, CancellationToken cancellationToken)
+        {
+            return await Task.Run(() => MoveFileToDir(file, dir), cancellationToken);
         }
 
         // Removes illegal chars from filename
