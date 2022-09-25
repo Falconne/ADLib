@@ -236,19 +236,25 @@ namespace ADLib.Util
             GenLog.Info($"Writing logfile to {GenLog.LogFile}");
         }
 
-        public static string MoveFileToDir(string file, string dir)
+        public static string MoveFileToDir(string file, string dir, bool makeUnique = false)
         {
             CreateDirectory(dir);
             var fileName = Path.GetFileName(file);
-            var dest = Path.Combine(dir, fileName);
+            var dest = makeUnique
+                ? GetUniquelyNamedFileIn(dir, fileName)
+                : Path.Combine(dir, fileName);
+
+            if (File.Exists(dest))
+                throw new InvalidAssumptionException($"Cannot move '{file}' to '{dest}'. Target already exists.");
+
             GenLog.Info($"Moving '{file}' to dir '{dir}'");
             File.Move(file, dest);
             return dest;
         }
 
-        public static async Task<string> MoveFileToDirAsync(string file, string dir, CancellationToken cancellationToken)
+        public static async Task<string> MoveFileToDirAsync(string file, string dir, bool makeUnique = false)
         {
-            return await Task.Run(() => MoveFileToDir(file, dir), cancellationToken);
+            return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
         }
 
         // Removes illegal chars from filename
@@ -326,6 +332,23 @@ namespace ADLib.Util
                 return Array.Empty<string>();
 
             return allFilesRaw.Split(Environment.NewLine).Where(f => f.IsNotEmpty()).ToArray();
+        }
+
+        public static string GetUniquelyNamedFileIn(string dir, string baseFilename)
+        {
+            var basename = Path.GetFileNameWithoutExtension(baseFilename);
+            var extension = Path.GetExtension(baseFilename);
+            var index = 0;
+            while (true)
+            {
+                var suffix = index == 0 ? "" : $" {index}";
+                var remoteFilename = $"{basename}{suffix}{extension}";
+                var remotePath = Path.Combine(dir, remoteFilename);
+                if (!File.Exists(remotePath))
+                    return remotePath;
+
+                index++;
+            }
         }
     }
 }
