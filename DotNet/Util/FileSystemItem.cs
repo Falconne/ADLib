@@ -24,4 +24,6 @@ public class FileSystemItem
 
         return Directory;
     }
+
+    public bool IsInDirectory(string dir) => GetNonRootContainingDirectory().EqualsIgnoringCase(dir);
 }
