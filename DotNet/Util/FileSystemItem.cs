@@ -8,6 +8,8 @@ public class FileSystemItem
 
     public string Basename => Path.GetFileNameWithoutExtension(OriginalPath);
 
+    public string Extension => Path.GetExtension(OriginalPath);
+
     public string? Directory => Path.GetDirectoryName(OriginalPath);
 
     public FileSystemItem(string originalPath)
