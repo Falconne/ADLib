@@ -320,13 +320,14 @@ namespace ADLib.Util
         }
 
         // Note: Unicode filenames will be mangled
-        public static async Task<string[]> GetFilesUnderFast(string dir)
+        public static async Task<string[]> GetFilesUnderFast(string dir, bool recurse = false)
         {
             if (!Directory.Exists(dir))
                 throw new InvalidAssumptionException($"Directory not found: {dir}");
 
+            var recurseParam = recurse ? "/s" : "";
             var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync(
-                "cmd.exe", "/c", "dir", "/b", dir);
+                "cmd.exe", "/c", "dir", "/b", recurseParam, dir);
 
             if (allFilesRaw.IsEmpty())
                 return Array.Empty<string>();
