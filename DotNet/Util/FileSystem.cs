@@ -325,14 +325,21 @@ namespace ADLib.Util
             if (!Directory.Exists(dir))
                 throw new InvalidAssumptionException($"Directory not found: {dir}");
 
-            var recurseParam = recurse ? "/s" : "";
+            var parameters = new List<object>() { "/c", "dir", "/b", dir };
+            if (recurse)
+                parameters.Add("/s");
+
             var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync(
-                "cmd.exe", "/c", "dir", "/b", recurseParam, dir);
+                "cmd.exe", parameters.ToArray());
 
             if (allFilesRaw.IsEmpty())
                 return Array.Empty<string>();
 
-            return allFilesRaw.Split(Environment.NewLine).Where(f => f.IsNotEmpty()).ToArray();
+            return allFilesRaw
+                .Split(Environment.NewLine)
+                .Where(f => f.IsNotEmpty())
+                .Select(f => recurse ? f : Path.Combine(dir, f))
+                .ToArray();
         }
 
         public static string GetUniquelyNamedFileIn(string dir, string baseFilename)
