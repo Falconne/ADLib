@@ -59,8 +59,9 @@ namespace ADLib.Logging
                 var fi = new FileInfo(LogFile);
                 if (fi.Length > MaxLogSize)
                 {
-                    var rolloverFile =
-                        $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}";
+                    var rolloverFile = Path.Combine(Path.GetDirectoryName(LogFile)!,
+                        $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}");
+
                     if (File.Exists(rolloverFile))
                         File.Delete(rolloverFile);
 
