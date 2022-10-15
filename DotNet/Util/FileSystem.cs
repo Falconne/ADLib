@@ -247,8 +247,7 @@ namespace ADLib.Util
             if (File.Exists(dest))
                 throw new InvalidAssumptionException($"Cannot move '{file}' to '{dest}'. Target already exists.");
 
-            GenLog.Info($"Moving '{file}' to dir '{dir}'");
-            File.Move(file, dest);
+            Retry.OnException(() => File.Move(file, dest), $"Moving '{file}' to dir '{dir}'");
             return dest;
         }
 
