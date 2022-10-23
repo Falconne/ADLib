@@ -15,6 +15,8 @@ namespace WPFUtil
 
         private SafeSynchronizedObject<bool> _busy = new(false);
 
+        private Action? _preFunction;
+
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
@@ -34,6 +36,12 @@ namespace WPFUtil
             return this;
         }
 
+        public RelayCommandAsync WithPreFunction(Action? preFunction)
+        {
+            _preFunction = preFunction;
+            return this;
+        }
+
         public bool CanExecute(object? parameter)
         {
             return !_busy.Get() && (_canExecute?.Invoke() ?? true);
@@ -42,6 +50,7 @@ namespace WPFUtil
         public void Execute(object? parameter)
         {
             _busy.Set(true);
+            _preFunction?.Invoke();
             _execute().FireAndForget(_errorHandler, () => _busy.Set(false));
         }
     }
