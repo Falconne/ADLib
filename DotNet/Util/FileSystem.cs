@@ -302,7 +302,7 @@ namespace ADLib.Util
 
         public static async Task DeleteDirToRecycleBinAsync(string? path, CancellationToken cancellationToken)
         {
-            if (path!.IsEmpty())
+            if (path.IsEmpty())
                 return;
 
             if (File.Exists(path))
