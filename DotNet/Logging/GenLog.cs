@@ -49,28 +49,47 @@ namespace ADLib.Logging
             if (string.IsNullOrWhiteSpace(LogFile))
                 return;
 
-            var directory = Path.GetDirectoryName(LogFile);
-            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
-
-            // Rollover existing log file if it's larger than MaxLogSize
-            if (File.Exists(LogFile))
+            var retries = 4;
+            while (true)
             {
-                var fi = new FileInfo(LogFile);
-                if (fi.Length > MaxLogSize)
+                try
                 {
-                    var rolloverFile = Path.Combine(Path.GetDirectoryName(LogFile)!,
-                        $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}");
+                    var directory = Path.GetDirectoryName(LogFile);
+                    if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
 
-                    if (File.Exists(rolloverFile))
-                        File.Delete(rolloverFile);
+                    // Rollover existing log file if it's larger than MaxLogSize
+                    if (File.Exists(LogFile))
+                    {
+                        var fi = new FileInfo(LogFile);
+                        if (fi.Length > MaxLogSize)
+                        {
+                            var rolloverFile = Path.Combine(Path.GetDirectoryName(LogFile)!,
+                                $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}");
 
-                    File.Move(LogFile, rolloverFile);
+                            if (File.Exists(rolloverFile))
+                                File.Delete(rolloverFile);
+
+                            File.Move(LogFile, rolloverFile);
+                        }
+                    }
+
+                    var timestamp = DateTime.Now.ToString("s");
+                    File.AppendAllText(LogFile, $"{timestamp} {logMessage}\n");
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine($"Error writing to log file: {e.Message}");
+                    if (retries-- == 0)
+                    {
+                        Console.Error.WriteLine("Giving up");
+                        return;
+                    }
+
+                    Thread.Sleep(2000);
                 }
             }
-
-            var timestamp = DateTime.Now.ToString("s");
-            File.AppendAllText(LogFile, $"{timestamp} {logMessage}\n");
         }
 
         private static void SetColorForLogType(LogMessageType type)
