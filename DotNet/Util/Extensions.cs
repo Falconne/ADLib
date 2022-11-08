@@ -35,5 +35,15 @@ namespace ADLib.Util
         {
             return source.Select((item, index) => (item, index));
         }
+
+        public static bool IsEmpty([NotNullWhen(false)] this Array? array)
+        {
+            return array == null || array.Length == 0;
+        }
+
+        public static bool IsNotEmpty([NotNullWhen(true)] this Array? array)
+        {
+            return array is { Length: > 0 };
+        }
     }
 }
