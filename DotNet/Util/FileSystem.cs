@@ -1,6 +1,7 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
 using Microsoft.VisualBasic.FileIO;
+using SearchOption = System.IO.SearchOption;
 
 namespace ADLib.Util
 {
@@ -340,6 +341,26 @@ namespace ADLib.Util
                 .Select(f => recurse ? f : Path.Combine(dir, f))
                 .ToArray();
         }
+
+        public static async Task<string[]> GetFilesUnderAsync(string root, bool recurse)
+        {
+            return await GetFilesUnderAsync(root, recurse, CancellationToken.None);
+        }
+
+        public static async Task<string[]> GetFilesUnderAsync(string root, bool recurse, CancellationToken stoppingToken)
+        {
+            if (!Directory.Exists(root))
+                return Array.Empty<string>();
+
+            GenLog.Debug($"Finding all files under {root}");
+            return await Task.Run(
+                () => Directory.GetFiles(
+                    root,
+                    "*.*",
+                    recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
+                stoppingToken);
+        }
+
 
         public static string GetUniquelyNamedFileIn(string dir, string baseFilename)
         {
