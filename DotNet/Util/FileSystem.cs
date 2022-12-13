@@ -342,6 +342,11 @@ namespace ADLib.Util
                 .ToArray();
         }
 
+        public static async Task<string[]> GetDirectoriesUnderAsync(string root)
+        {
+            return await Task.Run(() => Directory.EnumerateDirectories(root).ToArray());
+        }
+
         public static async Task<string[]> GetFilesUnderAsync(string root, bool recurse)
         {
             return await GetFilesUnderAsync(root, recurse, CancellationToken.None);
