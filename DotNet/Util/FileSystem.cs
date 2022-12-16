@@ -319,13 +319,13 @@ namespace ADLib.Util
 
         }
 
-        // Note: Unicode filenames will be mangled
+        // Note: Unicode filenames will be mangled, does not handle special chars like & in path
         public static async Task<string[]> GetFilesUnderFast(string dir, bool recurse = false)
         {
             if (!Directory.Exists(dir))
                 throw new InvalidAssumptionException($"Directory not found: {dir}");
 
-            var parameters = new List<object>() { "/c", "dir", "/b", dir };
+            var parameters = new List<object> { "/c", "dir", "/b", dir };
             if (recurse)
                 parameters.Add("/s");
 

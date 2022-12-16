@@ -56,8 +56,8 @@ namespace ADLib.Util
 
         public static async Task<(int exitCode, string stdout, string stderr)> RunSilent(string program, params object[] args)
         {
-            var argsPrinted = args.Length == 0 ? "" : string.Join(" ", args);
-            GenLog.Debug($"{program} {argsPrinted}");
+            var commandPrinted = GetCommandForPrinting(program, args);
+            GenLog.Debug(commandPrinted);
 
             var command = Command.Run(program, args);
 
@@ -68,11 +68,19 @@ namespace ADLib.Util
             return (command.Result.ExitCode, stdout, stderr);
         }
 
+        private static string GetCommandForPrinting(string program, object[] args)
+        {
+            var argsPrinted = args.Length == 0 ? "" : string.Join(" ", args);
+            var commandPrinted = $"{program} {argsPrinted}";
+            return commandPrinted;
+        }
+
         public static string RunAndFailIfNotExitZero(string program, params object[] args)
         {
             var (exitCode, stdout, _) = Run(program, args);
             if (exitCode != 0)
             {
+                GenLog.Error($"Command failed: {GetCommandForPrinting(program, args)}");
                 throw new ConfigurationException($"Exit code was {exitCode}");
             }
 
@@ -81,9 +89,12 @@ namespace ADLib.Util
 
         public static async Task<string> RunSilentAndFailIfNotExitZeroAsync(string program, params object[] args)
         {
-            var (exitCode, stdout, _) = await RunSilent(program, args);
+            var (exitCode, stdout, stderr) = await RunSilent(program, args);
             if (exitCode != 0)
             {
+                GenLog.Info(stdout);
+                GenLog.Error(stderr);
+                GenLog.Error($"Command failed: {GetCommandForPrinting(program, args)}");
                 throw new ConfigurationException($"Exit code was {exitCode}");
             }
 
