@@ -35,9 +35,10 @@ namespace ADLib.Net
         {
             await DoThrottle(cancellationToken);
             string? result = null;
+            GenLog.Debug($"GETting {url}");
             await Retry.OnExceptionAsync(
                 async () => { result = await _client.GetStringAsync(url, cancellationToken); },
-                $"GETting {url}",
+                null,
                 cancellationToken);
 
             return result;

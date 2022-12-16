@@ -6,7 +6,7 @@ namespace ADLib.Util
     public static class Retry
     {
         public static async Task OnExceptionAsync(
-            Func<Task> action, string introMessage, CancellationToken cancellationToken, int numRetries = 3, int delay = 3000)
+            Func<Task> action, string? introMessage, CancellationToken cancellationToken, int numRetries = 3, int delay = 3000)
 
         {
             if (numRetries < 0)
@@ -18,6 +18,7 @@ namespace ADLib.Util
                 {
                     if (!introMessage.IsEmpty())
                         GenLog.Info(introMessage);
+
                     await action();
                     return;
                 }
