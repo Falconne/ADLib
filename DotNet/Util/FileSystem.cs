@@ -84,8 +84,7 @@ namespace ADLib.Util
             if (!File.Exists(path))
                 return;
 
-            GenLog.Info($"Deleting {path}");
-            File.Delete(path);
+            Retry.OnException(() => File.Delete(path), $"Deleting {path}");
         }
 
         public static void WriteToFileSafely(string path, string[] content)
