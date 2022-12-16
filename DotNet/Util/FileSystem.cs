@@ -87,6 +87,23 @@ namespace ADLib.Util
             Retry.OnException(() => File.Delete(path), $"Deleting {path}");
         }
 
+        public static async Task DeleteAsync(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                await Task.Run(() => DeleteDirectory(path));
+                return;
+            }
+
+            if (!File.Exists(path))
+                return;
+
+            await Retry.OnExceptionAsync(
+                async () => await Task.Run(() => File.Delete(path)),
+                $"Deleting {path}",
+                CancellationToken.None);
+        }
+
         public static void WriteToFileSafely(string path, string[] content)
         {
             void WriteToFile()
