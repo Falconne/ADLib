@@ -61,6 +61,10 @@ namespace ADLib.Net
 
         public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
         {
+            var dir = Path.GetDirectoryName(path);
+            if (dir.IsNotEmpty() && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
             await DoThrottle(cancellationToken);
             byte[]? bytes = null;
             await Retry.OnExceptionAsync(

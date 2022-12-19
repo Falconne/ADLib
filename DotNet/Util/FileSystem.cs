@@ -274,14 +274,15 @@ namespace ADLib.Util
         }
 
         // Removes illegal chars from filename
-        public static string GetCleanFilename(string path)
+        public static string GetCleanFilename(string path, bool asciiOnly = false)
         {
             foreach (var invalidChar in Path.GetInvalidFileNameChars())
             {
                 path = path.Replace(invalidChar, '_');
             }
 
-            return path.Trim(' ').TrimEnd('.', ' ');
+            var result = path.Trim(' ').TrimEnd('.', ' ');
+            return asciiOnly ? StringUtils.GetWithoutNonASCIIChars(result) : result;
         }
 
         public static void DeleteFileToRecycleBin(string? path)
