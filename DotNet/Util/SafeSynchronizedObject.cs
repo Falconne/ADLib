@@ -26,5 +26,15 @@
                 _data = value;
             }
         }
+
+        // Use this to avoid race conditions if you must read the value before changing it
+        public T ApplyFunction(Func<T, T> function)
+        {
+            lock (_lock)
+            {
+                _data = function(_data);
+                return _data;
+            }
+        }
     }
 }
