@@ -15,6 +15,11 @@ namespace ADLib.Util
             return str.Equals(compareTo, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public static bool EqualsIgnoringCaseAndSpace(this string str, string compareTo)
+        {
+            return str.Trim().Equals(compareTo.Trim(), StringComparison.InvariantCultureIgnoreCase);
+        }
+
         public static bool IsEmpty([NotNullWhen(false)] this string? str)
         {
             return string.IsNullOrWhiteSpace(str);
