@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace WPFUtil
 {
-    public class Observable<T> : ViewModelBase
+    public class Observable<T> : PropertyContainerBase
     {
         private T? _value;
 

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace WPFUtil
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class PropertyContainerBase : INotifyPropertyChanged
     {
         #region Property Change Events
 
