@@ -1,7 +1,9 @@
-﻿using ADLib.Logging;
+﻿using ADLib.Exceptions;
+using ADLib.Logging;
 using ADLib.Util;
 using HtmlAgilityPack;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace ADLib.Net
 {
@@ -15,6 +17,7 @@ namespace ADLib.Net
 
         private readonly HttpClient _client;
 
+        private static readonly Regex _urlChecker = new(@"^https*://[^\s""']+$", RegexOptions.Singleline);
 
         public ThrottledWebClient(int defaultDelayMilliseconds = 50)
         {
@@ -25,6 +28,8 @@ namespace ADLib.Net
 
         public async Task<HtmlDocument> GetPageDocOrFailAsync(string url, CancellationToken cancellationToken)
         {
+            FailIfBadUrl(url);
+
             var doc = new HtmlDocument();
             doc.LoadHtml(await GetPageContentOrFailAsync(url, cancellationToken));
 
@@ -33,6 +38,8 @@ namespace ADLib.Net
 
         public async Task<string?> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
         {
+            FailIfBadUrl(url);
+
             await DoThrottle(cancellationToken);
             string? result = null;
             GenLog.Debug($"GETting {url}");
@@ -47,6 +54,8 @@ namespace ADLib.Net
         public async Task<HttpResponseMessage> PostAndFailIfNotOk(string url, Dictionary<string, string> parameters,
             CancellationToken cancellationToken)
         {
+            FailIfBadUrl(url);
+
             var encodedContent = new FormUrlEncodedContent(parameters);
 
             await DoThrottle(cancellationToken);
@@ -56,7 +65,7 @@ namespace ADLib.Net
                 return response;
 
             GenLog.Error(await response.Content.ReadAsStringAsync(cancellationToken));
-            throw new($"Bad status code from POST: {response.StatusCode}");
+            throw new Exception($"Bad status code from POST: {response.StatusCode}");
         }
 
         public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
@@ -79,6 +88,8 @@ namespace ADLib.Net
 
         public async Task<bool> TryDownloadFileAsync(string url, string path, CancellationToken cancellationToken)
         {
+            FailIfBadUrl(url);
+
             await DoThrottle(cancellationToken);
             GenLog.Info($"Attempt download {url} to {path}");
             try
@@ -93,6 +104,18 @@ namespace ADLib.Net
                 GenLog.Info($"Failed: {e.Message}");
                 return false;
             }
+        }
+
+        private static void FailIfBadUrl(string url)
+        {
+
+            if (!IsValidUrl(url))
+                throw new InvalidAssumptionException($"Invalid URL: {url}");
+        }
+
+        public static bool IsValidUrl(string url)
+        {
+            return url.IsNotEmpty() && _urlChecker.IsMatch(url);
         }
 
         private async Task DoThrottle(CancellationToken cancellationToken)
