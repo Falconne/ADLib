@@ -214,7 +214,7 @@ namespace ADLib.Util
         public static bool IsEnvironmentVariableTrue(string name)
         {
             var value = Environment.GetEnvironmentVariable(name);
-            GenLog.Info($"Env: {name} => {value}");
+            GenLog.Debug($"Env: {name} => {value}");
             if (string.IsNullOrWhiteSpace(value))
                 return false;
 
