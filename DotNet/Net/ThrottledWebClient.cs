@@ -36,6 +36,11 @@ namespace ADLib.Net
             return doc;
         }
 
+        public async Task<string?> GetPageContentOrFailAsync(string url)
+        {
+            return await GetPageContentOrFailAsync(url, CancellationToken.None);
+        }
+
         public async Task<string?> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
         {
             FailIfBadUrl(url);
@@ -51,7 +56,14 @@ namespace ADLib.Net
             return result;
         }
 
-        public async Task<HttpResponseMessage> PostAndFailIfNotOk(string url, Dictionary<string, string> parameters,
+        public async Task<HttpResponseMessage> PostAndFailIfNotOk(string url, Dictionary<string, string> parameters)
+        {
+            return await PostAndFailIfNotOk(url, parameters, CancellationToken.None);
+        }
+
+        public async Task<HttpResponseMessage> PostAndFailIfNotOk(
+            string url,
+            Dictionary<string, string> parameters,
             CancellationToken cancellationToken)
         {
             FailIfBadUrl(url);
