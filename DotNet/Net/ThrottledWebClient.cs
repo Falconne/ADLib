@@ -26,6 +26,11 @@ namespace ADLib.Net
             MinDelayMilliseconds = defaultDelayMilliseconds;
         }
 
+        public async Task<HtmlDocument> GetPageDocOrFailAsync(string url)
+        {
+            return await GetPageDocOrFailAsync(url, CancellationToken.None);
+        }
+
         public async Task<HtmlDocument> GetPageDocOrFailAsync(string url, CancellationToken cancellationToken)
         {
             FailIfBadUrl(url);
