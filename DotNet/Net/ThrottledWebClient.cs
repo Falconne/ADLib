@@ -85,6 +85,11 @@ namespace ADLib.Net
             throw new Exception($"Bad status code from POST: {response.StatusCode}");
         }
 
+        public async Task DownloadFileAsync(string url, string path)
+        {
+            await DownloadFileAsync(url, path, CancellationToken.None);
+        }
+
         public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
         {
             var dir = Path.GetDirectoryName(path);
