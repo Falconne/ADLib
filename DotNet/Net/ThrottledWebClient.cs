@@ -26,6 +26,11 @@ public class ThrottledWebClient
         MinDelayMilliseconds = defaultDelayMilliseconds;
     }
 
+    public void SetTimeout(TimeSpan timespan)
+    {
+        _client.Timeout = timespan;
+    }
+
     public async Task<HtmlDocument> GetPageDocOrFailAsync(string url)
     {
         return await GetPageDocOrFailAsync(url, CancellationToken.None);
@@ -128,6 +133,19 @@ public class ThrottledWebClient
             GenLog.Info($"Failed: {e.Message}");
             return false;
         }
+    }
+
+    public async Task<HttpResponseMessage> GetAsync(string url)
+    {
+        return await GetAsync(url, CancellationToken.None);
+    }
+
+    public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
+    {
+        FailIfBadUrl(url);
+        await DoThrottle(cancellationToken);
+        GenLog.Debug($"GETing {url}");
+        return await _client.GetAsync(url, cancellationToken);
     }
 
     private static void FailIfBadUrl(string url)
