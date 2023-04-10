@@ -11,24 +11,22 @@ public class ThrottledWebClient
 {
     private static readonly Regex _urlChecker = new(@"^https*://[^\s""']+$", RegexOptions.Singleline);
 
-    public int MinDelayMilliseconds;
+    public readonly HttpClient Client;
 
-    private readonly HttpClient _client;
+    public int MinDelayMilliseconds;
 
     private readonly CookieContainer _cookies = new();
 
     private DateTime _lastCallTime = DateTime.MinValue;
 
-    public ThrottledWebClient(int defaultDelayMilliseconds = 50)
+    public ThrottledWebClient(int defaultDelayMilliseconds = 50, bool followRedirects = true)
     {
         HttpClientHandler handler = new() { CookieContainer = _cookies };
-        _client = new HttpClient(handler);
-        MinDelayMilliseconds = defaultDelayMilliseconds;
-    }
+        if (!followRedirects)
+            handler.AllowAutoRedirect = false;
 
-    public void SetTimeout(TimeSpan timespan)
-    {
-        _client.Timeout = timespan;
+        Client = new HttpClient(handler);
+        MinDelayMilliseconds = defaultDelayMilliseconds;
     }
 
     public async Task<HtmlDocument> GetPageDocOrFailAsync(string url)
@@ -59,7 +57,7 @@ public class ThrottledWebClient
         string? result = null;
         GenLog.Debug($"GETting {url}");
         await Retry.OnExceptionAsync(
-            async () => { result = await _client.GetStringAsync(url, cancellationToken); },
+            async () => { result = await Client.GetStringAsync(url, cancellationToken); },
             null,
             cancellationToken);
 
@@ -84,7 +82,7 @@ public class ThrottledWebClient
 
         await DoThrottle(cancellationToken);
         GenLog.Debug($"POSTing {url}");
-        var response = await _client.PostAsync(url, encodedContent, cancellationToken).ConfigureAwait(false);
+        var response = await Client.PostAsync(url, encodedContent, cancellationToken).ConfigureAwait(false);
         if (response.StatusCode == HttpStatusCode.OK)
             return response;
 
@@ -106,12 +104,13 @@ public class ThrottledWebClient
         await DoThrottle(cancellationToken);
         byte[]? bytes = null;
         await Retry.OnExceptionAsync(
-            async () => { bytes = await _client.GetByteArrayAsync(url, cancellationToken); },
+            async () => { bytes = await Client.GetByteArrayAsync(url, cancellationToken); },
             $"Downloading {url} to {path}",
             cancellationToken);
 
         if (bytes == null)
             throw new Exception($"Download returned empty result: {url}");
+
         await File.WriteAllBytesAsync(path, bytes, cancellationToken);
     }
 
@@ -123,7 +122,7 @@ public class ThrottledWebClient
         GenLog.Info($"Attempt download {url} to {path}");
         try
         {
-            var bytes = await _client.GetByteArrayAsync(url, cancellationToken);
+            var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
             await File.WriteAllBytesAsync(path, bytes, cancellationToken);
             GenLog.Info("Success");
             return true;
@@ -145,18 +144,18 @@ public class ThrottledWebClient
         FailIfBadUrl(url);
         await DoThrottle(cancellationToken);
         GenLog.Debug($"GETing {url}");
-        return await _client.GetAsync(url, cancellationToken);
+        return await Client.GetAsync(url, cancellationToken);
+    }
+
+    public static bool IsValidUrl(string url)
+    {
+        return url.IsNotEmpty() && _urlChecker.IsMatch(url);
     }
 
     private static void FailIfBadUrl(string url)
     {
         if (!IsValidUrl(url))
             throw new InvalidAssumptionException($"Invalid URL: {url}");
-    }
-
-    public static bool IsValidUrl(string url)
-    {
-        return url.IsNotEmpty() && _urlChecker.IsMatch(url);
     }
 
     private async Task DoThrottle(CancellationToken cancellationToken)
