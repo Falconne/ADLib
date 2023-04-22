@@ -11,9 +11,9 @@ public static class WindowsHost
         Shell.RunAndFailIfNotExitZero($@"{Environment.SystemDirectory}\shutdown.exe", "/r", "/t", delay);
     }
 
-    public static void OpenInDefaultBrowser(string url)
+    public static void OpenInDefaultApp(string uri)
     {
-        GenLog.Info($"Opening in browser: {url}");
-        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+        GenLog.Info($"Opening: {uri}");
+        Process.Start(new ProcessStartInfo { FileName = uri, UseShellExecute = true });
     }
 }
