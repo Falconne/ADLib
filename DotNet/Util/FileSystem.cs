@@ -8,33 +8,6 @@ namespace ADLib.Util;
 
 public static class FileSystem
 {
-    private static void DeleteDirectory(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            return;
-
-        var retries = 10;
-        while (Directory.Exists(path))
-        {
-            try
-            {
-                GenLog.Info($"Deleting directory: {path}...");
-                Directory.Delete(path, true);
-            }
-            catch (IOException e) when (retries-- >= 0)
-            {
-                GenLog.Warning("Unable to delete directory. Will retry...");
-                GenLog.Warning(e.Message);
-                Thread.Sleep(5000);
-            }
-            catch (UnauthorizedAccessException) when (retries-- >= 0)
-            {
-                GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
-                RemoveReadOnlyAttributes(path);
-            }
-        }
-    }
-
     public static void CreateDirectory(string path)
     {
         if (Directory.Exists(path))
@@ -48,6 +21,12 @@ public static class FileSystem
     public static void InitialiseDirectory(string path)
     {
         DeleteDirectory(path);
+        CreateDirectory(path);
+    }
+
+    public static async Task InitialiseDirectoryAsync(string path)
+    {
+        await DeleteAsync(path);
         CreateDirectory(path);
     }
 
@@ -124,30 +103,6 @@ public static class FileSystem
         Retry.OnException(WriteToFile, $"Writing to {path}", 5);
     }
 
-    private static void RemoveReadOnlyAttributes(string path)
-    {
-        try
-        {
-            foreach (var s in Directory.GetDirectories(path))
-            {
-                RemoveReadOnlyAttributes(s);
-            }
-
-            foreach (var f in Directory.GetFiles(path))
-            {
-                var attr = File.GetAttributes(f);
-                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                {
-                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
-                }
-            }
-        }
-        catch
-        {
-            // ignored
-        }
-    }
-
     public static void CopyWithoutMirror(string source, string destination)
     {
         DoRobocopy(source, destination, "/e", 3);
@@ -156,25 +111,6 @@ public static class FileSystem
     public static void CopyWithMirror(string source, string destination)
     {
         DoRobocopy(source, destination, "/MIR", 4);
-    }
-
-    private static void DoRobocopy(string source, string destination, string type, int exitCodeLimit)
-    {
-        GenLog.Info($"Robocopy ({type}) '{source}' --> '{destination}'");
-
-        if (!Directory.Exists(source))
-        {
-            throw new ArgumentException($"{source} not found");
-        }
-
-        Directory.CreateDirectory(destination);
-
-        var result = Shell.RunAndGetExitCode("robocopy", source, destination, type, "/MT", "/R:3");
-
-        if (result > exitCodeLimit)
-        {
-            throw new IOException($"Robocopy returned code {result}");
-        }
     }
 
     public static string? SearchUpForFileFrom(
@@ -410,6 +346,76 @@ public static class FileSystem
                 return remotePath;
 
             index++;
+        }
+    }
+
+    private static void DeleteDirectory(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        var retries = 10;
+        while (Directory.Exists(path))
+        {
+            try
+            {
+                GenLog.Info($"Deleting directory: {path}...");
+                Directory.Delete(path, true);
+            }
+            catch (IOException e) when (retries-- >= 0)
+            {
+                GenLog.Warning("Unable to delete directory. Will retry...");
+                GenLog.Warning(e.Message);
+                Thread.Sleep(5000);
+            }
+            catch (UnauthorizedAccessException) when (retries-- >= 0)
+            {
+                GenLog.Warning("Unable to delete directory. Will attempt to remove read-only files...");
+                RemoveReadOnlyAttributes(path);
+            }
+        }
+    }
+
+    private static void RemoveReadOnlyAttributes(string path)
+    {
+        try
+        {
+            foreach (var s in Directory.GetDirectories(path))
+            {
+                RemoveReadOnlyAttributes(s);
+            }
+
+            foreach (var f in Directory.GetFiles(path))
+            {
+                var attr = File.GetAttributes(f);
+                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                {
+                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                }
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private static void DoRobocopy(string source, string destination, string type, int exitCodeLimit)
+    {
+        GenLog.Info($"Robocopy ({type}) '{source}' --> '{destination}'");
+
+        if (!Directory.Exists(source))
+        {
+            throw new ArgumentException($"{source} not found");
+        }
+
+        Directory.CreateDirectory(destination);
+
+        var result = Shell.RunAndGetExitCode("robocopy", source, destination, type, "/MT", "/R:3");
+
+        if (result > exitCodeLimit)
+        {
+            throw new IOException($"Robocopy returned code {result}");
         }
     }
 }
