@@ -11,14 +11,6 @@ public class ThrottledWebClient
 {
     private static readonly Regex _urlChecker = new(@"^https*://[^\s""']+$", RegexOptions.Singleline);
 
-    public readonly HttpClient Client;
-
-    public int MinDelayMilliseconds;
-
-    private readonly CookieContainer _cookies = new();
-
-    private DateTime _lastCallTime = DateTime.MinValue;
-
     public ThrottledWebClient(int defaultDelayMilliseconds = 50, bool followRedirects = true)
     {
         HttpClientHandler handler = new() { CookieContainer = _cookies };
@@ -28,6 +20,14 @@ public class ThrottledWebClient
         Client = new HttpClient(handler);
         MinDelayMilliseconds = defaultDelayMilliseconds;
     }
+
+    public readonly HttpClient Client;
+
+    public int MinDelayMilliseconds;
+
+    private readonly CookieContainer _cookies = new();
+
+    private DateTime _lastCallTime = DateTime.MinValue;
 
     public async Task<HtmlDocument> GetPageDocOrFailAsync(string url)
     {
@@ -102,16 +102,24 @@ public class ThrottledWebClient
             Directory.CreateDirectory(dir);
 
         await DoThrottle(cancellationToken);
-        byte[]? bytes = null;
-        await Retry.OnExceptionAsync(
-            async () => { bytes = await Client.GetByteArrayAsync(url, cancellationToken); },
-            $"Downloading {url} to {path}",
-            cancellationToken);
+        try
+        {
+            byte[]? bytes = null;
+            await Retry.OnExceptionAsync(
+                async () => { bytes = await Client.GetByteArrayAsync(url, cancellationToken); },
+                $"Downloading {url} to {path}",
+                cancellationToken);
 
-        if (bytes == null)
-            throw new Exception($"Download returned empty result: {url}");
+            if (bytes == null)
+                throw new Exception($"Download returned empty result: {url}");
 
-        await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+        }
+        catch (Exception)
+        {
+            File.Delete(path);
+            throw;
+        }
     }
 
     public async Task<bool> TryDownloadFileAsync(string url, string path, CancellationToken cancellationToken)
@@ -130,6 +138,7 @@ public class ThrottledWebClient
         catch (Exception e)
         {
             GenLog.Info($"Failed: {e.Message}");
+            File.Delete(path);
             return false;
         }
     }
@@ -150,6 +159,13 @@ public class ThrottledWebClient
     public static bool IsValidUrl(string url)
     {
         return url.IsNotEmpty() && _urlChecker.IsMatch(url);
+    }
+
+    public async Task<string> DownloadToTempFile(string link)
+    {
+        var tempFile = Path.GetTempFileName();
+        await DownloadFileAsync(link, tempFile);
+        return tempFile;
     }
 
     private static void FailIfBadUrl(string url)
