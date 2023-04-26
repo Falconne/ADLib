@@ -44,12 +44,12 @@ public class ThrottledWebClient
         return doc;
     }
 
-    public async Task<string?> GetPageContentOrFailAsync(string url)
+    public async Task<string> GetPageContentOrFailAsync(string url)
     {
         return await GetPageContentOrFailAsync(url, CancellationToken.None);
     }
 
-    public async Task<string?> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
+    public async Task<string> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
     {
         FailIfBadUrl(url);
 
@@ -60,6 +60,9 @@ public class ThrottledWebClient
             async () => { result = await Client.GetStringAsync(url, cancellationToken); },
             null,
             cancellationToken);
+
+        if (result == null)
+            throw new Exception($"GET returned empty result for {url}");
 
         return result;
     }
