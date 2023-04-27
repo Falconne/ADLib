@@ -93,12 +93,11 @@ public class ThrottledWebClient
         throw new Exception($"Bad status code from POST: {response.StatusCode}");
     }
 
-    public async Task DownloadFileAsync(string url, string path)
-    {
-        await DownloadFileAsync(url, path, CancellationToken.None);
-    }
-
-    public async Task DownloadFileAsync(string url, string path, CancellationToken cancellationToken)
+    public async Task DownloadFileAsync(
+        string url,
+        string path,
+        CancellationToken cancellationToken = default,
+        int retries = 3)
     {
         var dir = Path.GetDirectoryName(path);
         if (dir.IsNotEmpty() && !Directory.Exists(dir))
@@ -111,7 +110,8 @@ public class ThrottledWebClient
             await Retry.OnExceptionAsync(
                 async () => { bytes = await Client.GetByteArrayAsync(url, cancellationToken); },
                 $"Downloading {url} to {path}",
-                cancellationToken);
+                cancellationToken,
+                retries);
 
             if (bytes == null)
                 throw new Exception($"Download returned empty result: {url}");
