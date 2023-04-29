@@ -29,27 +29,22 @@ public class ThrottledWebClient
 
     private DateTime _lastCallTime = DateTime.MinValue;
 
-    public async Task<HtmlDocument> GetPageDocOrFailAsync(string url)
-    {
-        return await GetPageDocOrFailAsync(url, CancellationToken.None);
-    }
-
-    public async Task<HtmlDocument> GetPageDocOrFailAsync(string url, CancellationToken cancellationToken)
+    public async Task<HtmlDocument> GetPageDocOrFailAsync(
+        string url,
+        CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
 
         var doc = new HtmlDocument();
+        await DoThrottle(cancellationToken);
         doc.LoadHtml(await GetPageContentOrFailAsync(url, cancellationToken));
 
         return doc;
     }
 
-    public async Task<string> GetPageContentOrFailAsync(string url)
-    {
-        return await GetPageContentOrFailAsync(url, CancellationToken.None);
-    }
-
-    public async Task<string> GetPageContentOrFailAsync(string url, CancellationToken cancellationToken)
+    public async Task<string> GetPageContentOrFailAsync(
+        string url,
+        CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
 
@@ -69,22 +64,15 @@ public class ThrottledWebClient
 
     public async Task<HttpResponseMessage> PostAndFailIfNotOk(
         string url,
-        Dictionary<string, string> parameters)
-    {
-        return await PostAndFailIfNotOk(url, parameters, CancellationToken.None);
-    }
-
-    public async Task<HttpResponseMessage> PostAndFailIfNotOk(
-        string url,
         Dictionary<string, string> parameters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
 
         var encodedContent = new FormUrlEncodedContent(parameters);
 
-        await DoThrottle(cancellationToken);
         GenLog.Debug($"POSTing {url}");
+        await DoThrottle(cancellationToken);
         var response = await Client.PostAsync(url, encodedContent, cancellationToken).ConfigureAwait(false);
         if (response.StatusCode == HttpStatusCode.OK)
             return response;
@@ -125,7 +113,10 @@ public class ThrottledWebClient
         }
     }
 
-    public async Task<bool> TryDownloadFileAsync(string url, string path, CancellationToken cancellationToken)
+    public async Task<bool> TryDownloadFileAsync(
+        string url,
+        string path,
+        CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
 
@@ -146,12 +137,7 @@ public class ThrottledWebClient
         }
     }
 
-    public async Task<HttpResponseMessage> GetAsync(string url)
-    {
-        return await GetAsync(url, CancellationToken.None);
-    }
-
-    public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken)
+    public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
         await DoThrottle(cancellationToken);
@@ -164,10 +150,11 @@ public class ThrottledWebClient
         return url.IsNotEmpty() && _urlChecker.IsMatch(url);
     }
 
-    public async Task<string> DownloadToTempFile(string link)
+    public async Task<string> DownloadToTempFile(string link, CancellationToken cancellationToken = default)
     {
+        await DoThrottle(cancellationToken);
         var tempFile = Path.GetTempFileName();
-        await DownloadFileAsync(link, tempFile);
+        await DownloadFileAsync(link, tempFile, cancellationToken);
         return tempFile;
     }
 
