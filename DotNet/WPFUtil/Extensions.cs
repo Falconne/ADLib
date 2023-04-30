@@ -1,24 +1,43 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace WPFUtil
+namespace WPFUtil;
+
+public static class Extensions
 {
-    public static class Extensions
-    {
 #pragma warning disable RECS0165 // Asynchronous methods should return a Task instead of void
-        public static async void FireAndForget(
-            this Task task, Action<Exception> errorHandler, Action? onActionCompleted = null)
+    public static async void FireAndForget(
+        this Task task,
+        Action<Exception> errorHandler,
+        Action? onActionCompleted = null)
 #pragma warning restore RECS0165 // Asynchronous methods should return a Task instead of void
+    {
+        try
         {
-            try
-            {
-                await task;
-                onActionCompleted?.Invoke();
-            }
-            catch (Exception e)
-            {
-                errorHandler(e);
-            }
+            await task;
+            onActionCompleted?.Invoke();
+        }
+        catch (Exception e)
+        {
+            errorHandler(e);
+        }
+    }
+
+#pragma warning disable RECS0165 // Asynchronous methods should return a Task instead of void
+    public static async void FireAndForgetOnOtherThread(
+        this Task task,
+        Action<Exception> errorHandler,
+        Action? onActionCompleted = null)
+#pragma warning restore RECS0165 // Asynchronous methods should return a Task instead of void
+    {
+        try
+        {
+            await task.ConfigureAwait(false);
+            onActionCompleted?.Invoke();
+        }
+        catch (Exception e)
+        {
+            errorHandler(e);
         }
     }
 }
