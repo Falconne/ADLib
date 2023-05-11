@@ -36,7 +36,6 @@ public class ThrottledWebClient
         FailIfBadUrl(url);
 
         var doc = new HtmlDocument();
-        await DoThrottle(cancellationToken);
         doc.LoadHtml(await GetPageContentOrFailAsync(url, cancellationToken));
 
         return doc;
