@@ -83,24 +83,24 @@ public static class FileSystem
             CancellationToken.None);
     }
 
-    public static void WriteToFileSafely(string path, string[] content)
+    public static async Task WriteToFileSafelyAsync(string path, string[] content)
     {
-        void WriteToFile()
+        async Task WriteToFile()
         {
-            File.WriteAllLines(path, content);
+            await File.WriteAllLinesAsync(path, content);
         }
 
-        Retry.OnException(WriteToFile, $"Writing to {path}", 5);
+        await Retry.OnExceptionAsync(WriteToFile, $"Writing to {path}", 5);
     }
 
-    public static void WriteToFileSafely(string path, string content)
+    public static async Task WriteToFileSafelyAsync(string path, string content)
     {
-        void WriteToFile()
+        async Task WriteToFile()
         {
-            File.WriteAllText(path, content);
+            await File.WriteAllTextAsync(path, content);
         }
 
-        Retry.OnException(WriteToFile, $"Writing to {path}", 5);
+        await Retry.OnExceptionAsync(WriteToFile, $"Writing to {path}", 5);
     }
 
     public static void CopyWithoutMirror(string source, string destination)
