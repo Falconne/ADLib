@@ -11,9 +11,14 @@ public static class WindowsHost
         Shell.RunAndFailIfNotExitZero($@"{Environment.SystemDirectory}\shutdown.exe", "/r", "/t", delay);
     }
 
-    public static void OpenInDefaultApp(string uri)
+    public static void RunOrOpenFile(string uri)
     {
         GenLog.Info($"Opening: {uri}");
         Process.Start(new ProcessStartInfo { FileName = uri, UseShellExecute = true });
+    }
+
+    public static bool IsProcessRunning(string name)
+    {
+        return Process.GetProcessesByName(name).Length > 0;
     }
 }
