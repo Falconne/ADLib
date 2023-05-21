@@ -18,7 +18,7 @@ public static class GenLog
 
     public static Action<string> Error = s => WriteToAllSinks(s, LogMessageType.Error);
 
-    public static List<Action<LogMessageType, string>> Sinks { get; } = new();
+    public static List<Action<LogMessageType, string>> CustomSinks { get; } = new();
 
     public static void WriteProgress(string message)
     {
@@ -36,7 +36,7 @@ public static class GenLog
         if (type == LogMessageType.Debug && !DebugEnabled)
             return;
 
-        foreach (var sink in Sinks)
+        foreach (var sink in CustomSinks)
         {
             sink(type, message);
         }

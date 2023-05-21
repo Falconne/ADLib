@@ -36,6 +36,7 @@ public static class TopLevelExceptionHandler
 
     private static void ShowError(Exception e)
     {
+        GenLog.CustomSinks.Clear();
         GenLog.Error($"Unhandled Exception: {e.Message}");
         if (e.StackTrace != null)
         {
@@ -43,11 +44,11 @@ public static class TopLevelExceptionHandler
         }
 
         MessageBox.Show(
-            $"{e.Message}", "Unhandled Exception",
+            $"{e.Message}",
+            "Unhandled Exception",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
 
         Environment.Exit(1);
     }
-
 }
