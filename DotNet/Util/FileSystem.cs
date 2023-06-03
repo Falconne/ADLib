@@ -197,6 +197,9 @@ public static class FileSystem
 
     public static string MoveFileToDir(string file, string dir, bool makeUnique = false)
     {
+        if (!File.Exists(file))
+            throw new InvalidOperationException($"Cannot move non-existent file: {file}");
+
         CreateDirectory(dir);
         var fileName = Path.GetFileName(file);
         var dest = makeUnique ? GetUniquelyNamedFileIn(dir, fileName) : Path.Combine(dir, fileName);
