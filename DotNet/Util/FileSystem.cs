@@ -337,6 +337,9 @@ public static class FileSystem
 
     public static string GetUniquelyNamedFileIn(string dir, string baseFilename)
     {
+        if (!Directory.Exists(dir))
+            throw new InvalidOperationException($"Directory does not exist: {dir}");
+
         var basename = Path.GetFileNameWithoutExtension(baseFilename);
         var extension = Path.GetExtension(baseFilename);
         var index = 0;
