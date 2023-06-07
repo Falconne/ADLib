@@ -14,6 +14,7 @@ public static class Retry
         await OnExceptionAsync(action, introMessage, CancellationToken.None, numRetries, delay);
     }
 
+    // TODO reorder and use default cancellation token
     public static async Task OnExceptionAsync(
         Func<Task> action,
         string? introMessage,
