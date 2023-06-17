@@ -288,7 +288,7 @@ public static class FileSystem
     }
 
     // Note: Unicode filenames will be mangled, does not handle special chars like & in path
-    public static async Task<string[]> GetFilesUnderFast(string dir, bool recurse = false)
+    public static async Task<string[]> GetFilesUnderFastAsync(string dir, bool recurse = false)
     {
         if (!Directory.Exists(dir))
             throw new InvalidAssumptionException($"Directory not found: {dir}");
