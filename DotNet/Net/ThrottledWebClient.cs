@@ -117,16 +117,23 @@ public class ThrottledWebClient
     public async Task<bool> TryDownloadFileAsync(
         string url,
         string path,
+        int retries = 3,
         CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
-
         await DoThrottle(cancellationToken);
-        GenLog.Info($"Attempt download {url} to {path}");
         try
         {
-            var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
-            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+            await Retry.OnExceptionAsync(
+                async () =>
+                {
+                    var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
+                    await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+                },
+                $"Attempt download {url} to {path}",
+                cancellationToken,
+                retries);
+
             GenLog.Info("Success");
             return true;
         }
