@@ -237,6 +237,7 @@ resharper_blank_lines_around_single_line_auto_property = 1
 resharper_blank_lines_around_single_line_local_method = 1
 resharper_blank_lines_around_single_line_property = 1
 resharper_braces_for_ifelse = required_for_multiline
+resharper_continuous_indent_multiplier = 1
 resharper_csharp_blank_lines_around_single_line_field = 1
 resharper_csharp_blank_lines_around_single_line_invocable = 1
 resharper_csharp_keep_blank_lines_in_code = 1
