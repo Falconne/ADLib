@@ -48,7 +48,7 @@ public static class ClipboardHelper
                 GenLog.Error($"Ignoring clipboard error: {e.Message}");
             }
 
-            if (oldClipText != null && clipText != null && clipText != oldClipText)
+            if (clipText != null && clipText != oldClipText)
             {
                 GenLog.Info($"Caught new clipboard test: {clipText}");
                 await onTextChanged(clipText);
