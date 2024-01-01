@@ -45,25 +45,7 @@ public static class ClipboardHelper
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            string? clipText = null;
-            string? sourceUrl = null;
-            try
-            {
-                clipText = await ClipboardService.GetTextAsync(cancellationToken);
-                if (Clipboard.ContainsText(TextDataFormat.Html))
-                {
-                    clipText = Clipboard.GetText(TextDataFormat.Html);
-                    var sourceMatch = _sourceRegex.Match(clipText);
-                    if (sourceMatch.Success)
-                    {
-                        sourceUrl = sourceMatch.Groups[1].Value;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                GenLog.Error($"Ignoring clipboard error: {e.Message}");
-            }
+            var (sourceUrl, clipText) = await GetCurrentContentSafely(cancellationToken);
 
             if (clipText != null && clipText != oldClipText)
             {
@@ -78,5 +60,41 @@ public static class ClipboardHelper
 
             await Task.Delay(100, cancellationToken);
         }
+    }
+
+    public static async Task<(string? sourceUrl, string? clipText)> GetCurrentContentSafely(
+        CancellationToken cancellationToken = default)
+
+    {
+        while (true)
+        {
+            try
+            {
+                return await GetCurrentContent(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                GenLog.Error($"Ignoring clipboard error: {e.Message}");
+                await Task.Delay(100, cancellationToken);
+            }
+        }
+    }
+
+    public static async Task<(string? sourceUrl, string? clipText)> GetCurrentContent(
+        CancellationToken cancellationToken = default)
+    {
+        var clipText = await ClipboardService.GetTextAsync(cancellationToken);
+        string? sourceUrl = null;
+        if (Clipboard.ContainsText(TextDataFormat.Html))
+        {
+            clipText = Clipboard.GetText(TextDataFormat.Html);
+            var sourceMatch = _sourceRegex.Match(clipText);
+            if (sourceMatch.Success)
+            {
+                sourceUrl = sourceMatch.Groups[1].Value;
+            }
+        }
+
+        return (sourceUrl, clipText);
     }
 }
