@@ -1,11 +1,18 @@
 ﻿using ADLib.Logging;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Windows;
 using TextCopy;
+using Clipboard = System.Windows.Clipboard;
 
 namespace ClipboardHelper;
 
 public static class ClipboardHelper
 {
+    private static readonly Regex _sourceRegex = new(
+        @"SourceURL:\s*(http.+?)(<|\s|""|$)",
+        RegexOptions.Multiline | RegexOptions.Compiled);
+
     public static async Task CopyToClipboardAsync(string? text)
     {
         while (true)
@@ -31,7 +38,7 @@ public static class ClipboardHelper
     }
 
     public static async Task Monitor(
-        Func<string, Task> onTextChanged,
+        Func<string?, string, Task> onTextChanged,
         CancellationToken cancellationToken = default)
     {
         string? oldClipText = null;
@@ -39,9 +46,19 @@ public static class ClipboardHelper
         while (!cancellationToken.IsCancellationRequested)
         {
             string? clipText = null;
+            string? sourceUrl = null;
             try
             {
                 clipText = await ClipboardService.GetTextAsync(cancellationToken);
+                if (Clipboard.ContainsText(TextDataFormat.Html))
+                {
+                    clipText = Clipboard.GetText(TextDataFormat.Html);
+                    var sourceMatch = _sourceRegex.Match(clipText);
+                    if (sourceMatch.Success)
+                    {
+                        sourceUrl = sourceMatch.Groups[1].Value;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -51,7 +68,7 @@ public static class ClipboardHelper
             if (clipText != null && clipText != oldClipText)
             {
                 GenLog.Info($"Caught new clipboard test: {clipText}");
-                await onTextChanged(clipText);
+                await onTextChanged(sourceUrl, clipText);
             }
 
             if (clipText != null)
