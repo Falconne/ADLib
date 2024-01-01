@@ -38,19 +38,19 @@ public static class ClipboardHelper
     }
 
     public static async Task Monitor(
-        Func<string?, string, Task> onTextChanged,
+        Func<string?, string, string?, Task> onTextChanged,
         CancellationToken cancellationToken = default)
     {
         string? oldClipText = null;
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var (sourceUrl, clipText) = await GetCurrentContentSafely(cancellationToken);
+            var (sourceUrl, clipText, rawHtml) = await GetCurrentContentSafely(cancellationToken);
 
             if (clipText != null && clipText != oldClipText)
             {
                 GenLog.Info($"Caught new clipboard test: {clipText}");
-                await onTextChanged(sourceUrl, clipText);
+                await onTextChanged(sourceUrl, clipText, rawHtml);
             }
 
             if (clipText != null)
@@ -62,7 +62,7 @@ public static class ClipboardHelper
         }
     }
 
-    public static async Task<(string? sourceUrl, string? clipText)> GetCurrentContentSafely(
+    public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentContentSafely(
         CancellationToken cancellationToken = default)
 
     {
@@ -80,21 +80,22 @@ public static class ClipboardHelper
         }
     }
 
-    public static async Task<(string? sourceUrl, string? clipText)> GetCurrentContent(
+    public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentContent(
         CancellationToken cancellationToken = default)
     {
         var clipText = await ClipboardService.GetTextAsync(cancellationToken);
         string? sourceUrl = null;
+        string? rawHtml = null;
         if (Clipboard.ContainsText(TextDataFormat.Html))
         {
-            clipText = Clipboard.GetText(TextDataFormat.Html);
-            var sourceMatch = _sourceRegex.Match(clipText);
+            rawHtml = Clipboard.GetText(TextDataFormat.Html);
+            var sourceMatch = _sourceRegex.Match(rawHtml);
             if (sourceMatch.Success)
             {
                 sourceUrl = sourceMatch.Groups[1].Value;
             }
         }
 
-        return (sourceUrl, clipText);
+        return (sourceUrl, clipText, rawHtml);
     }
 }
