@@ -87,6 +87,8 @@ public static class FileSystem
             async () => await Task.Run(() => File.Delete(path)),
             $"Deleting {path}",
             CancellationToken.None);
+
+        await EnsurePathGoneAsync(path);
     }
 
     public static async Task WriteToFileSafelyAsync(string path, string[] content)
@@ -387,6 +389,22 @@ public static class FileSystem
 
             index++;
         }
+    }
+
+    private static async Task EnsurePathGoneAsync(string path)
+    {
+        var retries = 20;
+        while (retries-- > 0)
+        {
+            if (!File.Exists(path) && !Directory.Exists(path))
+            {
+                return;
+            }
+
+            await Task.Delay(10);
+        }
+
+        throw new IOException($"Unable to delete file {path}");
     }
 
     private static void DeleteDirectory(string path)
