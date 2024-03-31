@@ -11,7 +11,9 @@ public static class ImageHelper
     public static BitmapSource? GetImage(string? file, Action<BitmapImage>? setBitmapOptions = null)
     {
         if (file.IsEmpty() || !File.Exists(file))
+        {
             return null;
+        }
 
         try
         {
@@ -23,11 +25,12 @@ public static class ImageHelper
             GenLog.Error($"Error loading image '{file}'. Will retry without colour profile.");
         }
 
-        var bitmapOptionsSetter = new Action<BitmapImage>(b =>
-        {
-            setBitmapOptions?.Invoke(b);
-            b.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
-        });
+        var bitmapOptionsSetter = new Action<BitmapImage>(
+            b =>
+            {
+                setBitmapOptions?.Invoke(b);
+                b.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+            });
 
         return GetDPIFixedBitmap(file, bitmapOptionsSetter);
     }
