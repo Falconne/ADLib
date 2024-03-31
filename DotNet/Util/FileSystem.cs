@@ -2,6 +2,7 @@
 using ADLib.Logging;
 using Microsoft.VisualBasic.FileIO;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using SearchOption = System.IO.SearchOption;
 
 namespace ADLib.Util;
@@ -389,6 +390,18 @@ public static class FileSystem
 
             index++;
         }
+    }
+
+    // Handle long paths on Windows
+    public static string GetFixedWindowsPath(string path)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !path.StartsWith(@"\\?\"))
+        {
+            // Handle long paths
+            return @"\\?\" + path;
+        }
+
+        return path;
     }
 
     private static async Task EnsurePathGoneAsync(string path)
