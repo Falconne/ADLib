@@ -15,10 +15,13 @@ public class ThrottledWebClient
     {
         HttpClientHandler handler = new() { CookieContainer = _cookies };
         if (!followRedirects)
+        {
             handler.AllowAutoRedirect = false;
+        }
 
         Client = new HttpClient(handler);
         MinDelayMilliseconds = defaultDelayMilliseconds;
+        _followRedirects = followRedirects;
         Client.DefaultRequestHeaders.UserAgent.ParseAdd(
             @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
     }
@@ -28,6 +31,8 @@ public class ThrottledWebClient
     public int MinDelayMilliseconds;
 
     private readonly CookieContainer _cookies = new();
+
+    private readonly bool _followRedirects;
 
     private DateTime _lastCallTime = DateTime.MinValue;
 
@@ -50,17 +55,18 @@ public class ThrottledWebClient
         FailIfBadUrl(url);
 
         await DoThrottle(cancellationToken);
-        string? result = null;
-        GenLog.Debug($"GETting {url}");
+        HttpResponseMessage? response = null;
         await Retry.OnExceptionAsync(
-            async () => { result = await Client.GetStringAsync(url, cancellationToken); },
+            async () => { response = await GetAsync(url, cancellationToken); },
             null,
             cancellationToken);
 
-        if (result == null)
+        if (response == null)
+        {
             throw new Exception($"GET returned empty result for {url}");
+        }
 
-        return result;
+        return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
     public async Task<HttpResponseMessage> PostAndFailIfNotOk(
@@ -76,7 +82,9 @@ public class ThrottledWebClient
         await DoThrottle(cancellationToken);
         var response = await Client.PostAsync(url, encodedContent, cancellationToken).ConfigureAwait(false);
         if (response.StatusCode == HttpStatusCode.OK)
+        {
             return response;
+        }
 
         GenLog.Error(await response.Content.ReadAsStringAsync(cancellationToken));
         throw new Exception($"Bad status code from POST: {response.StatusCode}");
@@ -90,7 +98,9 @@ public class ThrottledWebClient
     {
         var dir = Path.GetDirectoryName(path);
         if (dir.IsNotEmpty() && !Directory.Exists(dir))
+        {
             Directory.CreateDirectory(dir);
+        }
 
         await DoThrottle(cancellationToken);
         try
@@ -103,7 +113,9 @@ public class ThrottledWebClient
                 retries);
 
             if (bytes == null)
+            {
                 throw new Exception($"Download returned empty result: {url}");
+            }
 
             await File.WriteAllBytesAsync(path, bytes, cancellationToken);
         }
@@ -149,8 +161,24 @@ public class ThrottledWebClient
     {
         FailIfBadUrl(url);
         await DoThrottle(cancellationToken);
-        GenLog.Debug($"GETing {url}");
-        return await Client.GetAsync(url, cancellationToken);
+        while (true)
+        {
+            GenLog.Debug($"GETing {url}");
+            var response = await Client.GetAsync(url, cancellationToken);
+            if (response.StatusCode != HttpStatusCode.Found || !_followRedirects)
+            {
+                return response;
+            }
+
+            var redirectUrl = response.Headers.Location?.ToString();
+            if (redirectUrl.IsEmpty())
+            {
+                throw new RemoteAccessException($"No redirect URL found for {url}");
+            }
+
+            GenLog.Info($"Following redirect to {redirectUrl}");
+            url = redirectUrl;
+        }
     }
 
     public static bool IsValidUrl(string url)
@@ -169,7 +197,9 @@ public class ThrottledWebClient
     private static void FailIfBadUrl(string url)
     {
         if (!IsValidUrl(url))
+        {
             throw new InvalidAssumptionException($"Invalid URL: {url}");
+        }
     }
 
     private async Task DoThrottle(CancellationToken cancellationToken)
