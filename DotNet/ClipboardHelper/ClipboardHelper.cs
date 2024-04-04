@@ -74,7 +74,7 @@ public static class ClipboardHelper
             }
             catch (Exception e)
             {
-                GenLog.Error($"Ignoring clipboard error: {e.Message}");
+                GenLog.Debug($"Ignoring clipboard error: {e.Message}");
                 await Task.Delay(100, cancellationToken);
             }
         }

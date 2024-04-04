@@ -24,14 +24,18 @@ public static class Retry
 
     {
         if (numRetries < 0)
+        {
             numRetries = 0;
+        }
 
         while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
         {
             try
             {
                 if (!introMessage.IsEmpty())
+                {
                     GenLog.Info(introMessage);
+                }
 
                 await action();
                 return;
