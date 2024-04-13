@@ -2,52 +2,58 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace WPFUtil
+namespace WPFUtil;
+
+public class SafeObservable<T> : PropertyContainerBase
 {
-    public class SafeObservable<T> : PropertyContainerBase
+    public SafeObservable(T defaultValue)
     {
-        private T _value;
+        _value = defaultValue;
+    }
 
-        private Action<T>? _onChange;
+    public T Value
+    {
+        get => _value;
 
-        private Func<T, Task>? _onChangeAsync;
-
-        private Action<Exception>? _errorHandler;
-
-        public SafeObservable(T defaultValue)
+        set
         {
-            _value = defaultValue;
-        }
-
-        public SafeObservable<T> WithOnChangeHandler(Action<T> onChange)
-        {
-            _onChange = onChange;
-            return this;
-        }
-
-        public SafeObservable<T> WithOnChangeHandlerAsync(
-            Func<T, Task> onChange, Action<Exception> errorHandler)
-        {
-            _onChangeAsync = onChange;
-            _errorHandler = errorHandler;
-            return this;
-        }
-
-        public T Value
-        {
-            get => _value;
-
-            set
+            if (EqualityComparer<T>.Default.Equals(_value, value))
             {
-                if (EqualityComparer<T>.Default.Equals(_value, value))
-                    return;
-
-                _value = value;
-                _onChange?.Invoke(_value);
-                _onChangeAsync?.Invoke(_value).FireAndForget(_errorHandler!);
-                OnPropertyChanged();
+                return;
             }
-        }
 
+            _value = value;
+            _onChange?.Invoke(_value);
+            _onChangeAsync?.Invoke(_value).FireAndForget(_errorHandler!);
+            OnPropertyChanged();
+        }
+    }
+
+    private T _value;
+
+    private Action<T>? _onChange;
+
+    private Func<T, Task>? _onChangeAsync;
+
+    private Action<Exception>? _errorHandler;
+
+    public SafeObservable<T> WithOnChangeHandler(Action<T> onChange)
+    {
+        _onChange = onChange;
+        return this;
+    }
+
+    public SafeObservable<T> WithOnChangeHandlerAsync(
+        Func<T, Task> onChange,
+        Action<Exception> errorHandler)
+    {
+        _onChangeAsync = onChange;
+        _errorHandler = errorHandler;
+        return this;
+    }
+
+    public override string? ToString()
+    {
+        return Value?.ToString();
     }
 }
