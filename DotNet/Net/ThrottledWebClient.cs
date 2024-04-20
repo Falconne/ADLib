@@ -28,6 +28,7 @@ public class ThrottledWebClient
 
     public readonly HttpClient Client;
 
+    // TODO: Make readonly
     public int MinDelayMilliseconds;
 
     private readonly CookieContainer _cookies = new();
@@ -129,32 +130,56 @@ public class ThrottledWebClient
     public async Task<bool> TryDownloadFileAsync(
         string url,
         string path,
-        int retries = 3,
+        int numRetries = 3,
+        int delay = 3000,
+        Func<Exception, bool>? shouldAbortEarly = null,
         CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
-        await DoThrottle(cancellationToken);
-        try
+        if (numRetries < 0)
         {
-            await Retry.OnExceptionAsync(
-                async () =>
-                {
-                    var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
-                    await File.WriteAllBytesAsync(path, bytes, cancellationToken);
-                },
-                $"Attempt download {url} to {path}",
-                cancellationToken,
-                retries);
+            numRetries = 0;
+        }
 
-            GenLog.Info("Success");
-            return true;
-        }
-        catch (Exception e)
+        await DoThrottle(cancellationToken);
+        while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
         {
-            GenLog.Info($"Failed: {e.Message}");
-            File.Delete(path);
-            return false;
+            try
+            {
+                GenLog.Info($"Attempt download {url} to {path}");
+                var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
+                await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+                GenLog.Info("Success");
+                return true;
+            }
+            catch (Exception e)
+            {
+                GenLog.Info($"Failed: {e.GetType()}: {e.Message}");
+                File.Delete(path);
+                if (shouldAbortEarly?.Invoke(e) == true)
+                {
+                    GenLog.Info("Aborting early on this type of exception");
+                    return false;
+                }
+
+                if (numRetries == 0)
+                {
+                    GenLog.Error("No more retries left");
+                    return false;
+                }
+
+                GenLog.Info($"Retries remaining: {numRetries}");
+                await Task.Delay(delay, cancellationToken);
+            }
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        return false;
+    }
+
+    public bool AbortOnForbiddenHandler(Exception e)
+    {
+        return e is HttpRequestException hre && hre.Message.Contains("403");
     }
 
     public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken cancellationToken = default)
