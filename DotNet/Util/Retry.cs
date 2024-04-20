@@ -42,7 +42,9 @@ public static class Retry
             }
             catch (FatalException e)
             {
-                GenLog.Error($"Aborting due to fatal exception: {e?.InnerException?.Message}");
+                GenLog.Error(
+                    $"Aborting due to fatal exception: {e?.InnerException?.GetType()}: {e?.InnerException?.Message}");
+
                 throw;
             }
             catch (Exception e)
@@ -53,7 +55,7 @@ public static class Retry
                     throw;
                 }
 
-                GenLog.Warning("Caught exception during retry-able operation:");
+                GenLog.Warning($"Caught exception during retry-able operation: {e.GetType()}");
                 GenLog.Warning(e.Message);
                 if (numRetries == 0)
                 {
