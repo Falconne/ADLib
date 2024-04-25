@@ -229,6 +229,32 @@ public static class FileSystem
         return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
     }
 
+    public static void MoveDirectoryContents(string sourceDir, string targetDir)
+    {
+        GenLog.Info($"Moving contents of {sourceDir} to {targetDir}");
+        if (!Directory.Exists(targetDir))
+        {
+            Directory.CreateDirectory(targetDir);
+        }
+
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
+            File.Move(file, targetFile);
+        }
+
+        foreach (var directory in Directory.GetDirectories(sourceDir))
+        {
+            var targetDirectory = Path.Combine(targetDir, Path.GetFileName(directory));
+            MoveDirectory(directory, targetDirectory);
+        }
+    }
+
+    public static Task MoveDirectoryContentsAsync(string sourceDir, string targetDir)
+    {
+        return Task.Run(() => MoveDirectoryContents(sourceDir, targetDir));
+    }
+
     // Removes illegal chars from filename
     public static string GetCleanFilename(string path, bool asciiOnly = false)
     {
@@ -402,6 +428,28 @@ public static class FileSystem
         }
 
         return path;
+    }
+
+    private static void MoveDirectory(string sourceDir, string targetDir)
+    {
+        if (!Directory.Exists(targetDir))
+        {
+            Directory.CreateDirectory(targetDir);
+        }
+
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
+            File.Move(file, targetFile);
+        }
+
+        foreach (var directory in Directory.GetDirectories(sourceDir))
+        {
+            var targetDirectory = Path.Combine(targetDir, Path.GetFileName(directory));
+            MoveDirectory(directory, targetDirectory);
+        }
+
+        Directory.Delete(sourceDir);
     }
 
     private static async Task EnsurePathGoneAsync(string path)
