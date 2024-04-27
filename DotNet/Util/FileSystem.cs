@@ -7,6 +7,15 @@ using SearchOption = System.IO.SearchOption;
 
 namespace ADLib.Util;
 
+public enum OverWriteMode
+{
+    Throw,
+
+    Overwrite,
+
+    Skip
+}
+
 public static class FileSystem
 {
     public static void CreateDirectory(string path)
@@ -229,7 +238,7 @@ public static class FileSystem
         return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
     }
 
-    public static void MoveDirectoryContents(string sourceDir, string targetDir)
+    public static void MoveDirectoryContents(string sourceDir, string targetDir, OverWriteMode overWriteMode)
     {
         GenLog.Info($"Moving contents of {sourceDir} to {targetDir}");
         if (!Directory.Exists(targetDir))
@@ -246,13 +255,16 @@ public static class FileSystem
         foreach (var directory in Directory.GetDirectories(sourceDir))
         {
             var targetDirectory = Path.Combine(targetDir, Path.GetFileName(directory));
-            MoveDirectory(directory, targetDirectory);
+            MoveDirectory(directory, targetDirectory, overWriteMode);
         }
     }
 
-    public static Task MoveDirectoryContentsAsync(string sourceDir, string targetDir)
+    public static Task MoveDirectoryContentsAsync(
+        string sourceDir,
+        string targetDir,
+        OverWriteMode overWriteMode)
     {
-        return Task.Run(() => MoveDirectoryContents(sourceDir, targetDir));
+        return Task.Run(() => MoveDirectoryContents(sourceDir, targetDir, overWriteMode));
     }
 
     // Removes illegal chars from filename
@@ -430,7 +442,10 @@ public static class FileSystem
         return path;
     }
 
-    private static void MoveDirectory(string sourceDir, string targetDir)
+    private static void MoveDirectory(
+        string sourceDir,
+        string targetDir,
+        OverWriteMode overWriteMode)
     {
         if (!Directory.Exists(targetDir))
         {
@@ -440,13 +455,31 @@ public static class FileSystem
         foreach (var file in Directory.GetFiles(sourceDir))
         {
             var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
+            if (File.Exists(targetFile))
+            {
+                switch (overWriteMode)
+                {
+                    case OverWriteMode.Overwrite:
+                        File.Delete(targetFile);
+                        break;
+
+                    case OverWriteMode.Skip:
+                        GenLog.Info($"Skipping existing file: {targetFile}");
+                        File.Delete(file);
+                        continue;
+
+                    case OverWriteMode.Throw:
+                        throw new InvalidOperationException($"File already exists: {targetFile}");
+                }
+            }
+
             File.Move(file, targetFile);
         }
 
         foreach (var directory in Directory.GetDirectories(sourceDir))
         {
             var targetDirectory = Path.Combine(targetDir, Path.GetFileName(directory));
-            MoveDirectory(directory, targetDirectory);
+            MoveDirectory(directory, targetDirectory, overWriteMode);
         }
 
         Directory.Delete(sourceDir);
