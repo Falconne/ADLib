@@ -13,7 +13,9 @@ public enum OverwriteMode
 
     Overwrite,
 
-    SkipIfSameSize
+    SkipIfSameSize,
+
+    Rename
 }
 
 public static class FileSystem
@@ -233,6 +235,48 @@ public static class FileSystem
         return dest;
     }
 
+    public static string MoveFileToDir(string file, string targetDir, OverwriteMode overwriteMode)
+    {
+        if (!File.Exists(file))
+        {
+            throw new FileNotFoundException($"Cannot move non-existent file: {file}");
+        }
+
+        CreateDirectory(targetDir);
+        var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
+        if (File.Exists(targetFile))
+        {
+            switch (overwriteMode)
+            {
+                case OverwriteMode.Overwrite:
+                    Delete(targetFile);
+                    break;
+
+                case OverwriteMode.SkipIfSameSize:
+                    if (new FileInfo(file).Length != new FileInfo(targetFile).Length)
+                    {
+                        GenLog.Info("Overwriting existing file that's different size");
+                        Delete(targetFile);
+                        break;
+                    }
+
+                    GenLog.Info($"Skipping existing file: {targetFile}");
+                    Delete(file);
+                    return targetFile;
+
+                case OverwriteMode.Rename:
+                    targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
+                    break;
+
+                case OverwriteMode.Throw:
+                    throw new InvalidOperationException($"File already exists: {targetFile}");
+            }
+        }
+
+        Retry.OnException(() => File.Move(file, targetFile), $"Moving '{file}' to dir '{targetDir}'");
+        return targetFile;
+    }
+
     public static async Task<string> MoveFileToDirAsync(string file, string dir, bool makeUnique = false)
     {
         return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
@@ -248,33 +292,7 @@ public static class FileSystem
 
         foreach (var file in Directory.GetFiles(sourceDir))
         {
-            var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
-            if (File.Exists(targetFile))
-            {
-                switch (overwriteMode)
-                {
-                    case OverwriteMode.Overwrite:
-                        File.Delete(targetFile);
-                        break;
-
-                    case OverwriteMode.SkipIfSameSize:
-                        if (new FileInfo(file).Length != new FileInfo(targetFile).Length)
-                        {
-                            GenLog.Info("Overwriting existing file that's different size");
-                            File.Delete(targetFile);
-                            break;
-                        }
-
-                        GenLog.Info($"Skipping existing file: {targetFile}");
-                        File.Delete(file);
-                        continue;
-
-                    case OverwriteMode.Throw:
-                        throw new InvalidOperationException($"File already exists: {targetFile}");
-                }
-            }
-
-            File.Move(file, targetFile);
+            MoveFileToDir(file, targetDir, overwriteMode);
         }
 
         foreach (var subDirectory in Directory.GetDirectories(sourceDir))
