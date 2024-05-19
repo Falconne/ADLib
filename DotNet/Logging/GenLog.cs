@@ -34,7 +34,9 @@ public static class GenLog
     private static void WriteToAllSinks(string message, LogMessageType type)
     {
         if (type == LogMessageType.Debug && !DebugEnabled)
+        {
             return;
+        }
 
         foreach (var sink in CustomSinks)
         {
@@ -56,7 +58,9 @@ public static class GenLog
     private static void WriteToFile(string logMessage)
     {
         if (string.IsNullOrWhiteSpace(LogFile))
+        {
             return;
+        }
 
         var retries = 4;
         while (true)
@@ -65,7 +69,9 @@ public static class GenLog
             {
                 var directory = Path.GetDirectoryName(LogFile);
                 if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                {
                     Directory.CreateDirectory(directory);
+                }
 
                 // Rollover existing log file if it's larger than MaxLogSize
                 if (File.Exists(LogFile))
@@ -78,7 +84,9 @@ public static class GenLog
                             $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}");
 
                         if (File.Exists(rolloverFile))
+                        {
                             File.Delete(rolloverFile);
+                        }
 
                         File.Move(LogFile, rolloverFile);
                     }
@@ -126,7 +134,9 @@ public static class GenLog
     private static void WriteErrorToTeamCity(string message)
     {
         if (!IsInTeamCity())
+        {
             return;
+        }
 
         using var writer = new TeamCityServiceMessages().CreateWriter(Console.WriteLine);
         writer.WriteError(message);
