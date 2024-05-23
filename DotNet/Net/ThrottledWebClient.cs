@@ -97,13 +97,15 @@ public class ThrottledWebClient
         CancellationToken cancellationToken = default,
         int retries = 3)
     {
-        var dir = Path.GetDirectoryName(path);
-        if (dir.IsNotEmpty() && !Directory.Exists(dir))
+        if (File.Exists(path))
         {
-            Directory.CreateDirectory(dir);
+            throw new InvalidOperationException($"File already exists: {path}");
         }
 
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         await DoThrottle(cancellationToken);
+        var tempPath = path + "_temp";
+        await FileSystem.DeleteAsync(tempPath);
         try
         {
             byte[]? bytes = null;
@@ -118,12 +120,12 @@ public class ThrottledWebClient
                 throw new Exception($"Download returned empty result: {url}");
             }
 
-            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+            await File.WriteAllBytesAsync(tempPath, bytes, cancellationToken);
+            File.Move(tempPath, path);
         }
-        catch (Exception)
+        finally
         {
-            File.Delete(path);
-            throw;
+            await FileSystem.DeleteAsync(tempPath);
         }
     }
 
