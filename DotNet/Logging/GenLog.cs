@@ -81,7 +81,7 @@ public static class GenLog
                     {
                         var rolloverFile = Path.Combine(
                             Path.GetDirectoryName(LogFile)!,
-                            $"{Path.GetFileNameWithoutExtension(LogFile)}.1.{Path.GetExtension(LogFile)}");
+                            $"{Path.GetFileNameWithoutExtension(LogFile)}.1{Path.GetExtension(LogFile)}");
 
                         if (File.Exists(rolloverFile))
                         {
