@@ -132,17 +132,11 @@ public class ThrottledWebClient
     public async Task<bool> TryDownloadFileAsync(
         string url,
         string path,
-        int numRetries = 3,
-        int delay = 3000,
         Func<Exception, bool>? shouldAbortEarly = null,
         CancellationToken cancellationToken = default)
     {
         FailIfBadUrl(url);
-        if (numRetries < 0)
-        {
-            numRetries = 0;
-        }
-
+        var numRetries = 3;
         await DoThrottle(cancellationToken);
         while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
         {
@@ -171,7 +165,7 @@ public class ThrottledWebClient
                 }
 
                 GenLog.Info($"Retries remaining: {numRetries}");
-                await Task.Delay(delay, cancellationToken);
+                await Task.Delay(3000, cancellationToken);
             }
         }
 
