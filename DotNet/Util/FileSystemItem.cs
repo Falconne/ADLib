@@ -2,7 +2,10 @@
 
 public class FileSystemItem
 {
-    public readonly string OriginalPath;
+    public FileSystemItem(string originalPath)
+    {
+        OriginalPath = originalPath;
+    }
 
     public string Filename => Path.GetFileName(OriginalPath);
 
@@ -12,10 +15,7 @@ public class FileSystemItem
 
     public string? Directory => Path.GetDirectoryName(OriginalPath);
 
-    public FileSystemItem(string originalPath)
-    {
-        OriginalPath = originalPath;
-    }
+    public readonly string OriginalPath;
 
     public string GetNonRootContainingDirectory()
     {
@@ -27,5 +27,13 @@ public class FileSystemItem
         return Directory;
     }
 
-    public bool IsInDirectory(string dir) => GetNonRootContainingDirectory().EqualsIgnoringCase(dir);
+    public bool IsInDirectory(string dir)
+    {
+        return GetNonRootContainingDirectory().EqualsIgnoringCase(dir);
+    }
+
+    public override string ToString()
+    {
+        return OriginalPath;
+    }
 }
