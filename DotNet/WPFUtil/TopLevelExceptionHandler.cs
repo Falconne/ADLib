@@ -36,7 +36,6 @@ public static class TopLevelExceptionHandler
 
     private static void ShowError(Exception e)
     {
-        GenLog.CustomSinks.Clear();
         GenLog.Error($"Unhandled Exception ({e.GetType()}): {e.Message}");
         if (e.StackTrace != null)
         {
