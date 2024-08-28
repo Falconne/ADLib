@@ -282,7 +282,11 @@ public static class FileSystem
         return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
     }
 
-    public static void MoveDirectoryContents(string sourceDir, string targetDir, OverwriteMode overwriteMode)
+    public static void MoveDirectoryContents(
+        string sourceDir,
+        string targetDir,
+        OverwriteMode overwriteMode,
+        bool deleteEmptySourceDir)
     {
         GenLog.Info($"Moving contents of {sourceDir} to {targetDir}");
         if (!Directory.Exists(targetDir))
@@ -298,18 +302,23 @@ public static class FileSystem
         foreach (var subDirectory in Directory.GetDirectories(sourceDir))
         {
             var targetDirectory = Path.Combine(targetDir, Path.GetFileName(subDirectory));
-            MoveDirectoryContents(subDirectory, targetDirectory, overwriteMode);
+            MoveDirectoryContents(subDirectory, targetDirectory, overwriteMode, deleteEmptySourceDir);
         }
 
-        Directory.Delete(sourceDir);
+        if (deleteEmptySourceDir)
+        {
+            Directory.Delete(sourceDir);
+        }
     }
 
     public static Task MoveDirectoryContentsAsync(
         string sourceDir,
         string targetDir,
-        OverwriteMode overwriteMode)
+        OverwriteMode overwriteMode,
+        bool deleteEmptySourceDir)
     {
-        return Task.Run(() => MoveDirectoryContents(sourceDir, targetDir, overwriteMode));
+        return Task.Run(
+            () => MoveDirectoryContents(sourceDir, targetDir, overwriteMode, deleteEmptySourceDir));
     }
 
     // Removes illegal chars from filename
