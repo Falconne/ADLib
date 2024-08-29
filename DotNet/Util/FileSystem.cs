@@ -3,6 +3,7 @@ using ADLib.Logging;
 using Microsoft.VisualBasic.FileIO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using SearchOption = System.IO.SearchOption;
 
 namespace ADLib.Util;
@@ -13,9 +14,7 @@ public enum OverwriteMode
 
     Overwrite,
 
-    SkipIfSameSize,
-
-    Rename
+    RenameIfDifferent
 }
 
 public static class FileSystem
@@ -246,31 +245,20 @@ public static class FileSystem
         var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
         if (File.Exists(targetFile))
         {
-            switch (overwriteMode)
+            if (overwriteMode == OverwriteMode.Throw)
             {
-                case OverwriteMode.Overwrite:
-                    Delete(targetFile);
-                    break;
-
-                case OverwriteMode.SkipIfSameSize:
-                    if (new FileInfo(file).Length != new FileInfo(targetFile).Length)
-                    {
-                        GenLog.Info("Overwriting existing file that's different size");
-                        Delete(targetFile);
-                        break;
-                    }
-
-                    GenLog.Info($"Skipping existing file: {targetFile}");
-                    Delete(file);
-                    return targetFile;
-
-                case OverwriteMode.Rename:
-                    targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
-                    break;
-
-                case OverwriteMode.Throw:
-                    throw new InvalidOperationException($"File already exists: {targetFile}");
+                throw new InvalidOperationException($"File already exists: {targetFile}");
             }
+
+            if (overwriteMode == OverwriteMode.RenameIfDifferent && !AreFilesTheSame(file, targetFile))
+            {
+                targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
+            }
+        }
+
+        if (File.Exists(targetFile))
+        {
+            DeleteFileToRecycleBin(targetFile);
         }
 
         Retry.OnException(() => File.Move(file, targetFile), $"Moving '{file}' to dir '{targetDir}'");
@@ -491,6 +479,24 @@ public static class FileSystem
         }
 
         return path;
+    }
+
+    private static bool AreFilesTheSame(string file1, string file2)
+    {
+        var file1Info = new FileInfo(file1);
+        var file2Info = new FileInfo(file2);
+        if (file1Info.Length != file2Info.Length)
+        {
+            return false;
+        }
+
+        using var md5 = MD5.Create();
+        using var stream1 = File.OpenRead(file1);
+        using var stream2 = File.OpenRead(file2);
+        var checksum1 = md5.ComputeHash(stream1);
+        var checksum2 = md5.ComputeHash(stream2);
+
+        return BitConverter.ToString(checksum1) == BitConverter.ToString(checksum2);
     }
 
     private static async Task EnsurePathGoneAsync(string path)
