@@ -245,14 +245,21 @@ public static class FileSystem
         var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
         if (File.Exists(targetFile))
         {
-            if (overwriteMode == OverwriteMode.Throw)
+            switch (overwriteMode)
             {
-                throw new InvalidOperationException($"File already exists: {targetFile}");
-            }
+                case OverwriteMode.Throw:
+                    throw new InvalidOperationException($"File already exists: {targetFile}");
 
-            if (overwriteMode == OverwriteMode.RenameIfDifferent && !AreFilesTheSame(file, targetFile))
-            {
-                targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
+                case OverwriteMode.RenameIfDifferent when AreFilesTheSame(file, targetFile):
+                    GenLog.Info($"Identical files {file} == {targetFile}, removing source");
+                    DeleteFileToRecycleBin(file);
+                    return targetFile;
+
+                case OverwriteMode.RenameIfDifferent:
+                    GenLog.Info($"File exists in both places and are different: {Path.GetFileName(file)}");
+                    targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
+                    GenLog.Info($"Renaming to {targetFile}");
+                    break;
             }
         }
 
