@@ -35,7 +35,7 @@ public class ThrottledWebClient
 
     private readonly bool _followRedirects;
 
-    private DateTime _lastCallTime = DateTime.MinValue;
+    private DateTimeOffset _lastCallTime = DateTimeOffset.MinValue;
 
     public async Task<HtmlDocument> GetPageDocOrFailAsync(
         string url,
@@ -225,13 +225,13 @@ public class ThrottledWebClient
 
     private async Task DoThrottle(CancellationToken cancellationToken)
     {
-        var timeSinceLastCall = (DateTime.Now - _lastCallTime).Milliseconds;
+        var timeSinceLastCall = (DateTimeOffset.UtcNow - _lastCallTime).Milliseconds;
         if (timeSinceLastCall < MinDelayMilliseconds)
         {
             var sleepTime = MinDelayMilliseconds - timeSinceLastCall;
             await Task.Delay(sleepTime, cancellationToken);
         }
 
-        _lastCallTime = DateTime.Now;
+        _lastCallTime = DateTimeOffset.UtcNow;
     }
 }
