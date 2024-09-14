@@ -14,7 +14,9 @@ public enum OverwriteMode
 
     Overwrite,
 
-    RenameIfDifferent
+    RenameIfDifferent,
+
+    Abort
 }
 
 public static class FileSystem
@@ -234,7 +236,18 @@ public static class FileSystem
         return dest;
     }
 
-    public static string MoveFileToDir(string file, string targetDir, OverwriteMode overwriteMode)
+    public static async Task<(bool success, string newFile)> MoveFileToDirAsync(
+        string file,
+        string targetDir,
+        OverwriteMode overwriteMode)
+    {
+        return await Task.Run(() => MoveFileToDir(file, targetDir, overwriteMode));
+    }
+
+    public static (bool success, string newFile) MoveFileToDir(
+        string file,
+        string targetDir,
+        OverwriteMode overwriteMode)
     {
         if (!File.Exists(file))
         {
@@ -253,13 +266,17 @@ public static class FileSystem
                 case OverwriteMode.RenameIfDifferent when AreFilesTheSame(file, targetFile):
                     GenLog.Info($"Identical files {file} == {targetFile}, removing source");
                     DeleteFileToRecycleBin(file);
-                    return targetFile;
+                    return (true, targetFile);
 
                 case OverwriteMode.RenameIfDifferent:
                     GenLog.Info($"File exists in both places and are different: {Path.GetFileName(file)}");
                     targetFile = GetUniquelyNamedFileIn(targetDir, Path.GetFileName(file));
                     GenLog.Info($"Renaming to {targetFile}");
                     break;
+
+                case OverwriteMode.Abort:
+                    GenLog.Info($"File exists, will abort: {targetFile}");
+                    return (false, "");
             }
         }
 
@@ -269,7 +286,7 @@ public static class FileSystem
         }
 
         Retry.OnException(() => File.Move(file, targetFile), $"Moving '{file}' to dir '{targetDir}'");
-        return targetFile;
+        return (true, targetFile);
     }
 
     public static async Task<string> MoveFileToDirAsync(string file, string dir, bool makeUnique = false)

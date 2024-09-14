@@ -7,7 +7,7 @@ public static class Extensions
 {
     public static bool ContainsIgnoringCase(this string? str, string compareTo)
     {
-        return str.ToLower().Contains(compareTo.ToLower());
+        return str != null && str.ToLower().Contains(compareTo.ToLower());
     }
 
     public static bool EqualsIgnoringCase(this string str, string compareTo)
