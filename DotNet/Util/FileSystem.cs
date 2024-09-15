@@ -1,7 +1,6 @@
 ﻿using ADLib.Exceptions;
 using ADLib.Logging;
 using Microsoft.VisualBasic.FileIO;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using SearchOption = System.IO.SearchOption;
@@ -187,17 +186,6 @@ public static class FileSystem
         }
     }
 
-    public static string GetWorkDir()
-    {
-        var filename = AppDomain.CurrentDomain.FriendlyName;
-        var basename = Path.GetFileNameWithoutExtension(filename);
-        var workDir = Path.Combine(GetZInternalsDir(), basename);
-        GenLog.Info($"Using work dir {workDir}");
-        CreateDirectory(workDir);
-
-        return workDir;
-    }
-
     public static string GetZInternalsDir()
     {
         return Path.Combine(Path.GetTempPath(), "ZInternals");
@@ -207,13 +195,6 @@ public static class FileSystem
     public static bool Exists(string path)
     {
         return File.Exists(path) || Directory.Exists(path);
-    }
-
-    public static void UseStandardLogFile()
-    {
-        var name = Process.GetCurrentProcess().ProcessName;
-        GenLog.LogFile = Path.Combine(GetZInternalsDir(), $"{name}.log");
-        GenLog.Info($"Writing logfile to {GenLog.LogFile}");
     }
 
     public static string MoveFileToDir(string file, string dir, bool makeUnique = false)
