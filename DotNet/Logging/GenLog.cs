@@ -1,4 +1,5 @@
 ﻿using JetBrains.TeamCity.ServiceMessages.Write.Special;
+using Serilog;
 
 namespace ADLib.Logging;
 
@@ -43,15 +44,36 @@ public static class GenLog
             sink(type, message);
         }
 
-        var logMessage = $"[{type.ToString().ToUpper()}]: {message}";
-        SetColorForLogType(type);
-        Console.WriteLine(logMessage);
-        Console.ResetColor();
+        switch (type)
+        {
+            case LogMessageType.Info:
+                Log.Information(message);
+                break;
+
+            case LogMessageType.Warning:
+                Log.Warning(message);
+                break;
+
+            case LogMessageType.Error:
+                Log.Error(message);
+                break;
+
+            case LogMessageType.Debug:
+                Log.Debug(message);
+                break;
+        }
+
         if (type == LogMessageType.Error)
         {
             WriteErrorToTeamCity(message);
         }
 
+        if (!IsInTeamCity())
+        {
+            return;
+        }
+
+        var logMessage = $"[{type.ToString().ToUpper()}]: {message}";
         WriteToFile(logMessage);
     }
 
