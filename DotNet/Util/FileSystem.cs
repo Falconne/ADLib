@@ -361,12 +361,9 @@ public static class FileSystem
             cancellationToken);
     }
 
-    public static async Task DeleteDirToRecycleBinAsync(string? path)
-    {
-        await DeleteDirToRecycleBinAsync(path, CancellationToken.None);
-    }
-
-    public static async Task DeleteDirToRecycleBinAsync(string? path, CancellationToken cancellationToken)
+    public static async Task DeleteDirToRecycleBinAsync(
+        string? path,
+        CancellationToken cancellationToken = default)
     {
         if (path.IsEmpty())
         {
