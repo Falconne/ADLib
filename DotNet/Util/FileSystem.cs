@@ -483,6 +483,11 @@ public static class FileSystem
         return path;
     }
 
+    public static async Task<bool> IsDirEmptyAsync(string dir)
+    {
+        return (await GetFilesUnderFastAsync(dir, true)).Length == 0;
+    }
+
     private static bool AreFilesTheSame(string file1, string file2)
     {
         var file1Info = new FileInfo(file1);
