@@ -135,23 +135,30 @@ public class ThrottledWebClient
         Func<Exception, bool>? shouldAbortEarly = null,
         CancellationToken cancellationToken = default)
     {
+        if (File.Exists(path))
+        {
+            throw new InvalidOperationException($"File already exists: {path}");
+        }
+
         FailIfBadUrl(url);
         var numRetries = 3;
-        await DoThrottle(cancellationToken);
+        var tempPath = path + "_temp";
+        await FileSystem.DeleteAsync(tempPath);
         while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
         {
+            await DoThrottle(cancellationToken);
             try
             {
                 GenLog.Info($"Attempt download {url} to {path}");
                 var bytes = await Client.GetByteArrayAsync(url, cancellationToken);
-                await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+                await File.WriteAllBytesAsync(tempPath, bytes, cancellationToken);
+                File.Move(tempPath, path);
                 GenLog.Info("Success");
                 return true;
             }
             catch (Exception e)
             {
                 GenLog.Info($"Failed: {e.GetType()}: {e.Message}");
-                File.Delete(path);
                 if (shouldAbortEarly?.Invoke(e) == true)
                 {
                     GenLog.Info("Aborting early on this type of exception");
@@ -167,13 +174,17 @@ public class ThrottledWebClient
                 GenLog.Info($"Retries remaining: {numRetries}");
                 await Task.Delay(3000, cancellationToken);
             }
+            finally
+            {
+                await FileSystem.DeleteAsync(tempPath);
+            }
         }
 
         cancellationToken.ThrowIfCancellationRequested();
         return false;
     }
 
-    public bool AbortOnForbiddenHandler(Exception e)
+    public static bool AbortOnForbiddenHandler(Exception e)
     {
         return e is HttpRequestException hre && hre.Message.Contains("403");
     }
