@@ -399,7 +399,15 @@ public static class FileSystem
             throw new InvalidAssumptionException($"Directory not found: {dir}");
         }
 
-        var parameters = new List<object> { "/c", "dir", "/b", dir };
+        var parameters = new List<object>
+        {
+            "/c",
+            "dir",
+            "/b",
+            "/a-d",
+            dir
+        };
+
         if (recurse)
         {
             parameters.Add("/s");
@@ -483,7 +491,7 @@ public static class FileSystem
         return path;
     }
 
-    public static async Task<bool> IsDirEmptyAsync(string dir)
+    public static async Task<bool> IsDirEmptyOfFilesAsync(string dir)
     {
         return (await GetFilesUnderFastAsync(dir, true)).Length == 0;
     }
