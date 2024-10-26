@@ -392,21 +392,14 @@ public static class FileSystem
     }
 
     // Note: Unicode filenames will be mangled, does not handle special chars like & in path
-    public static async Task<string[]> GetFilesUnderFastAsync(string dir, bool recurse = false)
+    public static async Task<string[]> GetEntriesUnderFastAsync(string dir, bool recurse = false)
     {
         if (!Directory.Exists(dir))
         {
             throw new InvalidAssumptionException($"Directory not found: {dir}");
         }
 
-        var parameters = new List<object>
-        {
-            "/c",
-            "dir",
-            "/b",
-            "/a-d",
-            dir
-        };
+        var parameters = new List<object> { "/c", "dir", "/b", dir };
 
         if (recurse)
         {
@@ -423,6 +416,7 @@ public static class FileSystem
         return allFilesRaw.Split(Environment.NewLine)
             .Where(f => f.IsNotEmpty())
             .Select(f => recurse ? f : Path.Combine(dir, f))
+            .Where(File.Exists)
             .ToArray();
     }
 
@@ -493,7 +487,7 @@ public static class FileSystem
 
     public static async Task<bool> IsDirEmptyOfFilesAsync(string dir)
     {
-        return (await GetFilesUnderFastAsync(dir, true)).Length == 0;
+        return (await GetEntriesUnderFastAsync(dir, true)).Length == 0;
     }
 
     private static bool AreFilesTheSame(string file1, string file2)
