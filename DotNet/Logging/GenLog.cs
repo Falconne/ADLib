@@ -5,8 +5,6 @@ namespace ADLib.Logging;
 
 public static class GenLog
 {
-    public static bool DebugEnabled = false;
-
     public static string? LogFile;
 
     public static readonly Action<string> Debug = s => WriteToAllSinks(s, LogMessageType.Debug);
@@ -32,11 +30,6 @@ public static class GenLog
 
     private static void WriteToAllSinks(string message, LogMessageType type)
     {
-        if (type == LogMessageType.Debug && !DebugEnabled)
-        {
-            return;
-        }
-
         foreach (var sink in CustomSinks)
         {
             sink(type, message);
