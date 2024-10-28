@@ -6,9 +6,11 @@ using System.Windows.Threading;
 
 namespace WPFUtil;
 
+public delegate void ExceptionHandler(Exception exception);
+
 public static class TopLevelExceptionHandler
 {
-    public static Action<Exception> Attach()
+    public static ExceptionHandler Attach()
     {
         AppDomain.CurrentDomain.UnhandledException += HandleGlobalException;
         Application.Current.DispatcherUnhandledException += HandleMainThreadException;

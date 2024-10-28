@@ -9,7 +9,7 @@ public abstract class InteractiveViewModelBase : PropertyContainerBase
     protected readonly SafeSynchronizedObject<bool> BusyIndicator = new(false);
 
     protected InteractiveViewModelBase(
-        Action<Exception>? exceptionHandler = null,
+        ExceptionHandler? exceptionHandler = null,
         SafeSynchronizedObject<bool>? shareBusyIndicator = null)
     {
         if (shareBusyIndicator != null)
@@ -20,7 +20,7 @@ public abstract class InteractiveViewModelBase : PropertyContainerBase
         ExceptionHandler = exceptionHandler ?? TopLevelExceptionHandler.Attach();
     }
 
-    protected Action<Exception> ExceptionHandler { get; }
+    protected ExceptionHandler ExceptionHandler { get; }
 
     protected bool CanExecuteAnyAction()
     {

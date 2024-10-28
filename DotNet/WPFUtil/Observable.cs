@@ -2,52 +2,51 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace WPFUtil
+namespace WPFUtil;
+
+public class Observable<T> : PropertyContainerBase
 {
-    public class Observable<T> : PropertyContainerBase
+    private ExceptionHandler? _errorHandler;
+
+    private Action<T?>? _onChange;
+
+    private Func<T?, Task>? _onChangeAsync;
+
+    private T? _value;
+
+    public Observable(T? defaultValue = default)
     {
-        private T? _value;
+        _value = defaultValue;
+    }
 
-        private Action<T?>? _onChange;
+    public T? Value
+    {
+        get => _value;
 
-        private Func<T?, Task>? _onChangeAsync;
-
-        private Action<Exception>? _errorHandler;
-
-
-        public Observable(T? defaultValue = default)
+        set
         {
-            _value = defaultValue;
-        }
-
-        public Observable<T> WithChangeHandler(Action<T?> onChange)
-        {
-            _onChange = onChange;
-            return this;
-        }
-
-        public Observable<T> WithChangeHandlerAsync(Func<T?, Task> onChangeAsync, Action<Exception> errorHandler)
-        {
-            _onChangeAsync = onChangeAsync;
-            _errorHandler = errorHandler;
-            return this;
-        }
-
-        public T? Value
-        {
-            get => _value;
-
-            set
+            if (EqualityComparer<T>.Default.Equals(_value, value))
             {
-                if (EqualityComparer<T>.Default.Equals(_value, value))
-                    return;
-
-                _value = value;
-                _onChange?.Invoke(_value);
-                _onChangeAsync?.Invoke(_value).FireAndForget(_errorHandler!);
-                OnPropertyChanged();
+                return;
             }
-        }
 
+            _value = value;
+            _onChange?.Invoke(_value);
+            _onChangeAsync?.Invoke(_value).FireAndForget(_errorHandler!);
+            OnPropertyChanged();
+        }
+    }
+
+    public Observable<T> WithChangeHandler(Action<T?> onChange)
+    {
+        _onChange = onChange;
+        return this;
+    }
+
+    public Observable<T> WithChangeHandlerAsync(Func<T?, Task> onChangeAsync, ExceptionHandler errorHandler)
+    {
+        _onChangeAsync = onChangeAsync;
+        _errorHandler = errorHandler;
+        return this;
     }
 }

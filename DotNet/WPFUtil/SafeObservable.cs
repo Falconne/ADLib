@@ -6,7 +6,7 @@ namespace WPFUtil;
 
 public class SafeObservable<T> : PropertyContainerBase where T : notnull
 {
-    private Action<Exception>? _errorHandler;
+    private ExceptionHandler? _errorHandler;
 
     private Action<T>? _onChange;
 
@@ -45,7 +45,7 @@ public class SafeObservable<T> : PropertyContainerBase where T : notnull
 
     public SafeObservable<T> WithOnChangeHandlerAsync(
         Func<T, Task> onChange,
-        Action<Exception> errorHandler)
+        ExceptionHandler errorHandler)
     {
         _onChangeAsync = onChange;
         _errorHandler = errorHandler;
