@@ -4,8 +4,16 @@ using System.Threading.Tasks;
 
 namespace WPFUtil;
 
-public class SafeObservable<T> : PropertyContainerBase
+public class SafeObservable<T> : PropertyContainerBase where T : notnull
 {
+    private Action<Exception>? _errorHandler;
+
+    private Action<T>? _onChange;
+
+    private Func<T, Task>? _onChangeAsync;
+
+    private T _value;
+
     public SafeObservable(T defaultValue)
     {
         _value = defaultValue;
@@ -28,14 +36,6 @@ public class SafeObservable<T> : PropertyContainerBase
             OnPropertyChanged();
         }
     }
-
-    private T _value;
-
-    private Action<T>? _onChange;
-
-    private Func<T, Task>? _onChangeAsync;
-
-    private Action<Exception>? _errorHandler;
 
     public SafeObservable<T> WithOnChangeHandler(Action<T> onChange)
     {

@@ -6,19 +6,21 @@ namespace WPFUtil;
 
 public abstract class InteractiveViewModelBase : PropertyContainerBase
 {
+    protected readonly SafeSynchronizedObject<bool> BusyIndicator = new(false);
+
     protected InteractiveViewModelBase(
-        Action<Exception> exceptionHandler,
+        Action<Exception>? exceptionHandler = null,
         SafeSynchronizedObject<bool>? shareBusyIndicator = null)
     {
         if (shareBusyIndicator != null)
+        {
             BusyIndicator = shareBusyIndicator;
+        }
 
-        ExceptionHandler = exceptionHandler;
+        ExceptionHandler = exceptionHandler ?? TopLevelExceptionHandler.Attach();
     }
 
     protected Action<Exception> ExceptionHandler { get; }
-
-    protected readonly SafeSynchronizedObject<bool> BusyIndicator = new(false);
 
     protected bool CanExecuteAnyAction()
     {
