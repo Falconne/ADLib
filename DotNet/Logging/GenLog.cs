@@ -15,6 +15,8 @@ public static class GenLog
 
     public static readonly Action<string> Error = s => WriteToAllSinks(s, LogMessageType.Error);
 
+    public static readonly Action<string> Fatal = s => WriteToAllSinks(s, LogMessageType.Fatal);
+
     public static List<Action<LogMessageType, string>> CustomSinks { get; } = new();
 
     public static void WriteProgress(string message)
@@ -47,6 +49,10 @@ public static class GenLog
 
             case LogMessageType.Error:
                 Log.Error(message);
+                break;
+
+            case LogMessageType.Fatal:
+                Log.Fatal(message);
                 break;
 
             case LogMessageType.Debug:
@@ -85,6 +91,8 @@ public enum LogMessageType
     Warning,
 
     Error,
+
+    Fatal,
 
     Debug
 }
