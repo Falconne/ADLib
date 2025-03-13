@@ -2,27 +2,28 @@
 
 public class ThrottledObject<T> where T : notnull
 {
-    public readonly int MinDelayMilliseconds;
+    public ThrottledObject(T o, int minDelayMilliseconds, CancellationToken cancellationToken)
+    {
+        _minDelayMilliseconds = minDelayMilliseconds;
+        _cancellationToken = cancellationToken;
+        _object = o ?? throw new ArgumentNullException(nameof(o));
+    }
 
-    private DateTime _lastCallTime = DateTime.MinValue;
+    private readonly int _minDelayMilliseconds;
 
     private readonly T _object;
 
     private readonly CancellationToken _cancellationToken;
 
-    public ThrottledObject(T o, int minDelayMilliseconds, CancellationToken cancellationToken)
-    {
-        MinDelayMilliseconds = minDelayMilliseconds;
-        _cancellationToken = cancellationToken;
-        _object = o ?? throw new ArgumentNullException(nameof(o));
-    }
+    private DateTime _lastCallTime = DateTime.MinValue;
 
     public async Task<T> GetAsync()
     {
+        // TODO: Use ThrottleService
         var timeSinceLastCall = (DateTime.Now - _lastCallTime).Milliseconds;
-        if (timeSinceLastCall < MinDelayMilliseconds)
+        if (timeSinceLastCall < _minDelayMilliseconds)
         {
-            var sleepTime = MinDelayMilliseconds - timeSinceLastCall;
+            var sleepTime = _minDelayMilliseconds - timeSinceLastCall;
             await Task.Delay(sleepTime, _cancellationToken);
         }
 
