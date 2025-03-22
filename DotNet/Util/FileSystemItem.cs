@@ -15,6 +15,8 @@ public class FileSystemItem
 
     public string? Directory => Path.GetDirectoryName(OriginalPath);
 
+    public long ModifiedTime => File.GetLastWriteTimeUtc(OriginalPath).Ticks;
+
     public readonly string OriginalPath;
 
     public string GetNonRootContainingDirectory()
