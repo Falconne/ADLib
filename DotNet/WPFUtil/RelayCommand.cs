@@ -1,35 +1,49 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Input;
 
-namespace WPFUtil
+namespace WPFUtil;
+
+public class RelayCommand : ICommand
 {
-    public class RelayCommand : ICommand
+    public RelayCommand(Action execute, Func<bool>? canExecute = null)
     {
-        private readonly Action _execute;
+        _executeWithNoParam = execute;
+        _canExecute = canExecute;
+    }
 
-        private readonly Func<bool>? _canExecute;
+    public RelayCommand(Action<object?> execute, Func<bool>? canExecute = null)
+    {
+        _executeWithParam = execute;
+        _canExecute = canExecute;
+    }
 
-        public event EventHandler? CanExecuteChanged
+    private readonly Action? _executeWithNoParam = null;
+
+    private readonly Action<object?>? _executeWithParam = null;
+
+    private readonly Func<bool>? _canExecute;
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add => CommandManager.RequerySuggested += value;
+
+        remove => CommandManager.RequerySuggested -= value;
+    }
+
+    public bool CanExecute(object? parameter)
+    {
+        return _canExecute?.Invoke() ?? true;
+    }
+
+    public void Execute(object? parameter)
+    {
+        if (_executeWithNoParam != null)
         {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
+            _executeWithNoParam();
         }
-
-        public RelayCommand(Action execute, Func<bool>? canExecute = null)
+        else if (_executeWithParam != null)
         {
-            _execute = execute;
-            _canExecute = canExecute;
-        }
-
-        public bool CanExecute(object? parameter)
-        {
-            return _canExecute?.Invoke() ?? true;
-        }
-
-        public void Execute(object? parameter)
-        {
-            _execute();
+            _executeWithParam(parameter);
         }
     }
 }
