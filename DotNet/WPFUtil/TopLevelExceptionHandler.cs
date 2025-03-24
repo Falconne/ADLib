@@ -19,6 +19,23 @@ public static class TopLevelExceptionHandler
         return ShowError;
     }
 
+    public static void ShowError(Exception e)
+    {
+        GenLog.Error($"Unhandled Exception ({e.GetType()}): {e.Message}");
+        if (e.StackTrace != null)
+        {
+            GenLog.Error(e.StackTrace);
+        }
+
+        MessageBox.Show(
+            $"{e.Message}",
+            $"Unhandled Exception ({e.GetType()})",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+
+        Environment.Exit(1);
+    }
+
     private static void HandleUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         e.SetObserved();
@@ -34,22 +51,5 @@ public static class TopLevelExceptionHandler
     private static void HandleGlobalException(object sender, UnhandledExceptionEventArgs args)
     {
         ShowError((Exception)args.ExceptionObject);
-    }
-
-    private static void ShowError(Exception e)
-    {
-        GenLog.Error($"Unhandled Exception ({e.GetType()}): {e.Message}");
-        if (e.StackTrace != null)
-        {
-            GenLog.Error(e.StackTrace);
-        }
-
-        MessageBox.Show(
-            $"{e.Message}",
-            $"Unhandled Exception ({e.GetType()})",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-
-        Environment.Exit(1);
     }
 }

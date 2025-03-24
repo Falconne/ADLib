@@ -8,7 +8,7 @@ public static class Extensions
 #pragma warning disable RECS0165 // Asynchronous methods should return a Task instead of void
     public static async void FireAndForget(
         this Task task,
-        ExceptionHandler errorHandler,
+        ExceptionHandler? errorHandler = null,
         Action? onActionCompleted = null)
 #pragma warning restore RECS0165 // Asynchronous methods should return a Task instead of void
     {
@@ -19,14 +19,21 @@ public static class Extensions
         }
         catch (Exception e)
         {
-            errorHandler(e);
+            if (errorHandler != null)
+            {
+                errorHandler(e);
+            }
+            else
+            {
+                TopLevelExceptionHandler.ShowError(e);
+            }
         }
     }
 
 #pragma warning disable RECS0165 // Asynchronous methods should return a Task instead of void
     public static async void FireAndForgetOnOtherThread(
         this Task task,
-        ExceptionHandler errorHandler,
+        ExceptionHandler? errorHandler = null,
         Action? onActionCompleted = null)
 #pragma warning restore RECS0165 // Asynchronous methods should return a Task instead of void
     {
@@ -37,7 +44,14 @@ public static class Extensions
         }
         catch (Exception e)
         {
-            errorHandler(e);
+            if (errorHandler != null)
+            {
+                errorHandler(e);
+            }
+            else
+            {
+                TopLevelExceptionHandler.ShowError(e);
+            }
         }
     }
 }
