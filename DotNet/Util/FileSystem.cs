@@ -204,6 +204,12 @@ public static class FileSystem
             throw new InvalidOperationException($"Cannot move non-existent file: {file}");
         }
 
+        var sourceDir = Path.GetDirectoryName(file);
+        if (sourceDir!.EqualsIgnoringCase(dir))
+        {
+            throw new InvalidOperationException($"Cannot move file to same directory: {file}");
+        }
+
         CreateDirectory(dir);
         var fileName = Path.GetFileName(file);
         var dest = makeUnique ? GetUniquelyNamedFileIn(dir, fileName) : Path.Combine(dir, fileName);
@@ -399,7 +405,7 @@ public static class FileSystem
             throw new InvalidAssumptionException($"Directory not found: {dir}");
         }
 
-        var parameters = new List<object> { "/c", "dir", "/b", dir };
+        var parameters = new List<object> {"/c", "dir", "/b", dir};
 
         if (recurse)
         {
