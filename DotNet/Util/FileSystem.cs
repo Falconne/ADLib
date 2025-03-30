@@ -397,7 +397,7 @@ public static class FileSystem
             cancellationToken);
     }
 
-    public static async Task<string[]> GetEntriesUnderFastAsync(string dir, bool recurse = false)
+    public static async Task<string[]> GetFileEntriesUnderFastAsync(string dir, bool recurse = false)
     {
         var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
         return allEntries
@@ -480,7 +480,7 @@ public static class FileSystem
 
     public static async Task<bool> IsDirEmptyOfFilesAsync(string dir)
     {
-        return (await GetEntriesUnderFastAsync(dir, true)).Length == 0;
+        return (await GetFileEntriesUnderFastAsync(dir, true)).Length == 0;
     }
 
     // Note: Unicode filenames will be mangled, does not handle special chars in path
