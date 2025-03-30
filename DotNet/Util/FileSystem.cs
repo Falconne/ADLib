@@ -391,32 +391,19 @@ public static class FileSystem
             cancellationToken);
     }
 
-    // Note: Unicode filenames will be mangled, does not handle special chars like & in path
     public static async Task<string[]> GetEntriesUnderFastAsync(string dir, bool recurse = false)
     {
-        if (!Directory.Exists(dir))
-        {
-            throw new InvalidAssumptionException($"Directory not found: {dir}");
-        }
-
-        var parameters = new List<object> { "/c", "dir", "/b", dir };
-
-        if (recurse)
-        {
-            parameters.Add("/s");
-        }
-
-        var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync("cmd.exe", parameters.ToArray());
-
-        if (allFilesRaw.IsEmpty())
-        {
-            return Array.Empty<string>();
-        }
-
-        return allFilesRaw.Split(Environment.NewLine)
-            .Where(f => f.IsNotEmpty())
-            .Select(f => recurse ? f : Path.Combine(dir, f))
+        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
+        return allEntries
             .Where(File.Exists)
+            .ToArray();
+    }
+
+    public static async Task<string[]> GetDirectoriesUnderFastAsync(string dir, bool recurse = false)
+    {
+        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
+        return allEntries
+            .Where(Directory.Exists)
             .ToArray();
     }
 
@@ -488,6 +475,43 @@ public static class FileSystem
     public static async Task<bool> IsDirEmptyOfFilesAsync(string dir)
     {
         return (await GetEntriesUnderFastAsync(dir, true)).Length == 0;
+    }
+
+    // Note: Unicode filenames will be mangled, does not handle special chars in path
+    private static async Task<IEnumerable<string>> GetAllFilesystemEntriesUnderFastAsync(
+        string dir,
+        bool recurse)
+    {
+        if (!Directory.Exists(dir))
+        {
+            throw new DirectoryNotFoundException($"Directory not found: {dir}");
+        }
+
+        if (dir.Contains(@"&"))
+        {
+            GenLog.Warning($"Directory contains & character, will revert to slow mode: {dir}");
+            // Use C# built-in method to return all filesystem entries under `dir`
+            return recurse
+                ? Directory.EnumerateFileSystemEntries(dir, "*", SearchOption.AllDirectories)
+                : Directory.EnumerateFileSystemEntries(dir);
+        }
+
+        var parameters = new List<object> { "/c", "dir", "/b", dir };
+
+        if (recurse)
+        {
+            parameters.Add("/s");
+        }
+
+        var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync("cmd.exe", parameters.ToArray());
+        if (allFilesRaw.IsEmpty())
+        {
+            return [];
+        }
+
+        return allFilesRaw.Split(Environment.NewLine)
+            .Where(f => f.IsNotEmpty())
+            .Select(f => recurse ? f : Path.Combine(dir, f));
     }
 
     private static bool AreFilesTheSame(string file1, string file2)
