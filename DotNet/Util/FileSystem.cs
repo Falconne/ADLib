@@ -495,7 +495,7 @@ public static class FileSystem
 
         if (dir.Contains(@"&"))
         {
-            GenLog.Warning($"Directory contains & character, will revert to slow mode: {dir}");
+            GenLog.Debug($"Directory contains '&' character, will revert to slow mode: {dir}");
             // Use C# built-in method to return all filesystem entries under `dir`
             return recurse
                 ? Directory.EnumerateFileSystemEntries(dir, "*", SearchOption.AllDirectories)
