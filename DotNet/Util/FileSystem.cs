@@ -407,6 +407,7 @@ public static class FileSystem
 
     public static async Task<string[]> GetDirectoriesUnderFastAsync(string dir, bool recurse = false)
     {
+        // TODO: Use dir output parsing to determine files vs directories
         var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
         return allEntries
             .Where(Directory.Exists)
