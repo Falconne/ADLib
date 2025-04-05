@@ -110,7 +110,8 @@ public static class FileSystem
             await File.WriteAllLinesAsync(path, content);
         }
 
-        await Retry.OnExceptionAsync(WriteToFile, $"Writing to {path}", 5);
+        GenLog.Debug($"Writing to {path}");
+        await Retry.OnExceptionAsync(WriteToFile, null, 5);
     }
 
     public static async Task WriteToFileSafelyAsync(string path, string content)
@@ -120,7 +121,8 @@ public static class FileSystem
             await File.WriteAllTextAsync(path, content);
         }
 
-        await Retry.OnExceptionAsync(WriteToFile, $"Writing to {path}", 5);
+        GenLog.Debug($"Writing to {path}");
+        await Retry.OnExceptionAsync(WriteToFile, null, 5);
     }
 
     public static void CopyWithoutMirror(string source, string destination)
