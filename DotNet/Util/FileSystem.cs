@@ -40,7 +40,7 @@ public static class FileSystem
 
     public static async Task InitialiseDirectoryAsync(string path)
     {
-        await DeleteAsync(path);
+        await DeleteAsync(path).ConfigureAwait(false);
         CreateDirectory(path);
     }
 
@@ -86,7 +86,7 @@ public static class FileSystem
     {
         if (Directory.Exists(path))
         {
-            await Task.Run(() => DeleteDirectory(path));
+            await Task.Run(() => DeleteDirectory(path)).ConfigureAwait(false);
             return;
         }
 
@@ -96,33 +96,34 @@ public static class FileSystem
         }
 
         await Retry.OnExceptionAsync(
-            async () => await Task.Run(() => File.Delete(path)),
-            $"Deleting {path}",
-            CancellationToken.None);
+                async () => await Task.Run(() => File.Delete(path)).ConfigureAwait(false),
+                $"Deleting {path}",
+                CancellationToken.None)
+            .ConfigureAwait(false);
 
-        await EnsurePathGoneAsync(path);
+        await EnsurePathGoneAsync(path).ConfigureAwait(false);
     }
 
     public static async Task WriteToFileSafelyAsync(string path, string[] content)
     {
         async Task WriteToFile()
         {
-            await File.WriteAllLinesAsync(path, content);
+            await File.WriteAllLinesAsync(path, content).ConfigureAwait(false);
         }
 
         GenLog.Debug($"Writing to {path}");
-        await Retry.OnExceptionAsync(WriteToFile, null, 5);
+        await Retry.OnExceptionAsync(WriteToFile, null, 5).ConfigureAwait(false);
     }
 
     public static async Task WriteToFileSafelyAsync(string path, string content)
     {
         async Task WriteToFile()
         {
-            await File.WriteAllTextAsync(path, content);
+            await File.WriteAllTextAsync(path, content).ConfigureAwait(false);
         }
 
         GenLog.Debug($"Writing to {path}");
-        await Retry.OnExceptionAsync(WriteToFile, null, 5);
+        await Retry.OnExceptionAsync(WriteToFile, null, 5).ConfigureAwait(false);
     }
 
     public static void CopyWithoutMirror(string source, string destination)
@@ -230,7 +231,7 @@ public static class FileSystem
         string targetDir,
         OverwriteMode overwriteMode)
     {
-        return await Task.Run(() => MoveFileToDir(file, targetDir, overwriteMode));
+        return await Task.Run(() => MoveFileToDir(file, targetDir, overwriteMode)).ConfigureAwait(false);
     }
 
     public static (bool success, string newFile) MoveFileToDir(
@@ -280,7 +281,7 @@ public static class FileSystem
 
     public static async Task<string> MoveFileToDirAsync(string file, string dir, bool makeUnique = false)
     {
-        return await Task.Run(() => MoveFileToDir(file, dir, makeUnique));
+        return await Task.Run(() => MoveFileToDir(file, dir, makeUnique)).ConfigureAwait(false);
     }
 
     public static void MoveDirectoryContents(
@@ -359,14 +360,16 @@ public static class FileSystem
         }
 
         await Retry.OnExceptionAsync(
-            async () => await Task.Run(
-                () => Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-                    path,
-                    UIOption.OnlyErrorDialogs,
-                    RecycleOption.SendToRecycleBin),
-                cancellationToken),
-            $"Deleting file to recycle bin: {path}",
-            cancellationToken);
+                async () => await Task.Run(
+                        () => Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                            path,
+                            UIOption.OnlyErrorDialogs,
+                            RecycleOption.SendToRecycleBin),
+                        cancellationToken)
+                    .ConfigureAwait(false),
+                $"Deleting file to recycle bin: {path}",
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public static async Task DeleteDirToRecycleBinAsync(
@@ -389,19 +392,21 @@ public static class FileSystem
         }
 
         await Retry.OnExceptionAsync(
-            async () => await Task.Run(
-                () => Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
-                    path,
-                    UIOption.OnlyErrorDialogs,
-                    RecycleOption.SendToRecycleBin),
-                cancellationToken),
-            $"Deleting directory to recycle bin: {path}",
-            cancellationToken);
+                async () => await Task.Run(
+                        () => Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
+                            path,
+                            UIOption.OnlyErrorDialogs,
+                            RecycleOption.SendToRecycleBin),
+                        cancellationToken)
+                    .ConfigureAwait(false),
+                $"Deleting directory to recycle bin: {path}",
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public static async Task<string[]> GetFileEntriesUnderFastAsync(string dir, bool recurse = false)
     {
-        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
+        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse).ConfigureAwait(false);
         return allEntries
             .Where(File.Exists)
             .ToArray();
@@ -410,7 +415,7 @@ public static class FileSystem
     public static async Task<string[]> GetDirectoriesUnderFastAsync(string dir, bool recurse = false)
     {
         // TODO: Use dir output parsing to determine files vs directories
-        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse);
+        var allEntries = await GetAllFilesystemEntriesUnderFastAsync(dir, recurse).ConfigureAwait(false);
         return allEntries
             .Where(Directory.Exists)
             .ToArray();
@@ -418,12 +423,12 @@ public static class FileSystem
 
     public static async Task<string[]> GetDirectoriesUnderAsync(string root)
     {
-        return await Task.Run(() => Directory.EnumerateDirectories(root).ToArray());
+        return await Task.Run(() => Directory.EnumerateDirectories(root).ToArray()).ConfigureAwait(false);
     }
 
     public static async Task<string[]> GetFilesUnderAsync(string root, bool recurse)
     {
-        return await GetFilesUnderAsync(root, recurse, CancellationToken.None);
+        return await GetFilesUnderAsync(root, recurse, CancellationToken.None).ConfigureAwait(false);
     }
 
     public static async Task<string[]> GetFilesUnderAsync(
@@ -438,11 +443,12 @@ public static class FileSystem
 
         GenLog.Debug($"Finding all files under {root}");
         return await Task.Run(
-            () => Directory.GetFiles(
-                root,
-                "*.*",
-                recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
-            stoppingToken);
+                () => Directory.GetFiles(
+                    root,
+                    "*.*",
+                    recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
+                stoppingToken)
+            .ConfigureAwait(false);
     }
 
     public static string GetUniquelyNamedFileIn(string dir, string baseFilename)
@@ -483,7 +489,7 @@ public static class FileSystem
 
     public static async Task<bool> IsDirEmptyOfFilesAsync(string dir)
     {
-        return (await GetFileEntriesUnderFastAsync(dir, true)).Length == 0;
+        return (await GetFileEntriesUnderFastAsync(dir, true).ConfigureAwait(false)).Length == 0;
     }
 
     // Note: Unicode filenames will be mangled, does not handle special chars in path
@@ -512,7 +518,9 @@ public static class FileSystem
             parameters.Add("/s");
         }
 
-        var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync("cmd.exe", parameters.ToArray());
+        var allFilesRaw = await Shell.RunSilentAndFailIfNotExitZeroAsync("cmd.exe", parameters.ToArray())
+            .ConfigureAwait(false);
+
         if (allFilesRaw.IsEmpty())
         {
             return [];
@@ -551,7 +559,7 @@ public static class FileSystem
                 return;
             }
 
-            await Task.Delay(10);
+            await Task.Delay(10).ConfigureAwait(false);
         }
 
         throw new IOException($"Unable to delete file {path}");

@@ -4,6 +4,7 @@
 # C# files
 [*.cs]
 max_line_length = 110
+configure_await_analysis_mode = library
 
 #### Core EditorConfig Options ####
 
