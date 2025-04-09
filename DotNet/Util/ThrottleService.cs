@@ -25,7 +25,7 @@ public class ThrottleService
             var jitter = _random.Next(2000, 4000);
             var delay = nextActionTime - now + TimeSpan.FromMilliseconds(jitter);
             using var _ = _statusLogger?.Invoke($"Delay for {delay.TotalSeconds} seconds");
-            await Task.Delay(delay);
+            await Task.Delay(delay).ConfigureAwait(false);
         }
 
         _lastActionTime = DateTimeOffset.UtcNow;

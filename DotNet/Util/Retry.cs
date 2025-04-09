@@ -11,7 +11,8 @@ public static class Retry
         int numRetries = 3,
         int delay = 3000)
     {
-        await OnExceptionAsync(action, introMessage, CancellationToken.None, numRetries, delay);
+        await OnExceptionAsync(action, introMessage, CancellationToken.None, numRetries, delay)
+            .ConfigureAwait(false);
     }
 
     // TODO reorder and use default cancellation token
@@ -37,7 +38,7 @@ public static class Retry
                     GenLog.Info(introMessage);
                 }
 
-                await action();
+                await action().ConfigureAwait(false);
                 return;
             }
             catch (FatalException e)
@@ -64,7 +65,7 @@ public static class Retry
                 }
 
                 GenLog.Info($"Retries remaining: {numRetries}");
-                await Task.Delay(delay, cancellationToken);
+                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                 delay *= 2;
             }
         }
