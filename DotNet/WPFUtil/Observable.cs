@@ -6,14 +6,6 @@ namespace WPFUtil;
 
 public class Observable<T> : PropertyContainerBase
 {
-    private ExceptionHandler? _errorHandler;
-
-    private Action<T?>? _onChange;
-
-    private Func<T?, Task>? _onChangeAsync;
-
-    private T? _value;
-
     public Observable(T? defaultValue = default)
     {
         _value = defaultValue;
@@ -37,16 +29,26 @@ public class Observable<T> : PropertyContainerBase
         }
     }
 
+    private ExceptionHandler? _errorHandler;
+
+    private Action<T?>? _onChange;
+
+    private Func<T?, Task>? _onChangeAsync;
+
+    private T? _value;
+
     public Observable<T> WithChangeHandler(Action<T?> onChange)
     {
         _onChange = onChange;
         return this;
     }
 
-    public Observable<T> WithChangeHandlerAsync(Func<T?, Task> onChangeAsync, ExceptionHandler errorHandler)
+    public Observable<T> WithChangeHandlerAsync(
+        Func<T?, Task> onChangeAsync,
+        ExceptionHandler? errorHandler = null)
     {
         _onChangeAsync = onChangeAsync;
-        _errorHandler = errorHandler;
+        _errorHandler = errorHandler ?? TopLevelExceptionHandler.ShowError;
         return this;
     }
 }
