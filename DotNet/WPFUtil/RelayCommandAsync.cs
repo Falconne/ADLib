@@ -46,7 +46,7 @@ public class RelayCommandAsync : ICommand
     {
         _busy.Set(true);
         _preFunction?.Invoke();
-        _execute().FireAndForget(_errorHandler, () => _busy.Set(false));
+        _execute().FireAndForgetOnOtherThread(_errorHandler, () => _busy.Set(false));
     }
 
     public RelayCommandAsync WithSharedBusyIndicator(SafeSynchronizedObject<bool> busy)
