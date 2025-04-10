@@ -8,6 +8,16 @@ namespace WPFUtil;
 
 public class RelayCommandAsync : ICommand
 {
+    public RelayCommandAsync(
+        Func<Task> action,
+        ExceptionHandler? errorHandler = null,
+        Func<bool>? canExecute = null)
+    {
+        _execute = action;
+        _errorHandler = errorHandler ?? TopLevelExceptionHandler.ShowError;
+        _canExecute = canExecute;
+    }
+
     private readonly Func<bool>? _canExecute;
 
     private readonly ExceptionHandler _errorHandler;
@@ -19,13 +29,6 @@ public class RelayCommandAsync : ICommand
     private Action? _postFunction;
 
     private Action? _preFunction;
-
-    public RelayCommandAsync(Func<Task> action, ExceptionHandler errorHandler, Func<bool>? canExecute = null)
-    {
-        _execute = action;
-        _errorHandler = errorHandler;
-        _canExecute = canExecute;
-    }
 
     public event EventHandler? CanExecuteChanged
     {
