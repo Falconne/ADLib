@@ -30,6 +30,8 @@ public class RelayCommandAsync : ICommand
 
     private Action? _preFunction;
 
+    private bool _continueOnAnyThread;
+
     public event EventHandler? CanExecuteChanged
     {
         add => CommandManager.RequerySuggested += value;
@@ -46,7 +48,14 @@ public class RelayCommandAsync : ICommand
     {
         _busy.Set(true);
         _preFunction?.Invoke();
-        _execute().FireAndForgetOnOtherThread(_errorHandler, () => _busy.Set(false));
+        if (_continueOnAnyThread)
+        {
+            _execute().FireAndForgetOnAnyThread(_errorHandler, () => _busy.Set(false));
+        }
+        else
+        {
+            _execute().FireAndForget(_errorHandler, () => _busy.Set(false));
+        }
     }
 
     public RelayCommandAsync WithSharedBusyIndicator(SafeSynchronizedObject<bool> busy)
@@ -64,6 +73,12 @@ public class RelayCommandAsync : ICommand
     public RelayCommandAsync WithPostFunction(Action? function)
     {
         _postFunction = function;
+        return this;
+    }
+
+    public RelayCommandAsync ContinueOnAnyThread()
+    {
+        _continueOnAnyThread = true;
         return this;
     }
 
