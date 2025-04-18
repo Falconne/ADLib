@@ -1,7 +1,6 @@
 ﻿using ADLib.Util;
 using System;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace WPFUtil;
@@ -26,11 +25,7 @@ public class RelayCommandAsync : ICommand
 
     private SafeSynchronizedObject<bool> _busy = new(false);
 
-    private Action? _postFunction;
-
     private Action? _preFunction;
-
-    private bool _continueOnAnyThread;
 
     public event EventHandler? CanExecuteChanged
     {
@@ -48,14 +43,7 @@ public class RelayCommandAsync : ICommand
     {
         _busy.Set(true);
         _preFunction?.Invoke();
-        if (_continueOnAnyThread)
-        {
-            _execute().FireAndForgetOnAnyThread(_errorHandler, () => _busy.Set(false));
-        }
-        else
-        {
-            _execute().FireAndForget(_errorHandler, () => _busy.Set(false));
-        }
+        _execute().FireAndForgetOnAnyThread(_errorHandler, () => _busy.Set(false));
     }
 
     public RelayCommandAsync WithSharedBusyIndicator(SafeSynchronizedObject<bool> busy)
@@ -68,24 +56,5 @@ public class RelayCommandAsync : ICommand
     {
         _preFunction = function;
         return this;
-    }
-
-    public RelayCommandAsync WithPostFunction(Action? function)
-    {
-        _postFunction = function;
-        return this;
-    }
-
-    public RelayCommandAsync ContinueOnAnyThread()
-    {
-        _continueOnAnyThread = true;
-        return this;
-    }
-
-    public void DoPostActions()
-    {
-        _busy.Set(false);
-        Application.Current.Dispatcher.Invoke(CommandManager.InvalidateRequerySuggested);
-        _postFunction?.Invoke();
     }
 }
