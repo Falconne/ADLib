@@ -493,7 +493,7 @@ public static class FileSystem
     }
 
     // Note: Unicode filenames will be mangled, does not handle special chars in path
-    private static async Task<IEnumerable<string>> GetAllFilesystemEntriesUnderFastAsync(
+    public static async Task<IEnumerable<string>> GetAllFilesystemEntriesUnderFastAsync(
         string dir,
         bool recurse)
     {
