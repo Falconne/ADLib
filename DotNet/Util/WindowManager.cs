@@ -8,10 +8,6 @@ using HWND = IntPtr;
 
 public static class WindowManager
 {
-    private const uint SWP_NOMOVE = 0x0002;
-
-    private const uint SWP_NOSIZE = 0x0001;
-
     public static bool BringWindowToFront(string title)
     {
         return BringWindowToFront(GetWindow(title));
