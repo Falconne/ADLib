@@ -22,7 +22,9 @@ public static class WindowsHost
     {
         GenLog.Info($"Opening: {dir}");
         if (!Directory.Exists(dir))
+        {
             throw new InvalidAssumptionException($"Directory not found: {dir}");
+        }
 
         Shell.RunAndDetach("explorer.exe", dir);
     }
