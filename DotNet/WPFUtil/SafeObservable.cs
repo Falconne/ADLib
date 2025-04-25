@@ -44,10 +44,10 @@ public class SafeObservable<T> : PropertyContainerBase where T : notnull
     }
 
     public SafeObservable<T> WithOnChangeHandlerAsync(
-        Func<T, Task> onChange,
+        Func<T, Task> onChangeAsync,
         ExceptionHandler? errorHandler = null)
     {
-        _onChangeAsync = onChange;
+        _onChangeAsync = onChangeAsync;
         _errorHandler = errorHandler ?? TopLevelExceptionHandler.ShowError;
         return this;
     }
