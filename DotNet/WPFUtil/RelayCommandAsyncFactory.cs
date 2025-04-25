@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 
 namespace WPFUtil;
 
-public class RelayCommandFactory
+public class RelayCommandAsyncFactory
 {
-    public Func<bool>? CanExecute { get; set; }
+    public Func<bool>? CanExecute { get; init; }
 
-    public ExceptionHandler ErrorHandler { get; set; } = TopLevelExceptionHandler.ShowError;
+    // ReSharper disable once MemberCanBePrivate.Global
+    public ExceptionHandler ErrorHandler { get; init; } = TopLevelExceptionHandler.ShowError;
 
-    public SafeSynchronizedObject<bool>? SharedBusyIndicator { get; set; }
+    public SafeSynchronizedObject<bool>? SharedBusyIndicator { get; init; }
 
     public RelayCommandAsync Create(Func<Task> action)
     {
