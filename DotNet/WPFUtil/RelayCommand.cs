@@ -3,17 +3,32 @@ using System.Windows.Input;
 
 namespace WPFUtil;
 
-public class RelayCommand : ICommand
+public class RelayCommandFactory
 {
-    public RelayCommand(Action execute, Func<bool>? canExecute = null)
+    public RelayCommandFactory(Func<bool> canExecute)
     {
-        _executeWithNoParam = execute;
         _canExecute = canExecute;
     }
 
-    public RelayCommand(Action<object?> execute, Func<bool>? canExecute = null)
+    private readonly Func<bool> _canExecute;
+
+    public RelayCommand Create(Action action)
     {
-        _executeWithParam = execute;
+        return new RelayCommand(action, _canExecute);
+    }
+}
+
+public class RelayCommand : ICommand
+{
+    public RelayCommand(Action action, Func<bool>? canExecute = null)
+    {
+        _executeWithNoParam = action;
+        _canExecute = canExecute;
+    }
+
+    public RelayCommand(Action<object?> action, Func<bool>? canExecute = null)
+    {
+        _executeWithParam = action;
         _canExecute = canExecute;
     }
 
@@ -41,9 +56,9 @@ public class RelayCommand : ICommand
         {
             _executeWithNoParam();
         }
-        else if (_executeWithParam != null)
+        else
         {
-            _executeWithParam(parameter);
+            _executeWithParam?.Invoke(parameter);
         }
     }
 }
