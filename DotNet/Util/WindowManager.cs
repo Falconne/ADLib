@@ -46,7 +46,7 @@ public static class WindowManager
     {
         if (handle == null)
         {
-            GenLog.Error("Table not found, cannot perform any action");
+            GenLog.Error("Window not found, cannot perform any action");
             return false;
         }
 
