@@ -46,7 +46,7 @@ public static class ClipboardHelper
         while (!cancellationToken.IsCancellationRequested)
         {
             var (sourceUrl, clipText, rawHtml) =
-                await GetCurrentContentSafely(cancellationToken).ConfigureAwait(false);
+                await GetCurrentTextContent(cancellationToken).ConfigureAwait(false);
 
             if (clipText != null && clipText != oldClipText)
             {
@@ -63,7 +63,7 @@ public static class ClipboardHelper
         }
     }
 
-    public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentContentSafely(
+    public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentTextContent(
         CancellationToken cancellationToken = default)
 
     {
@@ -71,7 +71,7 @@ public static class ClipboardHelper
         {
             try
             {
-                return await GetCurrentContent(cancellationToken).ConfigureAwait(false);
+                return await GetCurrentTextContentUnsafe(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -81,8 +81,9 @@ public static class ClipboardHelper
         }
     }
 
-    public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentContent(
-        CancellationToken cancellationToken = default)
+    private static async Task<(string? sourceUrl, string? clipText, string? rawHtml)>
+        GetCurrentTextContentUnsafe(
+            CancellationToken cancellationToken = default)
     {
         var clipText = await ClipboardService.GetTextAsync(cancellationToken).ConfigureAwait(false);
         string? sourceUrl = null;
