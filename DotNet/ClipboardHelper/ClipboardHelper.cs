@@ -19,7 +19,7 @@ public static class ClipboardHelper
         {
             try
             {
-                await ClipboardService.SetTextAsync(text ?? "");
+                await ClipboardService.SetTextAsync(text ?? "").ConfigureAwait(false);
                 return;
             }
             catch (COMException e)
@@ -32,7 +32,7 @@ public static class ClipboardHelper
                     throw;
                 }
 
-                await Task.Delay(100);
+                await Task.Delay(100).ConfigureAwait(false);
             }
         }
     }
@@ -45,12 +45,13 @@ public static class ClipboardHelper
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var (sourceUrl, clipText, rawHtml) = await GetCurrentContentSafely(cancellationToken);
+            var (sourceUrl, clipText, rawHtml) =
+                await GetCurrentContentSafely(cancellationToken).ConfigureAwait(false);
 
             if (clipText != null && clipText != oldClipText)
             {
                 GenLog.Info($"Caught new clipboard test: {clipText}");
-                await onTextChanged(sourceUrl, clipText, rawHtml);
+                await onTextChanged(sourceUrl, clipText, rawHtml).ConfigureAwait(false);
             }
 
             if (clipText != null)
@@ -58,7 +59,7 @@ public static class ClipboardHelper
                 oldClipText = clipText;
             }
 
-            await Task.Delay(100, cancellationToken);
+            await Task.Delay(100, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -70,12 +71,12 @@ public static class ClipboardHelper
         {
             try
             {
-                return await GetCurrentContent(cancellationToken);
+                return await GetCurrentContent(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 GenLog.Debug($"Ignoring clipboard error: {e.Message}");
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(100, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -83,7 +84,7 @@ public static class ClipboardHelper
     public static async Task<(string? sourceUrl, string? clipText, string? rawHtml)> GetCurrentContent(
         CancellationToken cancellationToken = default)
     {
-        var clipText = await ClipboardService.GetTextAsync(cancellationToken);
+        var clipText = await ClipboardService.GetTextAsync(cancellationToken).ConfigureAwait(false);
         string? sourceUrl = null;
         string? rawHtml = null;
         if (Clipboard.ContainsText(TextDataFormat.Html))
