@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using TextCopy;
 using Clipboard = System.Windows.Clipboard;
 
@@ -79,6 +80,28 @@ public static class ClipboardHelper
                 await Task.Delay(100, cancellationToken).ConfigureAwait(false);
             }
         }
+    }
+
+    public static async Task<BitmapSource?> GetCurrentImageContent(
+        CancellationToken cancellationToken = default)
+    {
+        while (true)
+        {
+            try
+            {
+                return GetClipboardImageUnsafe();
+            }
+            catch (Exception e)
+            {
+                GenLog.Debug($"Ignoring clipboard image error: {e.Message}");
+                await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private static BitmapSource? GetClipboardImageUnsafe()
+    {
+        return Clipboard.ContainsImage() ? Clipboard.GetImage() : null;
     }
 
     private static async Task<(string? sourceUrl, string? clipText, string? rawHtml)>
