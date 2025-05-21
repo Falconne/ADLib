@@ -6,6 +6,8 @@ using System.Windows.Media.Imaging;
 using TextCopy;
 using Clipboard = System.Windows.Clipboard;
 
+// ReSharper disable UseConfigureAwaitFalse
+
 namespace ClipboardHelper;
 
 public static class ClipboardHelper
@@ -20,7 +22,7 @@ public static class ClipboardHelper
         {
             try
             {
-                await ClipboardService.SetTextAsync(text ?? "").ConfigureAwait(false);
+                await ClipboardService.SetTextAsync(text ?? "");
                 return;
             }
             catch (COMException e)
@@ -33,7 +35,7 @@ public static class ClipboardHelper
                     throw;
                 }
 
-                await Task.Delay(100).ConfigureAwait(false);
+                await Task.Delay(100);
             }
         }
     }
@@ -47,12 +49,12 @@ public static class ClipboardHelper
         while (!cancellationToken.IsCancellationRequested)
         {
             var (sourceUrl, clipText, rawHtml) =
-                await GetCurrentTextContent(cancellationToken).ConfigureAwait(false);
+                await GetCurrentTextContent(cancellationToken);
 
             if (clipText != null && clipText != oldClipText)
             {
                 GenLog.Info($"Caught new clipboard test: {clipText}");
-                await onTextChanged(sourceUrl, clipText, rawHtml).ConfigureAwait(false);
+                await onTextChanged(sourceUrl, clipText, rawHtml);
             }
 
             if (clipText != null)
@@ -60,7 +62,7 @@ public static class ClipboardHelper
                 oldClipText = clipText;
             }
 
-            await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(100, cancellationToken);
         }
     }
 
@@ -72,12 +74,12 @@ public static class ClipboardHelper
         {
             try
             {
-                return await GetCurrentTextContentUnsafe(cancellationToken).ConfigureAwait(false);
+                return await GetCurrentTextContentUnsafe(cancellationToken);
             }
             catch (Exception e)
             {
                 GenLog.Debug($"Ignoring clipboard error: {e.Message}");
-                await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(100, cancellationToken);
             }
         }
     }
@@ -94,7 +96,7 @@ public static class ClipboardHelper
             catch (Exception e)
             {
                 GenLog.Debug($"Ignoring clipboard image error: {e.Message}");
-                await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(100, cancellationToken);
             }
         }
     }
@@ -108,7 +110,7 @@ public static class ClipboardHelper
         GetCurrentTextContentUnsafe(
             CancellationToken cancellationToken = default)
     {
-        var clipText = await ClipboardService.GetTextAsync(cancellationToken).ConfigureAwait(false);
+        var clipText = await ClipboardService.GetTextAsync(cancellationToken);
         string? sourceUrl = null;
         string? rawHtml = null;
         if (Clipboard.ContainsText(TextDataFormat.Html))
