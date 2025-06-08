@@ -15,4 +15,15 @@ public static class InteractionHelpers
                       MessageBoxImage.Question)
                   == MessageBoxResult.Yes);
     }
+
+    public static void ShowError(string message, string title = "Error")
+    {
+        Application.Current.Dispatcher.Invoke(
+            () => MessageBox.Show(
+                Application.Current.MainWindow!,
+                message,
+                title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error));
+    }
 }
