@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using ADLib.Util;
+using Microsoft.VisualBasic;
+using System.Windows;
 
 namespace WPFUtil;
 
@@ -25,5 +27,18 @@ public static class InteractionHelpers
                 title,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error));
+    }
+
+    public static string? GetInput(
+        string message,
+        string title = "Input Required",
+        string? defaultValue = null)
+    {
+        var name = Interaction.InputBox(
+            message,
+            title,
+            defaultValue ?? "");
+
+        return name.IsEmpty() ? null : name.Trim();
     }
 }
