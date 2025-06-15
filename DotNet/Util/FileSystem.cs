@@ -361,10 +361,16 @@ public static class FileSystem
 
         await Retry.OnExceptionAsync(
                 async () => await Task.Run(
-                        () => Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-                            path,
-                            UIOption.OnlyErrorDialogs,
-                            RecycleOption.SendToRecycleBin),
+                        () =>
+                        {
+                            if (File.Exists(path))
+                            {
+                                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                                    path,
+                                    UIOption.OnlyErrorDialogs,
+                                    RecycleOption.SendToRecycleBin);
+                            }
+                        },
                         cancellationToken)
                     .ConfigureAwait(false),
                 $"Deleting file to recycle bin: {path}",
