@@ -9,7 +9,7 @@ public static class Shell
 {
     public static int RunAndGetExitCode(string program, params object[] args)
     {
-        GenLog.Info($"{program} {string.Join(" ", args)}");
+        GenLog.Debug($"{program} {string.Join(" ", args)}");
         var command = Command.Run(program, args)
             .RedirectTo(Console.Out)
             .RedirectStandardErrorTo(Console.Error);
@@ -38,21 +38,21 @@ public static class Shell
 
         if (!string.IsNullOrWhiteSpace(stdout))
         {
-            GenLog.Info("=====================================stdout=====================================");
-            GenLog.Info(stdout);
+            GenLog.Debug("=====================================stdout=====================================");
+            GenLog.Debug(stdout);
         }
         else
         {
-            GenLog.Info("<no stdout>");
+            GenLog.Debug("<no stdout>");
         }
 
         if (!string.IsNullOrWhiteSpace(stderr))
         {
-            GenLog.Info("=====================================stderr=====================================");
-            GenLog.Info(stderr);
+            GenLog.Debug("=====================================stderr=====================================");
+            GenLog.Debug(stderr);
         }
 
-        GenLog.Info("================================================================================");
+        GenLog.Debug("================================================================================");
 
         return (exitCode, stdout, stderr);
     }
