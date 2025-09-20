@@ -56,7 +56,9 @@ public static class Retry
                     throw;
                 }
 
-                GenLog.Warning($"Caught exception during retry-able operation: {e.GetType()}");
+                GenLog.Warning(
+                    $"Caught exception during retry-able operation ({introMessage}): {e.GetType()}");
+
                 GenLog.Warning(e.Message);
                 if (numRetries == 0)
                 {
