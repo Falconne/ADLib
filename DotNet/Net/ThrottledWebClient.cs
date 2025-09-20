@@ -96,7 +96,8 @@ public class ThrottledWebClient
         string url,
         string path,
         CancellationToken cancellationToken = default,
-        int retries = 3)
+        int retries = 3,
+        int delay = 3000)
     {
         if (File.Exists(path))
         {
@@ -117,7 +118,8 @@ public class ThrottledWebClient
                     },
                     $"Downloading {url} to {path}",
                     cancellationToken,
-                    retries)
+                    retries,
+                    delay)
                 .ConfigureAwait(false);
 
             if (bytes == null)
