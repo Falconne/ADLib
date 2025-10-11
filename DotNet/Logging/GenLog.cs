@@ -5,8 +5,6 @@ namespace ADLib.Logging;
 
 public static class GenLog
 {
-    public static string? LogFile;
-
     public static readonly Action<string> Debug = s => WriteToAllSinks(s, LogMessageType.Debug);
 
     public static readonly Action<string> Info = s => WriteToAllSinks(s, LogMessageType.Info);
