@@ -140,7 +140,9 @@ public class ThrottledWebClient
         string url,
         string path,
         Func<Exception, bool>? shouldAbortEarly = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        int retries = 3,
+        int delay = 3000)
     {
         if (File.Exists(path))
         {
@@ -148,7 +150,6 @@ public class ThrottledWebClient
         }
 
         FailIfBadUrl(url);
-        var numRetries = 3;
         var tempPath = path + "_temp";
         await FileSystem.DeleteAsync(tempPath).ConfigureAwait(false);
         while (true)
@@ -179,14 +180,14 @@ public class ThrottledWebClient
                     return (false, e);
                 }
 
-                if (numRetries-- <= 0)
+                if (retries-- <= 0)
                 {
                     GenLog.Error("No more retries left");
                     return (false, e);
                 }
 
-                GenLog.Info($"Retries remaining: {numRetries}");
-                await Task.Delay(3000, cancellationToken).ConfigureAwait(false);
+                GenLog.Info($"Retries remaining: {retries}");
+                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
