@@ -136,7 +136,7 @@ public class ThrottledWebClient
         }
     }
 
-    public async Task<bool> TryDownloadFileAsync(
+    public async Task<(bool result, Exception? error)> TryDownloadFileAsync(
         string url,
         string path,
         Func<Exception, bool>? shouldAbortEarly = null,
@@ -151,9 +151,11 @@ public class ThrottledWebClient
         var numRetries = 3;
         var tempPath = path + "_temp";
         await FileSystem.DeleteAsync(tempPath).ConfigureAwait(false);
-        while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
+        while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             await DoThrottle(cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 GenLog.Info($"Attempt download {url} to {path}");
@@ -161,7 +163,12 @@ public class ThrottledWebClient
                 await File.WriteAllBytesAsync(tempPath, bytes, cancellationToken).ConfigureAwait(false);
                 File.Move(tempPath, path);
                 GenLog.Info("Success");
-                return true;
+                return (true, null);
+            }
+            catch (OperationCanceledException e)
+            {
+                GenLog.Warning("Cancel download on request");
+                return (false, e);
             }
             catch (Exception e)
             {
@@ -169,13 +176,13 @@ public class ThrottledWebClient
                 if (shouldAbortEarly?.Invoke(e) == true)
                 {
                     GenLog.Info("Aborting early on this type of exception");
-                    return false;
+                    return (false, e);
                 }
 
-                if (numRetries == 0)
+                if (numRetries-- <= 0)
                 {
                     GenLog.Error("No more retries left");
-                    return false;
+                    return (false, e);
                 }
 
                 GenLog.Info($"Retries remaining: {numRetries}");
@@ -186,9 +193,6 @@ public class ThrottledWebClient
                 await FileSystem.DeleteAsync(tempPath).ConfigureAwait(false);
             }
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
-        return false;
     }
 
     public static bool AbortOnForbiddenHandler(Exception e)
