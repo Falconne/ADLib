@@ -37,7 +37,7 @@ public class ThrottledWebClient
 
     private DateTimeOffset _lastCallTime = DateTimeOffset.MinValue;
 
-    public async Task<HtmlDocument> GetPageDocOrFailAsync(
+    public async Task<HtmlNode> GetPageDocNodeOrFailAsync(
         string url,
         CancellationToken cancellationToken = default)
     {
@@ -46,7 +46,7 @@ public class ThrottledWebClient
         var doc = new HtmlDocument();
         doc.LoadHtml(await GetPageContentOrFailAsync(url, cancellationToken).ConfigureAwait(false));
 
-        return doc;
+        return doc.DocumentNode;
     }
 
     public async Task<string> GetPageContentOrFailAsync(
