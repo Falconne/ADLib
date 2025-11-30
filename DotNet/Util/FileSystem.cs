@@ -319,8 +319,11 @@ public static class FileSystem
         OverwriteMode overwriteMode,
         bool deleteEmptySourceDir)
     {
-        return Task.Run(
-            () => MoveDirectoryContents(sourceDir, targetDir, overwriteMode, deleteEmptySourceDir));
+        return Task.Run(() => MoveDirectoryContents(
+            sourceDir,
+            targetDir,
+            overwriteMode,
+            deleteEmptySourceDir));
     }
 
     // Removes illegal chars from filename
@@ -338,6 +341,11 @@ public static class FileSystem
     public static void DeleteFileToRecycleBin(string? path)
     {
         DeleteFileToRecycleBinAsync(path, CancellationToken.None).Wait();
+    }
+
+    public static void DeleteDirToRecycleBin(string? path)
+    {
+        DeleteDirToRecycleBinAsync(path, CancellationToken.None).Wait();
     }
 
     public static async Task DeleteFileToRecycleBinAsync(
