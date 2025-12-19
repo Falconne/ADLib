@@ -11,6 +11,9 @@ public class Observable<T> : PropertyContainerBase
         _value = defaultValue;
     }
 
+    // Allow easy assignment from the underlying value type in tests and initializers
+    public static implicit operator Observable<T>(T? value) => new Observable<T>(value);
+
     public T? Value
     {
         get => _value;
