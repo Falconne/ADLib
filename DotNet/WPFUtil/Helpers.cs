@@ -6,7 +6,7 @@ namespace WPFUtil;
 
 public static class WPFHelpers
 {
-    public static async Task InvokeInUIThreadAsync(System.Func<Task> action)
+    public static async Task InvokeInUIThreadAsync(Func<Task> action)
     {
         await Application.Current.Dispatcher.InvokeAsync(async () => await action().ConfigureAwait(false));
     }
