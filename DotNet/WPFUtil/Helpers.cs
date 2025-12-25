@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace WPFUtil;
 
@@ -14,5 +15,10 @@ public static class WPFHelpers
     public static void InvokeInUIThread(Action action)
     {
         Application.Current.Dispatcher.Invoke(action);
+    }
+
+    public static void RefreshCommandsState()
+    {
+        InvokeInUIThread(CommandManager.InvalidateRequerySuggested);
     }
 }
