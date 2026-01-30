@@ -73,7 +73,7 @@ public static class Retry
         }
     }
 
-    public static void OnException(Action action, string introMessage, int numRetries = 3, int delay = 3000)
+    public static void OnException(Action action, string? introMessage, int numRetries = 3, int delay = 3000)
 
     {
         OnExceptionAsync(() => Task.Run(action), introMessage, CancellationToken.None, numRetries, delay)

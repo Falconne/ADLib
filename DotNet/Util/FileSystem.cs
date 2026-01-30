@@ -66,7 +66,7 @@ public static class FileSystem
         File.Copy(src, dst, force);
     }
 
-    public static void Delete(string path)
+    public static void Delete(string path, bool quiet = false)
     {
         if (Directory.Exists(path))
         {
@@ -79,10 +79,10 @@ public static class FileSystem
             return;
         }
 
-        Retry.OnException(() => File.Delete(path), $"Deleting {path}");
+        Retry.OnException(() => File.Delete(path), quiet ? null : $"Deleting {path}");
     }
 
-    public static async Task DeleteAsync(string path)
+    public static async Task DeleteAsync(string path, bool quiet = false)
     {
         if (Directory.Exists(path))
         {
@@ -97,7 +97,7 @@ public static class FileSystem
 
         await Retry.OnExceptionAsync(
                 async () => await Task.Run(() => File.Delete(path)).ConfigureAwait(false),
-                $"Deleting {path}",
+                quiet ? null : $"Deleting {path}",
                 CancellationToken.None)
             .ConfigureAwait(false);
 
