@@ -21,7 +21,7 @@ public static class TopLevelExceptionHandler
 
     public static void ShowError(Exception e)
     {
-        GenLog.Error($"Unhandled Exception ({e.GetType()}): {e.Message}");
+        GenLog.Error($"Unhandled Exception ({e.GetType()}): {e}");
         if (e.StackTrace != null)
         {
             GenLog.Error(e.StackTrace);
