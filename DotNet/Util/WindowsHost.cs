@@ -33,4 +33,15 @@ public static class WindowsHost
     {
         return Process.GetProcessesByName(name).Length > 0;
     }
+
+    public static void KillApp(string name)
+    {
+        var result = Process.GetProcessesByName(name);
+        var running = result.FirstOrDefault();
+        if (running != null)
+        {
+            GenLog.Info($"Killing app ${name}");
+            running.Kill();
+        }
+    }
 }
