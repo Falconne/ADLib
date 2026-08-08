@@ -73,6 +73,23 @@ public static class Shell
         return (command.Result.ExitCode, stdout, stderr);
     }
 
+    public static async Task<(int exitCode, string stdout, string stderr)> RunSilent(
+        string program,
+        CancellationToken cancellationToken,
+        params object[] args)
+    {
+        var commandPrinted = GetCommandForPrinting(program, args);
+        GenLog.Debug(commandPrinted);
+
+        var command = Command.Run(program, args, options => options.CancellationToken(cancellationToken));
+
+        await command.Task.ConfigureAwait(false);
+        var stdout = await command.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
+        var stderr = await command.StandardError.ReadToEndAsync().ConfigureAwait(false);
+
+        return (command.Result.ExitCode, stdout, stderr);
+    }
+
     public static string RunAndFailIfNotExitZero(string program, params object[] args)
     {
         var (exitCode, stdout, _) = Run(program, args);
@@ -88,6 +105,24 @@ public static class Shell
     public static async Task<string> RunSilentAndFailIfNotExitZeroAsync(string program, params object[] args)
     {
         var (exitCode, stdout, stderr) = await RunSilent(program, args).ConfigureAwait(false);
+        if (exitCode != 0)
+        {
+            GenLog.Info(stdout);
+            GenLog.Error(stderr);
+            GenLog.Error($"Command failed: {GetCommandForPrinting(program, args)}");
+            throw new ConfigurationException($"Exit code was {exitCode}");
+        }
+
+        return stdout;
+    }
+
+    public static async Task<string> RunSilentAndFailIfNotExitZeroAsync(
+        string program,
+        CancellationToken cancellationToken,
+        params object[] args)
+    {
+        var (exitCode, stdout, stderr) = await RunSilent(program, cancellationToken, args).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
         if (exitCode != 0)
         {
             GenLog.Info(stdout);
