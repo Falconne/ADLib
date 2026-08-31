@@ -1,11 +1,24 @@
 ﻿using JetBrains.TeamCity.ServiceMessages.Write.Special;
 using Serilog;
+using System.Collections.Immutable;
 
 namespace ADLib.Logging;
 
 public static class GenLog
 {
-    public static List<Action<LogMessageType, string>> CustomSinks { get; } = new();
+    private static ImmutableList<Action<LogMessageType, string>> _customSinks =
+        ImmutableList<Action<LogMessageType, string>>.Empty;
+
+    public static IDisposable AddSink(Action<LogMessageType, string> sink)
+    {
+        ImmutableInterlocked.Update(ref _customSinks, (sinks, toAdd) => sinks.Add(toAdd), sink);
+        return new SinkRegistration(sink);
+    }
+
+    public static void RemoveSink(Action<LogMessageType, string> sink)
+    {
+        ImmutableInterlocked.Update(ref _customSinks, (sinks, toRemove) => sinks.Remove(toRemove), sink);
+    }
 
     public static void Debug(string message) => WriteToAllSinks(message, LogMessageType.Debug, null);
 
@@ -49,9 +62,17 @@ public static class GenLog
             ? message
             : $"{message}: {exception.GetType().Name}: {exception.Message}";
 
-        foreach (var sink in CustomSinks)
+        foreach (var sink in _customSinks)
         {
-            sink(type, sinkMessage);
+            try
+            {
+                sink(type, sinkMessage);
+            }
+            catch (Exception e)
+            {
+                // Logged directly to avoid recursing back through the sinks
+                Log.Error(e, "Custom log sink threw an exception");
+            }
         }
 
         // The message is passed as a property rather than a template so that braces in paths,
@@ -100,6 +121,21 @@ public static class GenLog
     {
         var value = Environment.GetEnvironmentVariable("BUILD_NUMBER");
         return !string.IsNullOrWhiteSpace(value);
+    }
+
+    private sealed class SinkRegistration : IDisposable
+    {
+        public SinkRegistration(Action<LogMessageType, string> sink)
+        {
+            _sink = sink;
+        }
+
+        private readonly Action<LogMessageType, string> _sink;
+
+        public void Dispose()
+        {
+            RemoveSink(_sink);
+        }
     }
 }
 
