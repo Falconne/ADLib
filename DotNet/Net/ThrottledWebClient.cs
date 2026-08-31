@@ -7,11 +7,14 @@ using System.Text.RegularExpressions;
 
 namespace ADLib.Net;
 
-public class ThrottledWebClient
+public class ThrottledWebClient : IDisposable
 {
     private static readonly Regex _urlChecker = new(@"^https*://[^\s""']+$", RegexOptions.Singleline);
 
-    public ThrottledWebClient(int defaultDelayMilliseconds = 50, bool followRedirects = true)
+    public ThrottledWebClient(
+        int defaultDelayMilliseconds = 50,
+        bool followRedirects = true,
+        TimeSpan? timeout = null)
     {
         HttpClientHandler handler = new() { CookieContainer = _cookies };
         if (!followRedirects)
@@ -19,7 +22,7 @@ public class ThrottledWebClient
             handler.AllowAutoRedirect = false;
         }
 
-        Client = new HttpClient(handler);
+        Client = new HttpClient(handler) { Timeout = timeout ?? TimeSpan.FromMinutes(5) };
         MinDelayMilliseconds = defaultDelayMilliseconds;
         _followRedirects = followRedirects;
         Client.DefaultRequestHeaders.UserAgent.ParseAdd(
@@ -28,14 +31,26 @@ public class ThrottledWebClient
 
     public readonly HttpClient Client;
 
-    // TODO: Make readonly
-    public int MinDelayMilliseconds;
+    // Callers may adjust the throttle from other threads, so publish it explicitly
+    public int MinDelayMilliseconds
+    {
+        get => Volatile.Read(ref _minDelayMilliseconds);
+        set => Volatile.Write(ref _minDelayMilliseconds, value);
+    }
 
     private readonly CookieContainer _cookies = new();
 
     private readonly bool _followRedirects;
 
     private DateTimeOffset _lastCallTime = DateTimeOffset.MinValue;
+
+    private int _minDelayMilliseconds;
+
+    public void Dispose()
+    {
+        Client.Dispose();
+        GC.SuppressFinalize(this);
+    }
 
     public async Task<HtmlNode> GetPageDocNodeOrFailAsync(
         string url,
@@ -57,18 +72,29 @@ public class ThrottledWebClient
 
         await DoThrottle(cancellationToken).ConfigureAwait(false);
         HttpResponseMessage? response = null;
-        await Retry.OnExceptionAsync(
-                async () => { response = await GetAsync(url, cancellationToken).ConfigureAwait(false); },
-                null,
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        if (response == null)
+        try
         {
-            throw new Exception($"GET returned empty result for {url}");
-        }
+            await Retry.OnExceptionAsync(
+                    async () =>
+                    {
+                        response?.Dispose();
+                        response = await GetAsync(url, cancellationToken).ConfigureAwait(false);
+                    },
+                    null,
+                    cancellationToken)
+                .ConfigureAwait(false);
 
-        return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (response == null)
+            {
+                throw new Exception($"GET returned empty result for {url}");
+            }
+
+            return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            response?.Dispose();
+        }
     }
 
     public async Task<HttpResponseMessage> PostAndFailIfNotOk(
@@ -89,7 +115,9 @@ public class ThrottledWebClient
         }
 
         GenLog.Error(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-        throw new Exception($"Bad status code from POST: {response.StatusCode}");
+        var statusCode = response.StatusCode;
+        response.Dispose();
+        throw new Exception($"Bad status code from POST: {statusCode}");
     }
 
     public async Task DownloadFileAsync(
@@ -215,6 +243,7 @@ public class ThrottledWebClient
             }
 
             var redirectUrl = response.Headers.Location?.ToString();
+            response.Dispose();
             if (redirectUrl.IsEmpty())
             {
                 throw new RemoteAccessException($"No redirect URL found for {url}");
@@ -248,10 +277,11 @@ public class ThrottledWebClient
 
     private async Task DoThrottle(CancellationToken cancellationToken)
     {
+        var minDelay = MinDelayMilliseconds;
         var timeSinceLastCall = (DateTimeOffset.UtcNow - _lastCallTime).Milliseconds;
-        if (timeSinceLastCall < MinDelayMilliseconds)
+        if (timeSinceLastCall < minDelay)
         {
-            var sleepTime = MinDelayMilliseconds - timeSinceLastCall;
+            var sleepTime = minDelay - timeSinceLastCall;
             await Task.Delay(sleepTime, cancellationToken).ConfigureAwait(false);
         }
 
