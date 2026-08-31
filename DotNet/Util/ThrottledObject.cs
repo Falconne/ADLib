@@ -31,6 +31,7 @@ public class ThrottledObject<T> where T : notnull
         return _object;
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public T Get()
     {
         return GetAsync().Result;

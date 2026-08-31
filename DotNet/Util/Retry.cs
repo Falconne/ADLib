@@ -62,6 +62,7 @@ public static class Retry
         }
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static void OnException(Action action, string? introMessage, int maxAttempts = 3, int delay = 3000)
 
     {

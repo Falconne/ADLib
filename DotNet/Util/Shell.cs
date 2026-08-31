@@ -7,6 +7,7 @@ namespace ADLib.Util;
 
 public static class Shell
 {
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static int RunAndGetExitCode(string program, params object[] args)
     {
         GenLog.Debug($"{program} {string.Join(" ", args)}");
@@ -23,6 +24,7 @@ public static class Shell
         Command.Run(program, args);
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static (int exitCode, string stdout, string stderr) Run(
         string program,
         params object[] args)

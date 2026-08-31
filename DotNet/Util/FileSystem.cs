@@ -32,9 +32,10 @@ public static class FileSystem
     }
 
     // Create or clean out given directory
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static void InitialiseDirectory(string path)
     {
-        DeleteDirectory(path);
+        DeleteDirectoryAsync(path).GetAwaiter().GetResult();
         CreateDirectory(path);
     }
 
@@ -66,11 +67,12 @@ public static class FileSystem
         File.Copy(src, dst, force);
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static void Delete(string path, bool quiet = false)
     {
         if (Directory.Exists(path))
         {
-            DeleteDirectory(path);
+            DeleteDirectoryAsync(path).GetAwaiter().GetResult();
             return;
         }
 
@@ -86,7 +88,7 @@ public static class FileSystem
     {
         if (Directory.Exists(path))
         {
-            await Task.Run(() => DeleteDirectory(path)).ConfigureAwait(false);
+            await Task.Run(() => DeleteDirectoryAsync(path)).ConfigureAwait(false);
             return;
         }
 
@@ -338,11 +340,13 @@ public static class FileSystem
         return asciiOnly ? StringUtils.GetWithoutNonASCIIChars(result) : result;
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static void DeleteFileToRecycleBin(string? path)
     {
         DeleteFileToRecycleBinAsync(path, CancellationToken.None).Wait();
     }
 
+    // TODO: Sync-over-async. Use "async Task Main" in console apps and drop this wrapper.
     public static void DeleteDirToRecycleBin(string? path)
     {
         DeleteDirToRecycleBinAsync(path, CancellationToken.None).Wait();
@@ -579,7 +583,7 @@ public static class FileSystem
         throw new IOException($"Unable to delete file {path}");
     }
 
-    private static void DeleteDirectory(string path)
+    private static async Task DeleteDirectoryAsync(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -596,9 +600,8 @@ public static class FileSystem
             }
             catch (IOException e) when (retries-- >= 0)
             {
-                GenLog.Warning("Unable to delete directory. Will retry...");
-                GenLog.Warning(e.Message);
-                Thread.Sleep(5000);
+                GenLog.Warning(e, "Unable to delete directory. Will retry...");
+                await Task.Delay(5000).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException) when (retries-- >= 0)
             {
