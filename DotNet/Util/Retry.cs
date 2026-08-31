@@ -8,10 +8,10 @@ public static class Retry
     public static async Task OnExceptionAsync(
         Func<Task> action,
         string? introMessage,
-        int numRetries = 3,
+        int maxAttempts = 3,
         int delay = 3000)
     {
-        await OnExceptionAsync(action, introMessage, CancellationToken.None, numRetries, delay)
+        await OnExceptionAsync(action, introMessage, CancellationToken.None, maxAttempts, delay)
             .ConfigureAwait(false);
     }
 
@@ -20,17 +20,19 @@ public static class Retry
         Func<Task> action,
         string? introMessage,
         CancellationToken cancellationToken,
-        int numRetries = 3,
+        int maxAttempts = 3,
         int delay = 3000)
 
     {
-        if (numRetries < 0)
+        if (maxAttempts < 1)
         {
-            numRetries = 0;
+            maxAttempts = 1;
         }
 
-        while (numRetries-- > 0 && !cancellationToken.IsCancellationRequested)
+        for (var attempt = 1;; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
                 if (!introMessage.IsEmpty())
@@ -43,40 +45,27 @@ public static class Retry
             }
             catch (FatalException e)
             {
-                GenLog.Error(
-                    $"Aborting due to fatal exception: {e?.InnerException?.GetType()}: {e?.InnerException?.Message}");
-
+                GenLog.Error(e, "Aborting due to fatal exception");
                 throw;
             }
-            catch (Exception e)
+            catch (OperationCanceledException)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    GenLog.Warning("Cancelling retry-able operation");
-                    throw;
-                }
-
-                GenLog.Warning(
-                    $"Caught exception during retry-able operation ({introMessage}): {e.GetType()}");
-
-                GenLog.Warning(e.Message);
-                if (numRetries == 0)
-                {
-                    GenLog.Error("No more retries left");
-                    throw;
-                }
-
-                GenLog.Info($"Retries remaining: {numRetries}");
+                GenLog.Warning("Cancelling retry-able operation");
+                throw;
+            }
+            catch (Exception e) when (attempt < maxAttempts && !cancellationToken.IsCancellationRequested)
+            {
+                GenLog.Warning(e, $"Attempt {attempt} of {maxAttempts} failed ({introMessage})");
                 await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                 delay *= 2;
             }
         }
     }
 
-    public static void OnException(Action action, string? introMessage, int numRetries = 3, int delay = 3000)
+    public static void OnException(Action action, string? introMessage, int maxAttempts = 3, int delay = 3000)
 
     {
-        OnExceptionAsync(() => Task.Run(action), introMessage, CancellationToken.None, numRetries, delay)
+        OnExceptionAsync(() => Task.Run(action), introMessage, CancellationToken.None, maxAttempts, delay)
             .Wait();
     }
 }
