@@ -10,8 +10,6 @@ public class ThrottleService
 
     private readonly TimeSpan _delay;
 
-    private readonly Random _random = new();
-
     private readonly Func<string, bool, IDisposable>? _statusLogger;
 
     private DateTimeOffset _lastActionTime = DateTimeOffset.MinValue;
@@ -22,7 +20,7 @@ public class ThrottleService
         var nextActionTime = _lastActionTime + _delay;
         if (now < nextActionTime)
         {
-            var jitter = _random.Next(2000, 4000);
+            var jitter = Random.Shared.Next(2000, 4000);
             var delay = nextActionTime - now + TimeSpan.FromMilliseconds(jitter);
             using var _ = _statusLogger?.Invoke($"Delay for {delay.TotalSeconds} seconds", true);
             await Task.Delay(delay).ConfigureAwait(false);
