@@ -5,17 +5,32 @@ namespace ADLib.Logging;
 
 public static class GenLog
 {
-    public static readonly Action<string> Debug = s => WriteToAllSinks(s, LogMessageType.Debug);
-
-    public static readonly Action<string> Info = s => WriteToAllSinks(s, LogMessageType.Info);
-
-    public static readonly Action<string> Warning = s => WriteToAllSinks(s, LogMessageType.Warning);
-
-    public static readonly Action<string> Error = s => WriteToAllSinks(s, LogMessageType.Error);
-
-    public static readonly Action<string> Fatal = s => WriteToAllSinks(s, LogMessageType.Fatal);
-
     public static List<Action<LogMessageType, string>> CustomSinks { get; } = new();
+
+    public static void Debug(string message) => WriteToAllSinks(message, LogMessageType.Debug, null);
+
+    public static void Debug(Exception exception, string message) =>
+        WriteToAllSinks(message, LogMessageType.Debug, exception);
+
+    public static void Info(string message) => WriteToAllSinks(message, LogMessageType.Info, null);
+
+    public static void Info(Exception exception, string message) =>
+        WriteToAllSinks(message, LogMessageType.Info, exception);
+
+    public static void Warning(string message) => WriteToAllSinks(message, LogMessageType.Warning, null);
+
+    public static void Warning(Exception exception, string message) =>
+        WriteToAllSinks(message, LogMessageType.Warning, exception);
+
+    public static void Error(string message) => WriteToAllSinks(message, LogMessageType.Error, null);
+
+    public static void Error(Exception exception, string message) =>
+        WriteToAllSinks(message, LogMessageType.Error, exception);
+
+    public static void Fatal(string message) => WriteToAllSinks(message, LogMessageType.Fatal, null);
+
+    public static void Fatal(Exception exception, string message) =>
+        WriteToAllSinks(message, LogMessageType.Fatal, exception);
 
     public static void WriteProgress(string message)
     {
@@ -28,39 +43,45 @@ public static class GenLog
         Info($"==== {message} ====");
     }
 
-    private static void WriteToAllSinks(string message, LogMessageType type)
+    private static void WriteToAllSinks(string message, LogMessageType type, Exception? exception)
     {
+        var sinkMessage = exception == null
+            ? message
+            : $"{message}: {exception.GetType().Name}: {exception.Message}";
+
         foreach (var sink in CustomSinks)
         {
-            sink(type, message);
+            sink(type, sinkMessage);
         }
 
+        // The message is passed as a property rather than a template so that braces in paths,
+        // JSON and GUIDs are not interpreted as Serilog property tokens.
         switch (type)
         {
             case LogMessageType.Info:
-                Log.Information(message);
+                Log.Information(exception, "{LogMessage}", message);
                 break;
 
             case LogMessageType.Warning:
-                Log.Warning(message);
+                Log.Warning(exception, "{LogMessage}", message);
                 break;
 
             case LogMessageType.Error:
-                Log.Error(message);
+                Log.Error(exception, "{LogMessage}", message);
                 break;
 
             case LogMessageType.Fatal:
-                Log.Fatal(message);
+                Log.Fatal(exception, "{LogMessage}", message);
                 break;
 
             case LogMessageType.Debug:
-                Log.Debug(message);
+                Log.Debug(exception, "{LogMessage}", message);
                 break;
         }
 
         if (type == LogMessageType.Error)
         {
-            WriteErrorToTeamCity(message);
+            WriteErrorToTeamCity(sinkMessage);
         }
     }
 
