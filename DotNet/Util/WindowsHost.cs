@@ -15,7 +15,11 @@ public static class WindowsHost
     public static void RunOrOpenFile(string uri)
     {
         GenLog.Info($"Opening: {uri}");
-        Process.Start(new ProcessStartInfo { FileName = uri, UseShellExecute = true });
+        using var process = Process.Start(new ProcessStartInfo { FileName = uri, UseShellExecute = true });
+        if (process == null)
+        {
+            GenLog.Warning($"No process was started for: {uri}");
+        }
     }
 
     public static void OpenDir(string dir)
@@ -31,17 +35,49 @@ public static class WindowsHost
 
     public static bool IsProcessRunning(string name)
     {
-        return Process.GetProcessesByName(name).Length > 0;
+        var processes = Process.GetProcessesByName(name);
+        try
+        {
+            return processes.Length > 0;
+        }
+        finally
+        {
+            DisposeAll(processes);
+        }
     }
 
     public static void KillApp(string name)
     {
-        var result = Process.GetProcessesByName(name);
-        var running = result.FirstOrDefault();
-        if (running != null)
+        var processes = Process.GetProcessesByName(name);
+        try
         {
-            GenLog.Info($"Killing app ${name}");
-            running.Kill();
+            var running = processes.FirstOrDefault();
+            if (running == null)
+            {
+                return;
+            }
+
+            GenLog.Info($"Killing app {name}");
+            try
+            {
+                running.Kill();
+            }
+            catch (InvalidOperationException e)
+            {
+                GenLog.Warning(e, $"App has already exited: {name}");
+            }
+        }
+        finally
+        {
+            DisposeAll(processes);
+        }
+    }
+
+    private static void DisposeAll(Process[] processes)
+    {
+        foreach (var process in processes)
+        {
+            process.Dispose();
         }
     }
 }
