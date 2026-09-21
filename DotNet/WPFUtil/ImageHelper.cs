@@ -51,11 +51,16 @@ public static class ImageHelper
     private static BitmapSource ConvertBitmapToStandardDPI(BitmapSource bitmapImage)
     {
         const double dpi = 96;
+        if (Math.Abs(bitmapImage.DpiX - dpi) < 0.01 && Math.Abs(bitmapImage.DpiY - dpi) < 0.01)
+        {
+            return bitmapImage;
+        }
+
         var width = bitmapImage.PixelWidth;
         var height = bitmapImage.PixelHeight;
 
-        var stride = width * bitmapImage.Format.BitsPerPixel;
-        var pixelData = new byte[stride * height];
+        var stride = (width * bitmapImage.Format.BitsPerPixel + 7) / 8;
+        var pixelData = new byte[(long)stride * height];
         bitmapImage.CopyPixels(pixelData, stride, 0);
 
         return BitmapSource.Create(width, height, dpi, dpi, bitmapImage.Format, null, pixelData, stride);
