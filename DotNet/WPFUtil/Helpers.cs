@@ -17,6 +17,11 @@ public static class WPFHelpers
         Application.Current.Dispatcher.Invoke(action);
     }
 
+    public static T InvokeInUIThread<T>(Func<T> func)
+    {
+        return Application.Current.Dispatcher.Invoke(func);
+    }
+
     public static void RefreshCommandsState()
     {
         InvokeInUIThread(CommandManager.InvalidateRequerySuggested);
