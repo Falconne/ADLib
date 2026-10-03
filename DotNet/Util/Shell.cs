@@ -32,11 +32,19 @@ public static class Shell
         return RunAsync(program, args).Result;
     }
 
-    public static async Task<(int exitCode, string stdout, string stderr)> RunAsync(
+    public static Task<(int exitCode, string stdout, string stderr)> RunAsync(
         string program,
         params object[] args)
     {
-        var (exitCode, stdout, stderr) = await RunSilent(program, args).ConfigureAwait(false);
+        return RunAsync(program, CancellationToken.None, args);
+    }
+
+    public static async Task<(int exitCode, string stdout, string stderr)> RunAsync(
+        string program,
+        CancellationToken cancellationToken,
+        params object[] args)
+    {
+        var (exitCode, stdout, stderr) = await RunSilent(program, cancellationToken, args).ConfigureAwait(false);
 
         if (!string.IsNullOrWhiteSpace(stdout))
         {
