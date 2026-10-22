@@ -286,6 +286,37 @@ public static class FileSystem
         return await Task.Run(() => MoveFileToDir(file, dir, makeUnique)).ConfigureAwait(false);
     }
 
+    // Moves the whole directory with a single rename (MoveFileEx), like Explorer does on the same volume.
+    // Returns false without moving anything if the target exists, is on another volume, or the rename fails,
+    // so callers can fall back to moving file by file.
+    public static bool TryMoveDirectory(string sourceDir, string targetDir)
+    {
+        if (Exists(targetDir))
+        {
+            return false;
+        }
+
+        var sourceRoot = Path.GetPathRoot(Path.GetFullPath(sourceDir));
+        var targetRoot = Path.GetPathRoot(Path.GetFullPath(targetDir));
+        if (sourceRoot == null || targetRoot == null || !sourceRoot.EqualsIgnoringCase(targetRoot))
+        {
+            return false;
+        }
+
+        try
+        {
+            CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(targetDir))!);
+            GenLog.Info($"Moving directory '{sourceDir}' -> '{targetDir}'");
+            Directory.Move(sourceDir, targetDir);
+            return true;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            GenLog.Warning(e, $"Could not move directory '{sourceDir}' -> '{targetDir}' in one operation");
+            return false;
+        }
+    }
+
     public static void MoveDirectoryContents(
         string sourceDir,
         string targetDir,
